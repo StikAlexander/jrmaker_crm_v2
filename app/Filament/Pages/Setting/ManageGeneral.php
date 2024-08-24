@@ -19,13 +19,12 @@ use function Filament\Support\is_app_url;
 class ManageGeneral extends SettingsPage
 {
     use HasPageShield;
-    protected static string $settings = GeneralSettings::class;
 
+    protected static string $settings = GeneralSettings::class;
     protected static ?int $navigationSort = 99;
     protected static ?string $navigationIcon = 'fluentui-settings-20';
 
     public ?array $data = [];
-
     public string $themePath = '';
     public string $twConfigPath = '';
 
@@ -33,18 +32,15 @@ class ManageGeneral extends SettingsPage
     {
         $this->themePath = resource_path('css/filament/admin/theme.css');
         $this->twConfigPath = resource_path('css/filament/admin/tailwind.config.js');
-
         $this->fillForm();
     }
 
     protected function fillForm(): void
     {
         $settings = app(static::getSettings());
-
         $data = $this->mutateFormDataBeforeFill($settings->toArray());
 
         $fileService = new FileService;
-
         $data['theme-editor'] = $fileService->readfile($this->themePath);
         $data['tw-config-editor'] = $fileService->readfile($this->twConfigPath);
 
@@ -55,20 +51,20 @@ class ManageGeneral extends SettingsPage
     {
         return $form
             ->schema([
-                Forms\Components\Section::make(__('page.general_settings.sections.site'))
-                    ->label(__('page.general_settings.sections.site'))  // Forzando la traducción directamente
-                    ->description(__('page.general_settings.sections.site.description'))  // Forzando la traducción directamente
+                Forms\Components\Section::make(__('general.general_settings.sections.site'))
+                    ->label(__('general.general_settings.sections.site'))
+                    ->description(__('general.general_settings.sections.site.description'))
                     ->icon('fluentui-web-asset-24-o')
                     ->schema([
                         Forms\Components\Grid::make()->schema([
                             Forms\Components\TextInput::make('brand_name')
-                                ->label(__('page.general_settings.fields.brand_name'))  // Forzando la traducción directamente
+                                ->label(__('general.general_settings.fields.brand_name'))
                                 ->required(),
                             Forms\Components\Select::make('site_active')
-                                ->label(__('page.general_settings.fields.site_active'))  // Forzando la traducción directamente
+                                ->label(__('general.general_settings.fields.site_active'))
                                 ->options([
-                                    0 => __("Not Active"),
-                                    1 => __("Active"),
+                                    0 => __('Not Active'),
+                                    1 => __('Active'),
                                 ])
                                 ->native(false)
                                 ->required(),
@@ -76,11 +72,11 @@ class ManageGeneral extends SettingsPage
                         Forms\Components\Grid::make()->schema([
                             Forms\Components\Grid::make()->schema([
                                 Forms\Components\TextInput::make('brand_logoHeight')
-                                    ->label(__('page.general_settings.fields.brand_logoHeight'))  // Forzando la traducción directamente
+                                    ->label(__('general.general_settings.fields.brand_logoHeight'))
                                     ->required()
                                     ->columnSpan(2),
                                 Forms\Components\FileUpload::make('brand_logo')
-                                    ->label(__('page.general_settings.fields.brand_logo'))  // Forzando la traducción directamente
+                                    ->label(__('general.general_settings.fields.brand_logo'))
                                     ->image()
                                     ->directory('sites')
                                     ->visibility('public')
@@ -90,7 +86,7 @@ class ManageGeneral extends SettingsPage
                             ])
                                 ->columnSpan(2),
                             Forms\Components\FileUpload::make('site_favicon')
-                                ->label(__('page.general_settings.fields.site_favicon'))  // Forzando la traducción directamente
+                                ->label(__('general.general_settings.fields.site_favicon'))
                                 ->image()
                                 ->directory('sites')
                                 ->visibility('public')
@@ -101,25 +97,25 @@ class ManageGeneral extends SettingsPage
                     ]),
                 Forms\Components\Tabs::make('Tabs')
                     ->tabs([
-                        Forms\Components\Tabs\Tab::make(__('Color Palette'))  // Forzando la traducción directamente
+                        Forms\Components\Tabs\Tab::make(__('general.Color Palette'))
                             ->schema([
                                 Forms\Components\ColorPicker::make('site_theme.primary')
-                                    ->label(__('page.general_settings.fields.primary'))->rgb(),  // Forzando la traducción directamente
+                                    ->label(__('general.general_settings.fields.primary'))->rgb(),
                                 Forms\Components\ColorPicker::make('site_theme.secondary')
-                                    ->label(__('page.general_settings.fields.secondary'))->rgb(),  // Forzando la traducción directamente
+                                    ->label(__('general.general_settings.fields.secondary'))->rgb(),
                                 Forms\Components\ColorPicker::make('site_theme.gray')
-                                    ->label(__('page.general_settings.fields.gray'))->rgb(),  // Forzando la traducción directamente
+                                    ->label(__('general.general_settings.fields.gray'))->rgb(),
                                 Forms\Components\ColorPicker::make('site_theme.success')
-                                    ->label(__('page.general_settings.fields.success'))->rgb(),  // Forzando la traducción directamente
+                                    ->label(__('general.general_settings.fields.success'))->rgb(),
                                 Forms\Components\ColorPicker::make('site_theme.danger')
-                                    ->label(__('page.general_settings.fields.danger'))->rgb(),  // Forzando la traducción directamente
+                                    ->label(__('general.general_settings.fields.danger'))->rgb(),
                                 Forms\Components\ColorPicker::make('site_theme.info')
-                                    ->label(__('page.general_settings.fields.info'))->rgb(),  // Forzando la traducción directamente
+                                    ->label(__('general.general_settings.fields.info'))->rgb(),
                                 Forms\Components\ColorPicker::make('site_theme.warning')
-                                    ->label(__('page.general_settings.fields.warning'))->rgb(),  // Forzando la traducción directamente
+                                    ->label(__('general.general_settings.fields.warning'))->rgb(),
                             ])
                             ->columns(3),
-                        Forms\Components\Tabs\Tab::make(__('Code Editor'))  // Forzando la traducción directamente
+                        Forms\Components\Tabs\Tab::make(__('general.Code Editor'))
                             ->schema([
                                 Forms\Components\Grid::make()->schema([
                                     AceEditor::make('theme-editor')
@@ -138,58 +134,56 @@ class ManageGeneral extends SettingsPage
             ->columns(3)
             ->statePath('data');
     }
-    
+
     public function save(): void
     {
         try {
             $data = $this->mutateFormDataBeforeSave($this->form->getState());
-    
+
             $settings = app(static::getSettings());
-    
+
             $settings->fill($data);
             $settings->save();
-    
+
             $fileService = new FileService;
             $fileService->writeFile($this->themePath, $data['theme-editor']);
             $fileService->writeFile($this->twConfigPath, $data['tw-config-editor']);
-    
+
             Notification::make()
-                ->title(__('Settings updated.'))  // Forzando la traducción directamente
+                ->title(__('general.settings_updated'))
                 ->success()
                 ->send();
-    
-                $this->redirect(static::getUrl(), [
-                    'navigate' => FilamentView::hasSpaMode() && is_app_url(static::getUrl()),
-                ]);
+
+            $this->redirect(static::getUrl(), [
+                'navigate' => FilamentView::hasSpaMode() && is_app_url(static::getUrl()),
+            ]);
         } catch (\Throwable $th) {
             throw $th;
         }
     }
-    
-    
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Configuración'); // Traducido
+        return __('general.configuracion');
     }
-    
+
     public static function getNavigationLabel(): string
     {
-        return __('General'); // Traducido
+        return __('general.general');
     }
-    
+
     public function getTitle(): string|Htmlable
     {
-        return __('Configuración general'); // Traducido
+        return __('general.configuracion_general');
     }
-    
+
     public function getHeading(): string|Htmlable
     {
-        return __('Configuración general'); // Traducido
+        return __('general.configuracion_general');
     }
-    
+
     public function getSubheading(): string|Htmlable|null
     {
-        return __('Administre la configuración general del sitio aquí.'); // Traducido
+        return __('general.subheading');
     }
 }
