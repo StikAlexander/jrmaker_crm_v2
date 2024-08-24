@@ -35,8 +35,14 @@ public function panel(Panel $panel): Panel
         ->path('client')
         ->login(AuthClientLogin::class)
         ->colors([
-            'primary' => '#aa534e',
-            'secondary' => '#d87c73',
+        'primary' => 'rgb(171, 83, 79)',    // Rojo terracota (#ab534f) para botones y elementos clave
+        'secondary' => 'rgb(53, 65, 83)',   // Azul oscuro (#354153) para textos y detalles secundarios
+        'gray' => 'rgb(0, 0, 0)',           // Negro puro para texto y bordes generales
+        'success' => 'rgb(12, 195, 178)',   // Verde azulado (solo para elementos de éxito, no para texto)
+        'danger' => 'rgb(199, 29, 81)',     // Rojo vibrante para alertas y errores
+        'info' => 'rgb(113, 12, 195)',      // Púrpura vibrante para información adicional
+        'warning' => 'rgb(255, 186, 93)',   // Amarillo cálido para advertencias y alertas
+        'accent' => 'rgb(171, 83, 79)',     // Rojo terracota para acentos adicionales
         ])
         ->favicon(fn (GeneralSettings $settings) => Storage::url($settings->site_favicon))
         ->brandName(fn (GeneralSettings $settings) => $settings->brand_name)

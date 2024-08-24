@@ -11,33 +11,45 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    50: "#FFFBF0", // Definiendo un color diferente para el panel de cliente
-                    100: "#FEEBC8",
-                    200: "#FBD38D",
-                    300: "#F6AD55",
-                    400: "#ED8936",
-                    500: "#DD6B20",
-                    600: "#C05621",
-                    700: "#9C4221",
-                    800: "#7B341E",
-                    900: "#652B19",
+                    50: "#fce8e6",     // Rojo muy claro
+                    100: "#f8c5c3",    // Rojo claro
+                    200: "#f39f9d",    // Rojo más claro
+                    300: "#ef7875",    // Rojo terracota claro
+                    400: "#ea5a5b",    // Rojo terracota medio
+                    500: "#ab534f",    // Rojo terracota, color principal
+                    600: "#933F3A",    // Rojo más oscuro para hover
+                    700: "#80312e",
+                    800: "#6a2522",
+                    900: "#541817",    // Rojo terracota oscuro
                 },
                 secondary: {
-                    50: "#F0FFF4", // Definiendo un color secundario diferente
-                    100: "#C6F6D5",
-                    200: "#9AE6B4",
-                    300: "#68D391",
-                    400: "#48BB78",
-                    500: "#38A169",
-                    600: "#2F855A",
-                    700: "#276749",
-                    800: "#22543D",
-                    900: "#1C4532",
+                    50: "#e8ebf1",     // Azul muy claro
+                    100: "#bfc4d1",    // Azul claro
+                    200: "#97a0b2",    // Azul grisáceo
+                    300: "#6e7b92",    // Azul grisáceo más oscuro
+                    400: "#4f5d73",    // Azul medio
+                    500: "#354153",    // Azul oscuro, color secundario para textos y detalles
+                    600: "#2b3644",
+                    700: "#222c36",
+                    800: "#191f29",
+                    900: "#10141b",    // Azul más oscuro para detalles menores
                 },
-            },
-            boxShadow: {
-                'client-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                // Agregar más sombras personalizadas
+                gray: {
+                    50: "#f5f5f5",
+                    100: "#ebebeb",
+                    200: "#e0e0e0",
+                    300: "#d6d6d6",
+                    400: "#cbcbcb",
+                    500: "#9c9ea5",    // Gris claro con toque azulado
+                    600: "#838588",
+                    700: "#6a6b6c",
+                    800: "#515253",
+                    900: "#383838",    // Gris oscuro, si es necesario
+                },
+                success: "#12c3b2",    // Verde azulado (si realmente lo necesitas)
+                danger: "#c71d51",     // Rojo intenso para alertas y errores
+                info: "#710cc3",       // Púrpura vibrante para información adicional
+                warning: "#ffba5d",    // Amarillo cálido para advertencias y alertas
             },
         },
     },
