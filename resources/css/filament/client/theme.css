@@ -1,0 +1,92 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+@config 'tailwind.config.js';
+
+.fi-btn-primary {
+    background-color: #aa534e;
+    color: white;
+}
+
+.fi-btn-primary:hover {
+    background-color: #933F3A;
+}
+
+/* ClientPanel (`client/theme.css`) */
+.fi-logo {
+    @apply h-28; /* 7rem, 112px */
+}
+
+
+/* SIDEBAR */
+.fi-sidebar.fi-sidebar-open {
+    @apply lg:!w-1/4 2xl:!w-1/4; /* Cambia el ancho del sidebar para hacer una diferencia visual */
+}
+
+.fi-sidebar-nav-groups { 
+    @apply gap-y-3; /* Ajusta el espaciado entre grupos de navegación */
+}
+
+.fi-sidebar-header {
+    @apply py-3 !ring-1; /* Añade un borde superior para diferenciar el estilo */
+}
+
+.fi-sidebar-item a {
+    @apply px-3 py-2 rounded-lg; /* Cambia la forma de los enlaces para diferenciarlos */
+}
+
+.fi-sidebar-item a > span,
+.fi-sidebar-item a > svg {
+    @apply font-medium dark:font-semibold dark:text-gray-200; /* Ajuste de la tipografía */
+}
+
+.fi-sidebar-item a:focus,
+.fi-sidebar-item a:hover {
+    @apply bg-secondary-100 shadow-lg dark:bg-secondary-900 dark:shadow-xl transition-all ease-in-out duration-150 !important;
+    /* Cambia los colores para diferenciarlos */
+}
+
+.fi-sidebar-item a:hover svg,
+.fi-sidebar-item a:focus span,
+.fi-sidebar-item a:hover span {
+    @apply text-secondary-600 dark:text-gray-200 transition-all ease-in-out duration-150 !important;
+}
+
+.fi-sidebar-item-active a {
+    @apply shadow-lg bg-secondary-100 dark:bg-secondary-900 dark:shadow-xl;
+}
+
+.fi-sidebar-item a:hover svg,
+.fi-sidebar-item a:focus svg,
+.fi-sidebar-item-active svg {
+    @apply !text-primary-500 dark:!text-primary-500 transition-all ease-in-out duration-200 !important;
+}
+
+.fi-sidebar.fi-sidebar-open {
+    .fi-sidebar-item a:hover svg,
+    .fi-sidebar-item a:focus svg,
+    .fi-sidebar-item-active svg {
+        @apply !ml-2;
+    }
+}
+
+/* Content */
+.fi-main {
+    @apply lg:pl-10 !important; /* Ajusta el padding de contenido principal */
+}
+
+.fi-ta-ctn {
+    @apply shadow-2xl; /* Aumenta la sombra de los contenedores para más profundidad */
+}
+
+.fi-header-heading {
+    @apply !text-3xl text-secondary-600 dark:text-secondary-400; /* Cambia el tamaño y color del texto de cabecera */
+}
+
+.fi-header-subheading {
+    @apply !text-base; /* Ajuste en el subtítulo */
+}
+
+/* Filament Actions */
+.fi-dropdown-trigger button.fi-btn {
+    @apply !p-2; /* Ajuste en el padding de los botones de acciones */
+}
