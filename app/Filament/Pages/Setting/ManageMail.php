@@ -20,7 +20,6 @@ class ManageMail extends SettingsPage
     use HasPageShield;
 
     protected static string $settings = MailSettings::class;
-
     protected static ?int $navigationSort = 99;
     protected static ?string $navigationIcon = 'fluentui-mail-settings-20';
 
@@ -48,37 +47,37 @@ class ManageMail extends SettingsPage
             ->schema([
                 Forms\Components\Group::make()
                     ->schema([
-                        Forms\Components\Section::make('Configuration')
-                            ->label('Configuración') // Uso directo para forzar traducción temporal
+                        Forms\Components\Section::make(__('mail.configuration'))
+                            ->label(__('mail.configuration')) 
                             ->icon('fluentui-calendar-settings-32-o')
                             ->schema([
                                 Forms\Components\Grid::make()
                                     ->schema([
-                                        Forms\Components\Select::make('driver')->label('Conductor') // Uso directo para forzar traducción temporal
+                                        Forms\Components\Select::make('driver')->label(__('mail.driver')) 
                                             ->options([
-                                                "smtp" => "SMTP (Recommended)",
-                                                "mailgun" => "Mailgun",
-                                                "ses" => "Amazon SES",
-                                                "postmark" => "Postmark",
+                                                "smtp" => __('mail.smtp'),
+                                                "mailgun" => __('mail.mailgun'),
+                                                "ses" => __('mail.ses'),
+                                                "postmark" => __('mail.postmark'),
                                             ])
                                             ->native(false)
                                             ->required()
                                             ->columnSpan(2),
-                                        Forms\Components\TextInput::make('host')->label('Anfitrión') // Uso directo para forzar traducción temporal
+                                        Forms\Components\TextInput::make('host')->label(__('mail.host')) 
                                             ->required(),
-                                        Forms\Components\TextInput::make('port')->label('Puerto') // Uso directo para forzar traducción temporal
+                                        Forms\Components\TextInput::make('port')->label(__('mail.port')) 
                                             ->required(),
-                                        Forms\Components\Select::make('encryption')->label('Cifrado') // Uso directo para forzar traducción temporal
+                                        Forms\Components\Select::make('encryption')->label(__('mail.encryption')) 
                                             ->options([
                                                 "ssl" => "SSL",
                                                 "tls" => "TLS",
                                             ])
                                             ->native(false),
-                                        Forms\Components\TextInput::make('timeout')->label('Se acabó el tiempo') // Uso directo para forzar traducción temporal
+                                        Forms\Components\TextInput::make('timeout')->label(__('mail.timeout')) 
                                             ->required(),
-                                        Forms\Components\TextInput::make('username')->label('Nombre de usuario') // Uso directo para forzar traducción temporal
+                                        Forms\Components\TextInput::make('username')->label(__('mail.username')) 
                                             ->required(),
-                                        Forms\Components\TextInput::make('password')->label('Contraseña') // Uso directo para forzar traducción temporal
+                                        Forms\Components\TextInput::make('password')->label(__('mail.password')) 
                                             ->password()
                                             ->revealable(),
                                     ])
@@ -90,27 +89,27 @@ class ManageMail extends SettingsPage
                     ]),
                 Forms\Components\Group::make()
                     ->schema([
-                        Forms\Components\Section::make('From (Sender)')
-                            ->label('De (remitente)') // Uso directo para forzar traducción temporal
+                        Forms\Components\Section::make(__('mail.from.sender'))
+                            ->label(__('mail.from.sender')) 
                             ->icon('fluentui-person-mail-48-o')
                             ->schema([
-                                Forms\Components\TextInput::make('from_address')->label('Correo electrónico') // Uso directo para forzar traducción temporal
+                                Forms\Components\TextInput::make('from_address')->label(__('mail.from.address')) 
                                     ->required(),
-                                Forms\Components\TextInput::make('from_name')->label('Nombre') // Uso directo para forzar traducción temporal
+                                Forms\Components\TextInput::make('from_name')->label(__('mail.from.name')) 
                                     ->required(),
                             ]),
 
-                        Forms\Components\Section::make('Mail to')
-                            ->label('Enviar por correo a') // Uso directo para forzar traducción temporal
+                        Forms\Components\Section::make(__('mail.mail_to'))
+                            ->label(__('mail.mail_to')) 
                             ->schema([
                                 Forms\Components\TextInput::make('mail_to')
-                                    ->label('Correo electrónico del receptor') // Uso directo para forzar traducción temporal
+                                    ->label(__('mail.receiver_email')) 
                                     ->hiddenLabel()
-                                    ->placeholder('Correo electrónico del receptor') // Uso directo para forzar traducción temporal
+                                    ->placeholder(__('mail.receiver_email')) 
                                     ->required(),
                                 Forms\Components\Actions::make([
-                                        Forms\Components\Actions\Action::make('Enviar correo de prueba') // Uso directo para forzar traducción temporal
-                                            ->label('Enviar correo de prueba') // Uso directo para forzar traducción temporal
+                                        Forms\Components\Actions\Action::make(__('mail.send_test_mail')) 
+                                            ->label(__('mail.send_test_mail')) 
                                             ->action('sendTestMail')
                                             ->color('warning')
                                             ->icon('fluentui-mail-alert-28-o')
@@ -143,11 +142,11 @@ class ManageMail extends SettingsPage
 
             $this->callHook('afterSave');
 
-            $this->sendSuccessNotification('Configuración de correo actualizada.'); // Uso directo para forzar traducción temporal
+            $this->sendSuccessNotification(__('mail.mail_config_updated')); 
 
             $this->redirect(static::getUrl(), navigate: FilamentView::hasSpaMode() && is_app_url(static::getUrl()));
         } catch (\Throwable $th) {
-            $this->sendErrorNotification('Error al actualizar la configuración: ' . $th->getMessage()); // Uso directo para forzar traducción temporal
+            $this->sendErrorNotification(__('mail.error_updating', ['error' => $th->getMessage()]));
             throw $th;
         }
     }
@@ -160,15 +159,15 @@ class ManageMail extends SettingsPage
         try {
             $mailTo = $data['mail_to'];
             $mailData = [
-                'title' => 'Este es un correo de prueba para verificar la configuración de SMTP', // Uso directo para forzar traducción temporal
-                'body' => 'Esto es para probar el envío de correo utilizando SMTP.', // Uso directo para forzar traducción temporal
+                'title' => __('mail.test_mail_title'),
+                'body' => __('mail.test_mail_body'),
             ];
 
             Mail::to($mailTo)->send(new TestMail($mailData));
 
-            $this->sendSuccessNotification('Correo enviado a: ' . $mailTo); // Uso directo para forzar traducción temporal
+            $this->sendSuccessNotification(__('mail.mail_sent_to', ['mailTo' => $mailTo]));
         } catch (\Exception $e) {
-            $this->sendErrorNotification('Error al enviar correo: ' . $e->getMessage()); // Uso directo para forzar traducción temporal
+            $this->sendErrorNotification(__('mail.error_sending_mail', ['error' => $e->getMessage()]));
         }
     }
 
@@ -190,26 +189,26 @@ class ManageMail extends SettingsPage
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Configuración'; // Uso directo para forzar traducción temporal
+        return __('mail.navigation.group');
     }
-    
+
     public static function getNavigationLabel(): string
     {
-        return 'Correo'; // Uso directo para forzar traducción temporal
+        return __('mail.navigation.label');
     }
-    
+
     public function getTitle(): string|Htmlable
     {
-        return 'Configuración de correo'; // Uso directo para forzar traducción temporal
+        return __('mail.heading.title');
     }
-    
+
     public function getHeading(): string|Htmlable
     {
-        return 'Configuración de correo'; // Uso directo para forzar traducción temporal
+        return __('mail.heading.title');
     }
-    
+
     public function getSubheading(): string|Htmlable|null
     {
-        return 'Gestione la configuración del correo electrónico aquí.'; // Uso directo para forzar traducción temporal
+        return __('mail.heading.subheading');
     }
 }

@@ -21,6 +21,8 @@ return [
             'warning' => 'Advertencia',
         ],
     ],
+    'Color Palette' => 'Paleta de Colores',
+    'Code Editor' => 'Editor de Código',
     'settings_updated' => 'Configuración actualizada.',
     'configuracion' => 'Configuración',
     'general' => 'General',
