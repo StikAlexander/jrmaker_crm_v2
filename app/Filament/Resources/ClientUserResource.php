@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
+use Filament\Forms\Components\NumericInput;
 
 
 class ClientUserResource extends Resource implements HasMedia
@@ -43,61 +44,91 @@ class ClientUserResource extends Resource implements HasMedia
     {
         return $form
             ->schema([
-                Forms\Components\Section::make()
+                // Encapsulamos todo dentro de un Card
+                Forms\Components\Card::make()
                     ->schema([
-                        // Otros campos...
-                        Forms\Components\TextInput::make('document_number')
-                            ->label('Identificación')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('email')
-                            ->email()
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('phone')
-                            ->label('Phone')
-                            ->maxLength(20),
-                        Forms\Components\Select::make('document_type_id')
-                            ->label('Document Type')
-                            ->relationship('documentType', 'name')
-                            ->required(),
-                        Forms\Components\Select::make('status')
-                            ->label('Status')
-                            ->options([
-                                'active' => 'Active',
-                                'inactive' => 'Inactive',
-                                'suspended' => 'Suspended',
+                        // Sección de Datos Generales
+                        Forms\Components\Section::make('Datos Generales')
+                            ->description('Incluye los datos principales de tu cliente')
+                            ->schema([
+                                // Nombre Completo (2 columnas)
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->label('Razón social / nombre completo')
+                                    ->columnSpan(2),
+    
+                                // Tipo de Identificación (1 columna)
+                                Forms\Components\Select::make('document_type_id')
+                                    ->label('Tipo de identificación')
+                                    ->relationship('documentType', 'name')
+                                    ->required()
+                                    ->columnSpan(1),
+    
+                                // Número de Documento (1 columna)
+                                Forms\Components\TextInput::make('document_number')
+                                    ->label('Número de documento')
+                                    ->required()
+                                    ->rules(['regex:/^[0-9]+$/'])
+                                    ->maxLength(20)
+                                    ->helperText('Solo se permiten números.')
+                                    ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
+                                    ->numeric()
+                                    ->columnSpan(1),
                             ])
-                            ->default('active')
-                            ->required(),
-                    ]),
-                // Ocultar los campos de contraseña
-                Forms\Components\Group::make()
-                    ->schema([
-                        Forms\Components\TextInput::make('password')
-                            ->hidden(true),
-                        Forms\Components\TextInput::make('passwordConfirmation')
-                            ->hidden(true),
+                            ->columns(4),
+    
+                        // Sección de Información de Contacto
+                        Forms\Components\Section::make('Información de Contacto')
+                            ->description('Agrega los datos de contacto para este cliente')
+                            ->schema([
+                                // Correo Electrónico (2 columnas)
+                                Forms\Components\TextInput::make('email')
+                                    ->email()
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->label('Correo electrónico')
+                                    ->columnSpan(2),
+    
+                                // Teléfono (1 columna)
+                                Forms\Components\TextInput::make('phone')
+                                    ->label('Teléfono')
+                                    ->required()
+                                    ->rules(['regex:/^[0-9]+$/'])
+                                    ->maxLength(20)
+                                    ->helperText('Solo se permiten números.')
+                                    ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
+                                    ->numeric()
+                                    ->columnSpan(1),
+    
+                                // Estado (1 columna)
+                                Forms\Components\Select::make('status')
+                                    ->label('Estado')
+                                    ->options([
+                                        'active' => 'Active',
+                                        'inactive' => 'Inactive',
+                                        'suspended' => 'Suspended',
+                                    ])
+                                    ->default('active')
+                                    ->required()
+                                    ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Resources\ClientUserResource\Pages\CreateClientUser)
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(4),
                     ])
-                    ->hidden(true),
+                    ->columnSpanFull(), // El Card ocupa todo el ancho
             ])
-            ->columns(3);
+            ->columns(4); // Distribuye las columnas del formulario
     }
+    
     
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\SpatieMediaLibraryImageColumn::make('media')
-                    ->label('Foto')
-                    ->collection('avatars')
-                    ->wrap(),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Nombre')
+                    ->label('nombre')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('document_number')
                     ->label('Identificación')

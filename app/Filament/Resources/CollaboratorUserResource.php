@@ -45,87 +45,106 @@ class CollaboratorUserResource extends Resource implements HasMedia
     {
         return $form
             ->schema([
-                Forms\Components\SpatieMediaLibraryFileUpload::make('media')
-                    ->hiddenLabel()
-                    ->avatar()
-                    ->collection('avatars')   
-                    ->alignCenter()
-                    ->columnSpanFull(),
-                    Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                    Forms\Components\TextInput::make('document_number')
-                    ->label('Identificación')
-                    ->required()
-                    ->maxLength(255), 
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('phone')
-                    ->label('Phone')
-                    ->maxLength(20),
-                Forms\Components\Select::make('document_type_id')
-                    ->label('Document Type')
-                    ->relationship('documentType', 'name')
-                    ->required(),
-                Forms\Components\Select::make('status')
-                    ->label('Status')
-                    ->options([
-                        'active' => 'Active',
-                        'inactive' => 'Inactive',
-                        'suspended' => 'Suspended',
-                    ])
-                    ->default('active')
-                    ->required(),
-                Forms\Components\Group::make()
+                Forms\Components\Card::make()
                     ->schema([
-                        Forms\Components\Section::make()
+                        Forms\Components\Section::make('Datos Generales')
+                            ->description('Incluye los datos principales del colaborador')
+                            ->schema([
+                                Forms\Components\Placeholder::make('')
+                                    ->content('Foto de perfil')
+                                    ->columnSpanFull()
+                                    ->extraAttributes(['style' => 'text-align: center; font-size: 0.875rem; color: #6b7280;']),
+                                    
+                                Forms\Components\SpatieMediaLibraryFileUpload::make('media')
+                                    ->hiddenLabel()
+                                    ->avatar()
+                                    ->collection('avatars')
+                                    ->alignCenter()
+                                    ->columnSpanFull(),
+                                    
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->label('Nombre completo')
+                                    ->columnSpan(2),
+                                    
+                                Forms\Components\Select::make('document_type_id')
+                                    ->label('Tipo de identificación')
+                                    ->relationship('documentType', 'name')
+                                    ->required()
+                                    ->columnSpan(1),
+                                    
+                                Forms\Components\TextInput::make('document_number')
+                                    ->label('Identificación')
+                                    ->required()
+                                    ->rules(['regex:/^[0-9]+$/']) 
+                                    ->maxLength(20)
+                                    ->helperText('Solo se permiten números.')
+                                    ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
+                                    ->numeric()
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(4),
+                            
+                        Forms\Components\Section::make('Información de Contacto')
+                            ->description('Agrega los datos de contacto para este colaborador')
+                            ->schema([
+                                Forms\Components\TextInput::make('email')
+                                    ->email()
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->label('Correo electrónico')
+                                    ->columnSpan(2),
+                                    
+                                Forms\Components\TextInput::make('phone')
+                                    ->label('Teléfono')
+                                    ->required()
+                                    ->rules(['regex:/^[0-9]+$/'])
+                                    ->maxLength(20)
+                                    ->helperText('Solo se permiten números.')
+                                    ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
+                                    ->numeric()
+                                    ->columnSpan(1),
+                                    
+                                Forms\Components\Select::make('status')
+                                    ->label('Estado')
+                                    ->options([
+                                        'active' => 'Active',
+                                        'inactive' => 'Inactive',
+                                        'suspended' => 'Suspended',
+                                    ])
+                                    ->default('active')
+                                    ->required()
+                                    ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Resources\CollaboratorUserResource\Pages\CreateCollaboratorUser)
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(4),
+                            
+                        Forms\Components\Section::make('Contraseña')
                             ->schema([
                                 Forms\Components\TextInput::make('password')
                                     ->password()
                                     ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
                                     ->dehydrated(fn (?string $state): bool => filled($state))
                                     ->revealable()
-                                    ->required(),
+                                    ->required()
+                                    ->columnSpan(1),
+                                    
                                 Forms\Components\TextInput::make('passwordConfirmation')
                                     ->password()
                                     ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
                                     ->dehydrated(fn (?string $state): bool => filled($state))
                                     ->revealable()
                                     ->same('password')
-                                    ->required(),
+                                    ->required()
+                                    ->columnSpan(1),
                             ])
-                            ->compact()
+                            ->columns(2)
                             ->hidden(fn (string $operation): bool => $operation === 'edit'),
-                        Forms\Components\Section::make()
-                            ->schema([
-                                Forms\Components\Placeholder::make('email_verified_at')
-                                    ->label('Email Verified At')
-                                    ->content(fn (User $record): ?string => $record->email_verified_at),
-                                Forms\Components\Actions::make([
-                                    Forms\Components\Actions\Action::make('resend_verification')
-                                        ->label('Resend Verification')
-                                        ->color('secondary')
-                                        ->action(fn (MailSettings $settings, User $record) => static::doResendEmailVerification($settings, $record)),
-                                ])
-                                ->hidden(fn (User $user) => $user->email_verified_at != null)
-                                ->fullWidth(),
-                                Forms\Components\Placeholder::make('created_at')
-                                    ->label('Created At')
-                                    ->content(fn (User $record): ?string => $record->created_at?->diffForHumans()),
-                                Forms\Components\Placeholder::make('updated_at')
-                                    ->label('Updated At')
-                                    ->content(fn (User $record): ?string => $record->updated_at?->diffForHumans()),
-                                Forms\Components\Placeholder::make('created_by')
-                                    ->label('Creado por')
-                                    ->content(fn (User $record): string => $record->createdBy?->name ?? '-')
-                            ])
-                            ->hidden(fn (string $operation): bool => $operation === 'create'),
                     ])
-                    ->columnSpan(1),
+                    ->columnSpanFull(), 
             ])
-            ->columns(3);
+            ->columns(4); 
     }
 
     public static function table(Table $table): Table
@@ -136,43 +155,53 @@ class CollaboratorUserResource extends Resource implements HasMedia
                     ->label('Foto')
                     ->collection('avatars')
                     ->wrap(),
+                    
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nombre')
                     ->searchable(),
-                    Tables\Columns\TextColumn::make('document_number')
+                    
+                Tables\Columns\TextColumn::make('document_number')
                     ->label('Identificación')
                     ->searchable(),            
+                    
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+                    
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Teléfono')
                     ->searchable()
                     ->hidden(true),
+                    
                 Tables\Columns\TextColumn::make('documentType.name')
                     ->label('Tipo de identificación')
                     ->sortable()
                     ->searchable()
                     ->hidden(true),
-                    Tables\Columns\TextColumn::make('createdBy.name')
+                    
+                Tables\Columns\TextColumn::make('createdBy.name')
                     ->label('Creado por')
                     ->placeholder('-')
                     ->searchable()
                     ->hidden(true),
+                    
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')
                     ->formatStateUsing(fn ($state): string => Str::headline($state))
                     ->colors(['info'])
                     ->badge(),
+                    
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->label('Fecha verificación email')
                     ->dateTime()
                     ->sortable()
                     ->hidden(true),
+                    
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Fecha de creación')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                    
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Fecha de actualización')
                     ->dateTime()
@@ -203,7 +232,6 @@ class CollaboratorUserResource extends Resource implements HasMedia
         ];
     }
 
-
     public static function getPages(): array
     {
         return [
@@ -217,21 +245,20 @@ class CollaboratorUserResource extends Resource implements HasMedia
     {
         if (! method_exists($record, 'notify')) {
             $userClass = $record::class;
-    
+
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
         }
-    
+
         $notification = new AuthVerifyEmail();
         $notification->url = Filament::getVerifyEmailUrl($record);
-    
+
         $settings->loadMailSettingsToConfig();
-    
+
         $record->notify($notification);
-    
+
         Notification::make()
             ->title(__('resource.user.notifications.notification_resent.title'))
             ->success()
             ->send();
     }
-
 }
