@@ -29,7 +29,6 @@ class CreateInvoice extends CreateRecord
                 ->send();
 
             $this->halt();
-
             return null;
         }
 
@@ -39,18 +38,31 @@ class CreateInvoice extends CreateRecord
         $invoice = static::getModel()::create($data);
 
         // Renombrar el archivo PDF después de que la factura ha sido creada
-        if ($invoice && isset($data['invoice_pdf'])) {
-            $oldPath = $data['invoice_pdf']; // Path original
-            $extension = pathinfo($oldPath, PATHINFO_EXTENSION); // Obtener la extensión
-            $newFilename = 'FEVD' . $invoice->invoice_number . '.' . $extension; // Crear el nuevo nombre
-            $newPath = 'invoices/' . $newFilename;
-
-            Storage::move($oldPath, $newPath); // Mover el archivo a la nueva ubicación
-
-            // Actualizar la ruta del PDF en la base de datos
-            $invoice->update(['invoice_pdf' => $newPath]);
-        }
+        $this->renameInvoicePdf($invoice, $data['invoice_pdf'] ?? null);
 
         return $invoice;
+    }
+
+    protected function handleRecordUpdate(Model $record, array $data): Model
+    {
+        if (isset($data['invoice_pdf'])) {
+            $this->renameInvoicePdf($record, $data['invoice_pdf']);
+        }
+
+        $record->update($data);
+
+        return $record;
+    }
+
+    protected function renameInvoicePdf(Model $invoice, $pdfPath): void
+    {
+        if ($pdfPath) {
+            $extension = pathinfo($pdfPath, PATHINFO_EXTENSION);
+            $newFilename = 'FEVD' . $invoice->invoice_number . '.' . $extension;
+            $newPath = 'invoices/' . $newFilename;
+
+            Storage::move($pdfPath, $newPath); // Mover el archivo a la nueva ubicación
+            $invoice->update(['invoice_pdf' => $newPath]);
+        }
     }
 }

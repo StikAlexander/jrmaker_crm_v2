@@ -74,23 +74,23 @@ class VoucherPaymentResource extends Resource
                             ->description('Ingrese la información del pago')
                             ->schema([
                                 Forms\Components\TextInput::make('amount')
-                                    ->label('Monto')
-                                    ->required()
-                                    ->numeric()
-                                    ->mask(RawJs::make('$money($input)'))
-                                    ->stripCharacters(',')
-                                    ->prefix('$')
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        $invoiceIds = $get('invoice_id');
-                                        if (!$invoiceIds) return;
-                                        $totalAmount = Invoice::whereIn('id', $invoiceIds)->sum('total_amount');
-                                        if ($state > $totalAmount) {
-                                            $set('amount', $totalAmount);
-                                        }
-                                    })
-                                    ->columnSpan(1),
-    
+                                ->label('Monto')
+                                ->required()
+                                ->numeric()
+                                ->mask(RawJs::make('$money($input)'))
+                                ->stripCharacters([',', '.']) // Eliminar puntos y comas
+                                ->prefix('$')
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                    $invoiceIds = $get('invoice_id');
+                                    if (!$invoiceIds) return;
+                                    $totalAmount = (int)Invoice::whereIn('id', $invoiceIds)->sum('total_amount');
+                                    if ((int)$state > $totalAmount) {
+                                        $set('amount', $totalAmount);
+                                    }
+                                })
+                                ->columnSpan(1),
+                            
                                 Forms\Components\DatePicker::make('payment_date')
                                     ->label('Fecha de Pago')
                                     ->required()
@@ -152,10 +152,11 @@ class VoucherPaymentResource extends Resource
                     ->label('Fecha de Pago')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amount')
+                    Tables\Columns\TextColumn::make('amount')
                     ->label('Monto')
                     ->money('COP')
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn($state) => '$' . number_format($state, 0)),                
                 Tables\Columns\TextColumn::make('createdBy.name')
                     ->label('Creado por')
                     ->sortable()

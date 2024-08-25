@@ -16,12 +16,15 @@ return new class extends Migration
             $table->string('invoice_number', 10)->unique();
             $table->date('issue_date');
             $table->date('due_date');
-            $table->decimal('total_amount', 10, 2);
+            
+            // Cambiar de decimal a integer
+            $table->integer('total_amount');
+            $table->integer('pending_amount')->default(0);
+            $table->integer('total_paid')->default(0);
+
             $table->foreignId('client_id')->constrained('users')->onDelete('cascade'); 
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null'); 
             $table->enum('status', ['Pending', 'Paid', 'Cancelled', 'Under Review'])->default('Pending');
-            $table->decimal('pending_amount', 10, 2)->default(0.00);
-            $table->decimal('total_paid', 10, 2)->default(0.00);
             $table->string('invoice_pdf');
             $table->string('description')->nullable();
             $table->timestamps();

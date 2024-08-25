@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
+use Filament\Support\RawJs; 
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -73,121 +74,134 @@ class InvoiceResource extends Resource
                 Forms\Components\Card::make()
                     ->schema([
                         Forms\Components\Section::make('Datos de la Factura')
-                            ->description('Incluye los detalles principales de la factura')
-                            ->schema([
-                                Forms\Components\TextInput::make('invoice_number')
-                                    ->label('Número de Factura')
-                                    ->prefix('FEVD')
-                                    ->required()
-                                    ->numeric()
-                                    ->rules([
-                                        'regex:/^\d+$/',
-                                        'not_in:e,E',
-                                    ])
-                                    ->extraAttributes(['onkeydown' => 'if(event.key === "e" || event.key === "E") event.preventDefault();'])
-                                    ->live()
-                                    ->debounce(500)
-                                    ->afterStateUpdated(function (Get $get, $state, Set $set) {
-                                        $currentId = $get('id');
-                                        $exists = \App\Models\Invoice::where('invoice_number', $state)
-                                            ->when($currentId, fn ($query) => $query->where('id', '!=', $currentId))
-                                            ->exists();
-    
-                                        if ($exists) {
-                                            $set('invoice_number_error', 'Este número de factura ya está siendo usado.');
-                                        } else {
-                                            $set('invoice_number_error', null);
-                                        }
-                                    })
-                                    ->hint(fn (Get $get) => $get('invoice_number_error'))
-                                    ->hintColor('danger')
-                                    ->columnSpan(2),
-    
-                                Forms\Components\Select::make('client_id')
-                                    ->label('Cliente')
-                                    ->required()
-                                    ->relationship('client', 'name')
-                                    ->options(fn () => \App\Models\User::whereHas('roles', fn ($query) => $query->where('name', 'client'))->pluck('name', 'id'))
-                                    ->searchable()
-                                    ->preload()
-                                    ->columnSpan(2),
-                            ])
-                            ->columns(4),
-                        
-                        Forms\Components\Section::make('Fechas')
-                            ->description('Selecciona las fechas relevantes para la factura')
-                            ->schema([
-                                Forms\Components\DatePicker::make('issue_date')
-                                    ->label('Fecha de Emisión')
-                                    ->required()
-                                    ->reactive()
-                                    ->default(now())
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        $dueDate = \Carbon\Carbon::parse($state)->addDays(30)->format('Y-m-d');
-                                        $set('due_date', $dueDate);
-                                    })
-                                    ->columnSpan(2),
-    
-                                Forms\Components\DatePicker::make('due_date')
-                                    ->label('Fecha de Vencimiento')
-                                    ->required()
-                                    ->disabled()
-                                    ->columnSpan(2),
-                            ])
-                            ->columns(4),
-                        
+                        ->description('Incluye los detalles principales de la factura')
+                        ->schema([
+                            Forms\Components\TextInput::make('invoice_number')
+                                ->label('Número de Factura')
+                                ->prefix('FEVD')
+                                ->required()
+                                ->numeric()
+                                ->rules([
+                                    'regex:/^\d+$/',
+                                    'not_in:e,E',
+                                ])
+                                ->extraAttributes(['onkeydown' => 'if(event.key === "e" || event.key === "E") event.preventDefault();'])
+                                ->live()
+                                ->debounce(500)
+                                ->afterStateUpdated(function (Get $get, $state, Set $set) {
+                                    $currentId = $get('id');
+                                    $exists = \App\Models\Invoice::where('invoice_number', $state)
+                                        ->when($currentId, fn ($query) => $query->where('id', '!=', $currentId))
+                                        ->exists();
+                    
+                                    if ($exists) {
+                                        $set('invoice_number_error', 'Este número de factura ya está siendo usado.');
+                                    } else {
+                                        $set('invoice_number_error', null);
+                                    }
+                                })
+                                ->hint(fn (Get $get) => $get('invoice_number_error'))
+                                ->hintColor('danger')
+                                ->columnSpan(2),
+                    
+                            Forms\Components\Select::make('client_id')
+                                ->label('Cliente')
+                                ->required()
+                                ->relationship('client', 'name')
+                                ->options(fn () => \App\Models\User::whereHas('roles', fn ($query) => $query->where('name', 'client'))->pluck('name', 'id'))
+                                ->searchable()
+                                ->preload()
+                                ->columnSpan(2),
+                        ])
+                        ->columns(4),
+                    
+                    Forms\Components\Section::make('Fechas')
+                        ->description('Selecciona las fechas relevantes para la factura')
+                        ->schema([
+                            Forms\Components\DatePicker::make('issue_date')
+                                ->label('Fecha de Emisión')
+                                ->required()
+                                ->reactive()
+                                ->default(now())
+                                ->maxDate(now())  // Asegura que la fecha de emisión no sea mayor a la fecha actual
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    $dueDate = \Carbon\Carbon::parse($state)->addDays(30)->format('Y-m-d');
+                                    $set('due_date', $dueDate);
+                                })
+                                ->columnSpan(2),
+                    
+                            Forms\Components\DatePicker::make('due_date')
+                                ->label('Fecha de Vencimiento')
+                                ->required()
+                                ->disabled()
+                                ->columnSpan(2),
+                        ])
+                        ->columns(4),
+                    
                         Forms\Components\Section::make('Montos')
-                            ->description('Especifica los montos de la factura')
-                            ->schema([
-                                Forms\Components\TextInput::make('total_amount')
-                                    ->label('Monto Total')
-                                    ->required()
-                                    ->numeric()
-                                    ->extraAttributes(['onkeydown' => 'if(event.key === "e" || event.key === "E") event.preventDefault();'])
-                                    ->reactive()
-                                    ->debounce('500ms')
-                                    ->afterStateUpdated(function ($state, callable $set, Get $get) {
-                                        $totalPaid = (float)($get('total_paid') ?? 0);
-                                        $pendingAmount = (float)$state - $totalPaid;
-                                        $set('pending_amount', $pendingAmount);
-                                        // Verificar si el monto pendiente es cero
-                                        if ($pendingAmount <= 0) {
-                                            $set('status', 'Paid');
-                                        }
-                                    })
-                                    ->columnSpan(2),
-    
-                                Forms\Components\TextInput::make('total_paid')
-                                    ->label('Monto Pagado')
-                                    ->required()
-                                    ->numeric()
-                                    ->extraAttributes(['onkeydown' => 'if(event.key === "e" || event.key === "E") event.preventDefault();'])
-                                    ->reactive()
-                                    ->debounce('500ms')
-                                    ->disabled(fn (callable $get) => empty($get('total_amount')))
-                                    ->afterStateUpdated(function ($state, callable $set, Get $get) {
-                                        $totalAmount = (float)($get('total_amount') ?? 0);
-                                        if ((float)$state > $totalAmount) {
-                                            $state = $totalAmount;
-                                            $set('total_paid', $state);
-                                        }
-                                        $pendingAmount = $totalAmount - (float)$state;
-                                        $set('pending_amount', $pendingAmount);
-                                        // Verificar si el monto pendiente es cero
-                                        if ($pendingAmount <= 0) {
-                                            $set('status', 'Paid');
-                                        }
-                                    })
-                                    ->columnSpan(2),
-    
-                                Forms\Components\TextInput::make('pending_amount')
-                                    ->label('Monto Pendiente')
-                                    ->required()
-                                    ->disabled()
-                                    ->columnSpan(2),
-                            ])
-                            ->columns(4),
-    
+                        ->description('Especifica los montos de la factura')
+                        ->schema([
+                            Forms\Components\TextInput::make('total_amount')
+                            ->label('Monto Total')
+                            ->required()
+                            ->numeric()
+                            ->prefix('$')
+                            ->extraAttributes(['onkeydown' => 'if(event.key === "e" || event.key === "E") event.preventDefault();'])
+                            ->mask(RawJs::make('{
+                                mask: Number,
+                                thousandsSeparator: ".",
+                                radix: ",",
+                                scale: 0, // Set scale to 0 to remove decimals
+                                mapToRadix: []
+                            }'))
+                            ->reactive()  
+                            ->debounce(750)
+                            ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                                $totalPaid = (float)($get('total_paid') ?? 0);
+                                $pendingAmount = (float)$state - $totalPaid;
+                                $set('pending_amount', $pendingAmount);
+                                // Verificar si el monto pendiente es cero
+                                if ($pendingAmount <= 0) {
+                                    $set('status', 'Paid');
+                                }
+                            })
+                            ->columnSpan(2),
+                        
+                    
+                            Forms\Components\TextInput::make('total_paid')
+                                ->label('Monto Pagado')
+                                ->required()
+                                ->numeric()
+                                ->prefix('$')
+                                ->extraAttributes(['onkeydown' => 'if(event.key === "e" || event.key === "E") event.preventDefault();'])
+                                ->reactive()  // Sigue siendo reactivo
+                                ->debounce(750)  // Aumenta el tiempo de espera para reducir los problemas de borrado
+                                ->disabled(fn (callable $get) => empty($get('total_amount')))
+                                ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                                    $totalAmount = (float)($get('total_amount') ?? 0);
+                                    if ((float)$state > $totalAmount) {
+                                        $state = $totalAmount;
+                                        $set('total_paid', $state);
+                                    }
+                                    $pendingAmount = $totalAmount - (float)$state;
+                                    $set('pending_amount', $pendingAmount);
+                                    // Verificar si el monto pendiente es cero
+                                    if ($pendingAmount <= 0) {
+                                        $set('status', 'Paid');
+                                    }
+                                })
+                                ->columnSpan(2),
+                    
+                            Forms\Components\TextInput::make('pending_amount')
+                                ->label('Monto Pendiente')
+                                ->prefix('$')
+                                ->required()
+                                ->disabled()
+                                ->columnSpan(2),
+                        ])
+                        ->columns(4),
+                    
+                    
                         Forms\Components\Section::make('Información Adicional')
                             ->description('Agrega el pdf de la factura y una descripcion de la misma')
                             ->schema([
@@ -258,18 +272,18 @@ class InvoiceResource extends Resource
                     ->label('Fecha de Vencimiento')
                     ->date()
                     ->sortable(),
-                TextColumn::make('total_amount')
+                    TextColumn::make('total_amount')
                     ->label('Monto Total')
-                    ->money('COP')
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.')),     
                 TextColumn::make('total_paid')
                     ->label('Monto Pagado')
-                    ->money('COP')
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.')),
                 TextColumn::make('pending_amount')
                     ->label('Monto Pendiente')
-                    ->money('COP')
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.')),
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()

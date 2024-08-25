@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class VoucherPayment extends Model 
 {
@@ -27,17 +28,22 @@ class VoucherPayment extends Model
         parent::boot();
     
         static::creating(function ($model) {
+            // Establecer el número de voucher
             $lastVoucherNumber = static::max('voucher_number');
             $model->voucher_number = $lastVoucherNumber ? $lastVoucherNumber + 1 : 1;
+
+            // Establecer la fecha de emisión (issue_date) si no está definida
+            if (empty($model->issue_date)) {
+                $model->issue_date = Carbon::now()->toDateString(); // Fecha actual
+            }
+
+            // Convertir issue_date a un objeto Carbon
+            $issueDate = Carbon::parse($model->issue_date);
     
-            // Asegúrate de convertir la fecha de emisión a un objeto Carbon
-            $issueDate = \Carbon\Carbon::parse($model->issue_date);
-    
-            // Calcula la due_date 5 días después de issue_date
+            // Calcular la due_date 5 días después de issue_date
             $model->due_date = $issueDate->addDays(5)->format('Y-m-d');
         });
     }
-    
 
     public function client()
     {

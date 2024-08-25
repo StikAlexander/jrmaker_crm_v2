@@ -132,6 +132,7 @@ class UserResource extends Resource
                                     ->content(fn (User $record): ?string => $record->updated_at?->diffForHumans()),
                             ])
                             ->hidden(fn (string $operation): bool => $operation === 'create'),
+                            
                     ])
                     ->columnSpan(1),
             ])
@@ -180,6 +181,7 @@ class UserResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -188,10 +190,7 @@ class UserResource extends Resource
             ]);
     }
 
-    public static function canViewAny(): bool
-    {
-        return false;  // Retorna false para ocultar el recurso
-    }
+
 
     public static function getRelations(): array
     {
