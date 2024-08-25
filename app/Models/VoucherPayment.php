@@ -27,11 +27,17 @@ class VoucherPayment extends Model
         parent::boot();
     
         static::creating(function ($model) {
-            // Eliminar referencia a 'withTrashed' ya que no usamos SoftDeletes
             $lastVoucherNumber = static::max('voucher_number');
             $model->voucher_number = $lastVoucherNumber ? $lastVoucherNumber + 1 : 1;
+    
+            // Asegúrate de convertir la fecha de emisión a un objeto Carbon
+            $issueDate = \Carbon\Carbon::parse($model->issue_date);
+    
+            // Calcula la due_date 5 días después de issue_date
+            $model->due_date = $issueDate->addDays(5)->format('Y-m-d');
         });
     }
+    
 
     public function client()
     {

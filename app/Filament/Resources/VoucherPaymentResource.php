@@ -21,83 +21,115 @@ class VoucherPaymentResource extends Resource
     protected static ?string $model = VoucherPayment::class;
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
     protected static ?string $recordTitleAttribute = 'voucher_number';
-    protected static ?string $navigationLabel = 'Pagos';
+    protected static ?string $pluralLabel = 'Pagos';
+    protected static ?string $singularLabel = 'pago';
     protected static ?string $navigationGroup = 'Contabilidad';
     protected static ?int $navigationSort = 2;
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('client_id')
-                    ->label('Cliente')
-                    ->options(User::role('client')->pluck('name', 'id'))
-                    ->searchable()
-                    ->required()
-                    ->reactive()
-                    ->afterStateUpdated(function (callable $set) {
-                        // Resetear las facturas seleccionadas al cambiar el cliente
-                        $set('invoice_id', []);
-                    }),
+                Forms\Components\Card::make()
+                    ->schema([
+                        Forms\Components\Section::make('Información General')
+                            ->description('Detalles generales del pago')
+                            ->schema([
+                                Forms\Components\TextInput::make('voucher_number')
+                                    ->default(function () {
+                                        $lastVoucherNumber = VoucherPayment::max('voucher_number');
+                                        return $lastVoucherNumber ? $lastVoucherNumber + 1 : 1;
+                                    })
+                                    ->prefix('SP')
+                                    ->disabled()
+                                    ->columnSpan(1),
     
-                    Forms\Components\Select::make('invoice_id')
-                    ->label('Factura(s)')
-                    ->options(function (callable $get) {
-                        $clientId = $get('client_id');
-                        if (!$clientId) return [];
-                        return Invoice::where('client_id', $clientId)
-                            ->where('status', 'Pending')
-                            ->pluck('invoice_number', 'id');
-                    })
-                    ->searchable()
-                    ->required()
-                    ->multiple()
-                    ->reactive(),
-
-
-
-                Forms\Components\DatePicker::make('payment_date')
-                    ->label('Fecha de Pago')
-                    ->required()
-                    ->maxDate(now())
-                    ->default(now()),
+                                Select::make('client_id')
+                                    ->label('Cliente')
+                                    ->options(User::role('client')->pluck('name', 'id'))
+                                    ->searchable()
+                                    ->required()
+                                    ->reactive()
+                                    ->afterStateUpdated(function (callable $set) {
+                                        $set('invoice_id', []);
+                                    })
+                                    ->columnSpan(1),
     
-                    Forms\Components\TextInput::make('amount')
-                    ->label('Monto')
-                    ->required()
-                    ->numeric()
-                    ->mask(RawJs::make('$money($input)'))
-                    ->stripCharacters(',')
-                    ->prefix('$')
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        $invoiceIds = $get('invoice_id');
-                        if (!$invoiceIds) return;
-                        $totalAmount = Invoice::whereIn('id', $invoiceIds)->sum('total_amount');
-                        if ($state > $totalAmount) {
-                            $set('amount', $totalAmount);
-                        }
-                    }),
+                                Select::make('invoice_id')
+                                    ->label('Factura(s)')
+                                    ->options(function (callable $get) {
+                                        $clientId = $get('client_id');
+                                        return $clientId ? Invoice::where('client_id', $clientId)
+                                            ->where('status', 'Pending')
+                                            ->pluck('invoice_number', 'id') : [];
+                                    })
+                                    ->searchable()
+                                    ->required()
+                                    ->multiple()
+                                    ->reactive()
+                                    ->columnSpan(2),
+                            ])
+                            ->columns(3),
     
-                Forms\Components\FileUpload::make('payment_support')
-                    ->label('Soporte de Pago')
-                    ->directory('voucher_payments')
-                    ->acceptedFileTypes(['application/pdf'])
-                    ->maxSize(10240)
-                    ->required(),
+                        Forms\Components\Section::make('Detalles de Pago')
+                            ->description('Ingrese la información del pago')
+                            ->schema([
+                                Forms\Components\TextInput::make('amount')
+                                    ->label('Monto')
+                                    ->required()
+                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input)'))
+                                    ->stripCharacters(',')
+                                    ->prefix('$')
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        $invoiceIds = $get('invoice_id');
+                                        if (!$invoiceIds) return;
+                                        $totalAmount = Invoice::whereIn('id', $invoiceIds)->sum('total_amount');
+                                        if ($state > $totalAmount) {
+                                            $set('amount', $totalAmount);
+                                        }
+                                    })
+                                    ->columnSpan(1),
     
-                Forms\Components\TextInput::make('voucher_number')
-                    ->default(function () {
-                        $lastVoucherNumber = VoucherPayment::max('voucher_number');
-                        return $lastVoucherNumber ? $lastVoucherNumber + 1 : 1;
-                    })
-                    ->disabled(),
+                                Forms\Components\DatePicker::make('payment_date')
+                                    ->label('Fecha de Pago')
+                                    ->required()
+                                    ->maxDate(now())
+                                    ->default(now())
+                                    ->columnSpan(1),
     
-                Forms\Components\Hidden::make('issue_date')
-                    ->default(now()),
-            ]);
+                                Forms\Components\TextInput::make('issue_date')
+                                    ->label('Fecha de Emisión')
+                                    ->default(now()->format('Y-m-d'))
+                                    ->disabled()
+                                    ->columnSpan(1),
+    
+                                Forms\Components\TextInput::make('due_date')
+                                    ->label('Fecha de Vencimiento')
+                                    ->default(fn (callable $get) => \Carbon\Carbon::parse($get('issue_date'))->addDays(5)->format('Y-m-d'))
+                                    ->disabled()
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(4),
+    
+                        Forms\Components\Section::make('Soporte de Pago')
+                            ->description('Adjunte el soporte del pago')
+                            ->schema([
+                                Forms\Components\FileUpload::make('payment_support')
+                                    ->label('Soporte de Pago')
+                                    ->directory('voucher_payments')
+                                    ->acceptedFileTypes(['application/pdf'])
+                                    ->maxSize(10240)
+                                    ->required()
+                                    ->preserveFilenames()
+                                    ->columnSpanFull(),
+                            ])
+                    ])
+                    ->columnSpanFull(),
+            ])
+            ->columns(2);
     }
     
-
     public static function table(Table $table): Table
     {
         return $table
@@ -105,7 +137,8 @@ class VoucherPaymentResource extends Resource
                 Tables\Columns\TextColumn::make('voucher_number')
                     ->label('Número de Voucher')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn (string $state): string => 'SP' . $state),
                 Tables\Columns\TextColumn::make('client.name')  
                     ->label('Cliente')
                     ->sortable()

@@ -158,6 +158,7 @@ class AdminUserResource extends Resource implements HasMedia
                     ->collection('avatars')
                     ->wrap(),
                     Tables\Columns\TextColumn::make('name')
+                    ->label('Nombre')
                     ->searchable(),
                     Tables\Columns\TextColumn::make('document_number')
                     ->label('Identificación')
