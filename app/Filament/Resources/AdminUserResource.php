@@ -21,6 +21,7 @@ use Illuminate\Support\Str;
 use Exception;
 use Filament\Facades\Filament;
 use Filament\Notifications\Auth\VerifyEmail as AuthVerifyEmail;
+use Filament\Forms\Components\Actions\Action;
 
 class AdminUserResource extends Resource implements HasMedia
 {
@@ -50,99 +51,141 @@ class AdminUserResource extends Resource implements HasMedia
                 Forms\Components\Card::make()
                     ->schema([
                         Forms\Components\Section::make('Datos Generales')
-                        ->description('Incluye los datos principales del administrador')
-                        ->schema([
-                            Forms\Components\Placeholder::make('')
-                                ->content('Foto de perfil')
-                                ->columnSpanFull()
-                                ->extraAttributes(['style' => 'text-align: center; font-size: 0.875rem; color: #6b7280;']),
-                    
-                            Forms\Components\SpatieMediaLibraryFileUpload::make('media')
-                                ->avatar()
-                                ->collection('avatars')
-                                ->label('')
-                                ->alignCenter()
-                                ->columnSpanFull(),
-                    
-                            Forms\Components\TextInput::make('name')
-                                ->required()
-                                ->maxLength(255)
-                                ->label('Razón social / nombre completo')
-                                ->columnSpan(2),
-                    
-                            Forms\Components\Select::make('document_type_id')
-                                ->label('Tipo de identificación')
-                                ->relationship('documentType', 'name')
-                                ->required()
-                                ->columnSpan(1),
-                    
-                            Forms\Components\TextInput::make('document_number')
-                                ->label('Número de documento')
-                                ->required()
-                                ->rules(['regex:/^[0-9]+$/'])
-                                ->maxLength(20)
-                                ->helperText('Solo se permiten números.')
-                                ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
-                                ->numeric()
-                                ->columnSpan(1),
-                        ])
-                        ->columns(4),
- 
+                            ->description('Incluye los datos principales del colaborador')
+                            ->schema([
+                                Forms\Components\Grid::make(3)
+                                    ->schema([
+                                        Forms\Components\SpatieMediaLibraryFileUpload::make('media')
+                                            ->hiddenLabel()
+                                            ->avatar()
+                                            ->collection('avatars')
+                                            ->alignCenter()
+                                            ->columnSpanFull(),
+    
+                                        Forms\Components\TextInput::make('name')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->label('Nombre completo')
+                                            ->columnSpan(2),
+    
+                                        Forms\Components\Select::make('document_type_id')
+                                            ->label('Tipo de identificación')
+                                            ->relationship('documentType', 'name')
+                                            ->required()
+                                            ->columnSpan(1),
+    
+                                        Forms\Components\TextInput::make('document_number')
+                                            ->label('Identificación')
+                                            ->required()
+                                            ->rules(['regex:/^[0-9]+$/'])
+                                            ->maxLength(20)
+                                            ->helperText('Solo se permiten números.')
+                                            ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
+                                            ->numeric()
+                                            ->columnSpan(1),
+                                    ]),
+                            ])
+                            ->columns(1),
+    
                         Forms\Components\Section::make('Información de Contacto')
-                            ->description('Agrega los datos de contacto para este administrador')
+                            ->description('Agrega los datos de contacto para este colaborador')
                             ->schema([
-                                Forms\Components\TextInput::make('email')
-                                    ->email()
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->label('Correo electrónico')
-                                    ->columnSpan(2),
+                                Forms\Components\Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('email')
+                                            ->email()
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->label('Correo electrónico')
+                                            ->columnSpan(1),
     
-                                Forms\Components\TextInput::make('phone')
-                                    ->label('Teléfono')
-                                    ->required()
-                                    ->rules(['regex:/^[0-9]+$/'])
-                                    ->maxLength(20)
-                                    ->helperText('Solo se permiten números.')
-                                    ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
-                                    ->numeric()
-                                    ->columnSpan(1),
+                                        Forms\Components\TextInput::make('phone')
+                                            ->label('Teléfono')
+                                            ->required()
+                                            ->rules(['regex:/^[0-9]+$/'])
+                                            ->maxLength(20)
+                                            ->helperText('Solo se permiten números.')
+                                            ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
+                                            ->numeric()
+                                            ->columnSpan(1),
     
-                                Forms\Components\Select::make('status')
-                                    ->label('Estado')
-                                    ->options([
-                                        'active' => 'Active',
-                                        'inactive' => 'Inactive',
-                                        'suspended' => 'Suspended',
-                                    ])
-                                    ->default('active')
-                                    ->required()
-                                    ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Resources\AdminUserResource\Pages\CreateAdminUser)
-                                    ->columnSpan(1),
+                                            Forms\Components\Select::make('status')
+                                            ->label('Estado')
+                                            ->options([
+                                                'active' => 'Active',
+                                                'inactive' => 'Inactive',
+                                                'suspended' => 'Suspended',
+                                            ])
+                                            ->default('active')
+                                            ->required()
+                                            ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Resources\AdminUserResource\Pages\CreateAdminUser)
+                                            ->columnSpanFull(),
+                                    ]),
                             ])
-                            ->columns(4),
+                            ->columns(1),
     
-                        Forms\Components\Section::make('Contraseña')
+                            Forms\Components\Section::make('Contraseña')
                             ->schema([
-                                Forms\Components\TextInput::make('password')
-                                    ->password()
-                                    ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
-                                    ->dehydrated(fn (?string $state): bool => filled($state))
-                                    ->revealable()
-                                    ->required()
-                                    ->columnSpan(1),
-    
-                                Forms\Components\TextInput::make('passwordConfirmation')
-                                    ->password()
-                                    ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
-                                    ->dehydrated(fn (?string $state): bool => filled($state))
-                                    ->revealable()
-                                    ->same('password')
-                                    ->required()
-                                    ->columnSpan(1),
+                                Forms\Components\Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('password')
+                                            ->password()
+                                            ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
+                                            ->dehydrated(fn (?string $state): bool => filled($state))
+                                            ->revealable()
+                                            ->required()
+                                            ->columnSpan(1),
+                        
+                                        Forms\Components\TextInput::make('passwordConfirmation')
+                                            ->password()
+                                            ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
+                                            ->dehydrated(fn (?string $state): bool => filled($state))
+                                            ->revealable()
+                                            ->same('password')
+                                            ->required()
+                                            ->columnSpan(1),
+                                    ]),
                             ])
-                            ->columns(2)
-                            ->hidden(fn (string $operation): bool => $operation === 'edit'),
+                            ->columns(1)
+                            ->hidden(fn (string $operation): bool => in_array($operation, ['edit', 'view'])),
+    
+                        
+                        Forms\Components\Section::make('Verificación de Correo Electrónico')
+                            ->schema([
+                                Forms\Components\Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\Placeholder::make('email_verified_at')
+                                            ->label('Fecha de verificación del correo')
+                                            ->content(fn (?User $record): ?string => $record?->email_verified_at)
+                                            ->columnSpan(1),
+    
+                                        Forms\Components\Actions::make([
+                                            Action::make('resend_verification')
+                                                ->label('Reenviar verificación')
+                                                ->color('secondary')
+                                                ->action(fn (?MailSettings $settings, ?User $record) => $record ? static::doResendEmailVerification($settings, $record) : null)
+                                                ->hidden(fn (?User $user) => $user?->email_verified_at != null),
+                                        ])
+                                        ->columnSpanFull(),
+    
+                                        Forms\Components\Placeholder::make('created_at')
+                                            ->label('Fecha de creación')
+                                            ->content(fn (?User $record): ?string => $record?->created_at?->diffForHumans())
+                                            ->columnSpan(1),
+    
+                                        Forms\Components\Placeholder::make('updated_at')
+                                            ->label('Fecha de actualización')
+                                            ->content(fn (?User $record): ?string => $record?->updated_at?->diffForHumans())
+                                            ->columnSpan(1),
+    
+                                        Forms\Components\Placeholder::make('created_by')
+                                            ->label('Creado por')
+                                            ->content(fn (?User $record): string => $record ? ($record->createdBy?->name ?? '-') : '-')
+                                            ->columnSpan(2),
+                                    ]),
+                            ])
+                            ->visible(fn (string $operation): bool => in_array($operation, ['view', 'edit']))
+                            ->columns(1),
                     ])
                     ->columnSpanFull(),
             ])
@@ -157,44 +200,55 @@ class AdminUserResource extends Resource implements HasMedia
                     ->label('Foto de perfil')
                     ->collection('avatars')
                     ->wrap(),
-                    Tables\Columns\TextColumn::make('name')
+                    
+                Tables\Columns\TextColumn::make('name')
                     ->label('Nombre')
                     ->searchable(),
-                    Tables\Columns\TextColumn::make('document_number')
+                    
+                Tables\Columns\TextColumn::make('document_number')
                     ->label('Identificación')
-                    ->searchable(),     
+                    ->searchable(),            
+                    
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+                    
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Teléfono')
                     ->searchable()
                     ->hidden(true),
+                    
                 Tables\Columns\TextColumn::make('documentType.name')
                     ->label('Tipo de identificación')
                     ->sortable()
                     ->searchable()
                     ->hidden(true),
-                Tables\Columns\TextColumn::make('createdBy.name')
+                    
+                    Tables\Columns\TextColumn::make('createdBy.name')
                     ->label('Creado por')
                     ->placeholder('-')
+                    ->sortable()
                     ->searchable()
                     ->hidden(true),
+                
+                    
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')
-                    ->sortable()
-                    ->formatStateUsing(fn ($state): string => str::headline($state))
+                    ->formatStateUsing(fn ($state): string => Str::headline($state))
                     ->colors(['info'])
                     ->badge(),
+                    
                 Tables\Columns\TextColumn::make('email_verified_at')
-                    ->label('Fecha verificación')
+                    ->label('Fecha verificación email')
                     ->dateTime()
                     ->sortable()
                     ->hidden(true),
+                    
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Fecha de creación')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                    
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Fecha de actualización')
                     ->dateTime()
@@ -238,7 +292,6 @@ class AdminUserResource extends Resource implements HasMedia
     {
         if (! method_exists($record, 'notify')) {
             $userClass = $record::class;
-    
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
         }
     
@@ -254,6 +307,6 @@ class AdminUserResource extends Resource implements HasMedia
             ->success()
             ->send();
     }
-
+    
 }
 

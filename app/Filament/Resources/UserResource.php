@@ -190,7 +190,10 @@ class UserResource extends Resource
             ]);
     }
 
-
+    public static function canViewAny(): bool
+    {
+        return false;  // Retorna false para ocultar el recurso
+    }
 
     public static function getRelations(): array
     {

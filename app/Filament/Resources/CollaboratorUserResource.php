@@ -106,8 +106,8 @@ class CollaboratorUserResource extends Resource implements HasMedia
                                             ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
                                             ->numeric()
                                             ->columnSpan(1),
-    
-                                        Forms\Components\Select::make('status')
+                                            
+                                            Forms\Components\Select::make('status')
                                             ->label('Estado')
                                             ->options([
                                                 'active' => 'Active',
@@ -116,12 +116,13 @@ class CollaboratorUserResource extends Resource implements HasMedia
                                             ])
                                             ->default('active')
                                             ->required()
+                                            ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Resources\CollaboratorUserResource\Pages\CreateCollaboratorUser)
                                             ->columnSpanFull(),
                                     ]),
                             ])
                             ->columns(1),
     
-                        Forms\Components\Section::make('Contraseña')
+                            Forms\Components\Section::make('Contraseña')
                             ->schema([
                                 Forms\Components\Grid::make(2)
                                     ->schema([
@@ -132,7 +133,7 @@ class CollaboratorUserResource extends Resource implements HasMedia
                                             ->revealable()
                                             ->required()
                                             ->columnSpan(1),
-    
+                        
                                         Forms\Components\TextInput::make('passwordConfirmation')
                                             ->password()
                                             ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
@@ -144,7 +145,8 @@ class CollaboratorUserResource extends Resource implements HasMedia
                                     ]),
                             ])
                             ->columns(1)
-                            ->hidden(fn (string $operation): bool => $operation === 'edit'),
+                            ->hidden(fn (string $operation): bool => in_array($operation, ['edit', 'view'])),
+                        
     
                         // Sección de verificación solo visible en "view" y "edit"
                         Forms\Components\Section::make('Verificación de Correo Electrónico')
@@ -194,7 +196,7 @@ class CollaboratorUserResource extends Resource implements HasMedia
         return $table
             ->columns([
                 Tables\Columns\SpatieMediaLibraryImageColumn::make('media')
-                    ->label('Foto')
+                    ->label('Foto de perfil')
                     ->collection('avatars')
                     ->wrap(),
                     
@@ -224,7 +226,8 @@ class CollaboratorUserResource extends Resource implements HasMedia
                     ->label('Creado por')
                     ->placeholder('-')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->hidden(true),
                 
                     
                 Tables\Columns\TextColumn::make('status')

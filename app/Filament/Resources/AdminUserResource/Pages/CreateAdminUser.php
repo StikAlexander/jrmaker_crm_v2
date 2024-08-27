@@ -47,7 +47,7 @@ class CreateAdminUser extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        $data['created_by'] = auth()->id();
+        $data['created_by_id'] = auth()->id();
         $user = User::create($data);
         $user->assignRole(['panel_user', 'admin']);
 
