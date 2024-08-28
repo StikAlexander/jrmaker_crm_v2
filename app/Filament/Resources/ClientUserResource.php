@@ -150,16 +150,13 @@ class ClientUserResource extends Resource implements HasMedia
                 ->placeholder('-')
                 ->searchable()
                 ->hidden(true),
-            Tables\Columns\TextColumn::make('status')
-                ->label('Estado')
-                ->formatStateUsing(fn ($state): string => Str::headline($state))
-                ->colors(['info'])
-                ->badge(),
+
             Tables\Columns\TextColumn::make('created_at')
                 ->label('Fecha de creación')
                 ->dateTime()
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
+
             Tables\Columns\TextColumn::make('updated_at')
                 ->label('Fecha de actualización')
                 ->dateTime()
@@ -168,11 +165,26 @@ class ClientUserResource extends Resource implements HasMedia
         ])
         ->actions([
             Tables\Actions\ViewAction::make(),
-            Tables\Actions\EditAction::make(),
+            
+            Tables\Actions\EditAction::make()
+                ->modalHeading('Editar Cliente') // Personaliza el título del modal de edición
+                ->modalWidth('4xl'), // Define el tamaño del modal (Falta el punto y coma aquí)
+        
             Tables\Actions\DeleteAction::make(),
             Tables\Actions\RestoreAction::make(),
+            
             Impersonate::make('impersonate')
                 ->redirectTo(fn ($record) => $record->hasRole('client') ? '/client' : '/admin'),
+        
+            Tables\Actions\Action::make('toggleStatus')
+                ->icon('heroicon-o-light-bulb')
+                ->label('') 
+                ->action(function ($record) {
+                    $newStatus = $record->status === 'active' ? 'inactive' : 'active';
+                    $record->update(['status' => $newStatus]);
+                })
+                ->color(fn ($record) => $record->status === 'active' ? 'success' : 'danger')
+                ->tooltip(fn ($record) => $record->status === 'active' ? 'Desactivar' : 'Activar'),
         ])
         ->bulkActions([
             Tables\Actions\BulkActionGroup::make([
@@ -180,17 +192,6 @@ class ClientUserResource extends Resource implements HasMedia
                 Tables\Actions\RestoreBulkAction::make(),
             ]),
         ]);
-}
-
-    
-        public static function getPages(): array
-        {
-            return [
-                'index' => Pages\ListClientUsers::route('/'),
-                'create' => Pages\CreateClientUser::route('/create'),
-                'edit' => Pages\EditClientUser::route('/{record}/edit'),
-            ];
-        }
     }
 
-
+}   

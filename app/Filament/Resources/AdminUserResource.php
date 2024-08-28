@@ -112,18 +112,6 @@ class AdminUserResource extends Resource implements HasMedia
                                             ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
                                             ->numeric()
                                             ->columnSpan(1),
-    
-                                        Forms\Components\Select::make('status')
-                                            ->label('Estado')
-                                            ->options([
-                                                'active' => 'Active',
-                                                'inactive' => 'Inactive',
-                                                'suspended' => 'Suspended',
-                                            ])
-                                            ->default('active')
-                                            ->required()
-                                            ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Resources\AdminUserResource\Pages\CreateAdminUser)
-                                            ->columnSpanFull(),
                                     ]),
                             ])
                             ->columns(1),
@@ -228,19 +216,12 @@ class AdminUserResource extends Resource implements HasMedia
                     ->searchable()
                     ->hidden(true),
                     
-                    Tables\Columns\TextColumn::make('createdBy.name')
+                Tables\Columns\TextColumn::make('createdBy.name')
                     ->label('Creado por')
                     ->placeholder('-')
                     ->sortable()
                     ->searchable()
-                    ->hidden(true),
-                
-                    
-                Tables\Columns\TextColumn::make('status')
-                    ->label('Estado')
-                    ->formatStateUsing(fn ($state): string => Str::headline($state))
-                    ->colors(['info'])
-                    ->badge(),
+                    ->hidden(true),        
                     
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->label('Fecha verificación email')
@@ -265,6 +246,16 @@ class AdminUserResource extends Resource implements HasMedia
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
+
+                Tables\Actions\Action::make('toggleStatus')
+                ->icon('heroicon-o-light-bulb')
+                ->label('') 
+                ->action(function ($record) {
+                    $newStatus = $record->status === 'active' ? 'inactive' : 'active';
+                    $record->update(['status' => $newStatus]);
+                })
+                ->color(fn ($record) => $record->status === 'active' ? 'success' : 'danger')
+                ->tooltip(fn ($record) => $record->status === 'active' ? 'Desactivar' : 'Activar'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

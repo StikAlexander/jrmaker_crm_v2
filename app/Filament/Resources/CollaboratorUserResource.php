@@ -113,17 +113,6 @@ class CollaboratorUserResource extends Resource implements HasMedia
                                             ->numeric()
                                             ->columnSpan(1),
     
-                                        Forms\Components\Select::make('status')
-                                            ->label('Estado')
-                                            ->options([
-                                                'active' => 'Active',
-                                                'inactive' => 'Inactive',
-                                                'suspended' => 'Suspended',
-                                            ])
-                                            ->default('active')
-                                            ->required()
-                                            ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Resources\AdminUserResource\Pages\CreateAdminUser)
-                                            ->columnSpanFull(),
                                     ]),
                             ])
                             ->columns(1),
@@ -190,9 +179,9 @@ class CollaboratorUserResource extends Resource implements HasMedia
                             ->visible(fn (string $operation): bool => in_array($operation, ['view', 'edit']))
                             ->columns(1),
                     ])
-                    ->maxWidth(MaxWidth::FiveExtraLarge)  // Limita el ancho de la tarjeta
+                    ->maxWidth(MaxWidth::FiveExtraLarge)  
                     ->extraAttributes([
-                        'class' => 'mx-auto mt-10',  // Centra la tarjeta en la pantalla
+                        'class' => 'mx-auto mt-10', 
                     ]),
             ]);
     }
@@ -234,13 +223,6 @@ class CollaboratorUserResource extends Resource implements HasMedia
                     ->sortable()
                     ->searchable()
                     ->hidden(true),
-                
-                    
-                Tables\Columns\TextColumn::make('status')
-                    ->label('Estado')
-                    ->formatStateUsing(fn ($state): string => Str::headline($state))
-                    ->colors(['info'])
-                    ->badge(),
                     
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->label('Fecha verificación email')
@@ -268,6 +250,16 @@ class CollaboratorUserResource extends Resource implements HasMedia
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
+
+                Tables\Actions\Action::make('toggleStatus')
+                ->icon('heroicon-o-light-bulb')
+                ->label('') 
+                ->action(function ($record) {
+                    $newStatus = $record->status === 'active' ? 'inactive' : 'active';
+                    $record->update(['status' => $newStatus]);
+                })
+                ->color(fn ($record) => $record->status === 'active' ? 'success' : 'danger')
+                ->tooltip(fn ($record) => $record->status === 'active' ? 'Desactivar' : 'Activar'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

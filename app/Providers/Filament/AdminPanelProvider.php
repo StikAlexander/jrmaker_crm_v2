@@ -40,6 +40,7 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
+        ->spa()
         ->navigationGroups([
             NavigationGroup::make('Banner')
                 ->icon('heroicon-o-tag'), 

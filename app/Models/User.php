@@ -55,6 +55,17 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
         'password' => 'hashed',
     ];
 
+    protected static function booted()
+    {
+        
+        static::creating(function ($user) {
+        
+            if (is_null($user->status)) {
+                $user->status = 'active';
+            }
+        });
+    }
+
     public function setDocumentNumberAttribute($value)
     {
         // Convertir a cadena si no lo es
