@@ -14,7 +14,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
-use App\Notifications\VerifyEmail;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -22,6 +21,13 @@ use Exception;
 use Filament\Facades\Filament;
 use Filament\Notifications\Auth\VerifyEmail as AuthVerifyEmail;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Support\Enums\MaxWidth;
+
+
+
 
 class CollaboratorUserResource extends Resource implements HasMedia
 {
@@ -46,12 +52,12 @@ class CollaboratorUserResource extends Resource implements HasMedia
     {
         return $form
             ->schema([
-                Forms\Components\Card::make()
+                Card::make()
                     ->schema([
-                        Forms\Components\Section::make('Datos Generales')
+                        Section::make('Datos Generales')
                             ->description('Incluye los datos principales del colaborador')
                             ->schema([
-                                Forms\Components\Grid::make(3)
+                                Grid::make(3)
                                     ->schema([
                                         Forms\Components\SpatieMediaLibraryFileUpload::make('media')
                                             ->hiddenLabel()
@@ -85,10 +91,10 @@ class CollaboratorUserResource extends Resource implements HasMedia
                             ])
                             ->columns(1),
     
-                        Forms\Components\Section::make('Información de Contacto')
+                        Section::make('Información de Contacto')
                             ->description('Agrega los datos de contacto para este colaborador')
                             ->schema([
-                                Forms\Components\Grid::make(2)
+                                Grid::make(2)
                                     ->schema([
                                         Forms\Components\TextInput::make('email')
                                             ->email()
@@ -106,8 +112,8 @@ class CollaboratorUserResource extends Resource implements HasMedia
                                             ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
                                             ->numeric()
                                             ->columnSpan(1),
-                                            
-                                            Forms\Components\Select::make('status')
+    
+                                        Forms\Components\Select::make('status')
                                             ->label('Estado')
                                             ->options([
                                                 'active' => 'Active',
@@ -116,15 +122,15 @@ class CollaboratorUserResource extends Resource implements HasMedia
                                             ])
                                             ->default('active')
                                             ->required()
-                                            ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Resources\CollaboratorUserResource\Pages\CreateCollaboratorUser)
+                                            ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Resources\AdminUserResource\Pages\CreateAdminUser)
                                             ->columnSpanFull(),
                                     ]),
                             ])
                             ->columns(1),
     
-                            Forms\Components\Section::make('Contraseña')
+                        Section::make('Contraseña')
                             ->schema([
-                                Forms\Components\Grid::make(2)
+                                Grid::make(2)
                                     ->schema([
                                         Forms\Components\TextInput::make('password')
                                             ->password()
@@ -133,7 +139,7 @@ class CollaboratorUserResource extends Resource implements HasMedia
                                             ->revealable()
                                             ->required()
                                             ->columnSpan(1),
-                        
+    
                                         Forms\Components\TextInput::make('passwordConfirmation')
                                             ->password()
                                             ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
@@ -146,12 +152,10 @@ class CollaboratorUserResource extends Resource implements HasMedia
                             ])
                             ->columns(1)
                             ->hidden(fn (string $operation): bool => in_array($operation, ['edit', 'view'])),
-                        
     
-                        // Sección de verificación solo visible en "view" y "edit"
-                        Forms\Components\Section::make('Verificación de Correo Electrónico')
+                        Section::make('Verificación de Correo Electrónico')
                             ->schema([
-                                Forms\Components\Grid::make(2)
+                                Grid::make(2)
                                     ->schema([
                                         Forms\Components\Placeholder::make('email_verified_at')
                                             ->label('Fecha de verificación del correo')
@@ -186,9 +190,11 @@ class CollaboratorUserResource extends Resource implements HasMedia
                             ->visible(fn (string $operation): bool => in_array($operation, ['view', 'edit']))
                             ->columns(1),
                     ])
-                    ->columnSpanFull(),
-            ])
-            ->columns(4);
+                    ->maxWidth(MaxWidth::FiveExtraLarge)  // Limita el ancho de la tarjeta
+                    ->extraAttributes([
+                        'class' => 'mx-auto mt-10',  // Centra la tarjeta en la pantalla
+                    ]),
+            ]);
     }
     
     public static function table(Table $table): Table

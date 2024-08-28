@@ -54,7 +54,7 @@ class AdminPanelProvider extends PanelProvider
             NavigationGroup::make('Configuración')
                 ->icon('heroicon-o-cog-8-tooth'),
         ])
-            ->maxContentWidth(MaxWidth::Full)
+            ->maxContentWidth(MaxWidth::ScreenExtraLarge)
             ->sidebarFullyCollapsibleOnDesktop()
             ->default()
             ->id('admin')

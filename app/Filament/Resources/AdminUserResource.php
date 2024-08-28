@@ -22,6 +22,10 @@ use Exception;
 use Filament\Facades\Filament;
 use Filament\Notifications\Auth\VerifyEmail as AuthVerifyEmail;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Support\Enums\MaxWidth;
 
 class AdminUserResource extends Resource implements HasMedia
 {
@@ -48,12 +52,12 @@ class AdminUserResource extends Resource implements HasMedia
     {
         return $form
             ->schema([
-                Forms\Components\Card::make()
+                Card::make()
                     ->schema([
-                        Forms\Components\Section::make('Datos Generales')
+                        Section::make('Datos Generales')
                             ->description('Incluye los datos principales del colaborador')
                             ->schema([
-                                Forms\Components\Grid::make(3)
+                                Grid::make(3)
                                     ->schema([
                                         Forms\Components\SpatieMediaLibraryFileUpload::make('media')
                                             ->hiddenLabel()
@@ -87,10 +91,10 @@ class AdminUserResource extends Resource implements HasMedia
                             ])
                             ->columns(1),
     
-                        Forms\Components\Section::make('Información de Contacto')
+                        Section::make('Información de Contacto')
                             ->description('Agrega los datos de contacto para este colaborador')
                             ->schema([
-                                Forms\Components\Grid::make(2)
+                                Grid::make(2)
                                     ->schema([
                                         Forms\Components\TextInput::make('email')
                                             ->email()
@@ -109,7 +113,7 @@ class AdminUserResource extends Resource implements HasMedia
                                             ->numeric()
                                             ->columnSpan(1),
     
-                                            Forms\Components\Select::make('status')
+                                        Forms\Components\Select::make('status')
                                             ->label('Estado')
                                             ->options([
                                                 'active' => 'Active',
@@ -124,9 +128,9 @@ class AdminUserResource extends Resource implements HasMedia
                             ])
                             ->columns(1),
     
-                            Forms\Components\Section::make('Contraseña')
+                        Section::make('Contraseña')
                             ->schema([
-                                Forms\Components\Grid::make(2)
+                                Grid::make(2)
                                     ->schema([
                                         Forms\Components\TextInput::make('password')
                                             ->password()
@@ -135,7 +139,7 @@ class AdminUserResource extends Resource implements HasMedia
                                             ->revealable()
                                             ->required()
                                             ->columnSpan(1),
-                        
+    
                                         Forms\Components\TextInput::make('passwordConfirmation')
                                             ->password()
                                             ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
@@ -149,10 +153,9 @@ class AdminUserResource extends Resource implements HasMedia
                             ->columns(1)
                             ->hidden(fn (string $operation): bool => in_array($operation, ['edit', 'view'])),
     
-                        
-                        Forms\Components\Section::make('Verificación de Correo Electrónico')
+                        Section::make('Verificación de Correo Electrónico')
                             ->schema([
-                                Forms\Components\Grid::make(2)
+                                Grid::make(2)
                                     ->schema([
                                         Forms\Components\Placeholder::make('email_verified_at')
                                             ->label('Fecha de verificación del correo')
@@ -187,9 +190,11 @@ class AdminUserResource extends Resource implements HasMedia
                             ->visible(fn (string $operation): bool => in_array($operation, ['view', 'edit']))
                             ->columns(1),
                     ])
-                    ->columnSpanFull(),
-            ])
-            ->columns(4);
+                    ->maxWidth(MaxWidth::FiveExtraLarge)  // Limita el ancho de la tarjeta
+                    ->extraAttributes([
+                        'class' => 'mx-auto mt-10',  // Centra la tarjeta en la pantalla
+                    ]),
+            ]);
     }
     
     public static function table(Table $table): Table
@@ -255,9 +260,6 @@ class AdminUserResource extends Resource implements HasMedia
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                // Agrega filtros si es necesario
-            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
@@ -271,6 +273,7 @@ class AdminUserResource extends Resource implements HasMedia
                 ]),
             ]);
     }
+    
 
     public static function getRelations(): array
     {

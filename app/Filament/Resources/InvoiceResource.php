@@ -1,17 +1,12 @@
 <?php
 
-
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Models\Invoice;
 use Carbon\Carbon;
-use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\Resource;
-use Filament\Support\RawJs; 
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -20,6 +15,17 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Support\Htmlable;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Tabs;
+
 
 class InvoiceResource extends Resource
 {
@@ -65,184 +71,106 @@ class InvoiceResource extends Resource
             Action::make('edit')
                 ->url(static::getUrl('edit', ['record' => $record])),
         ];
-    }
-
+    }   
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Card::make()
+                Card::make()
                     ->schema([
-                        Forms\Components\Section::make('Datos de la Factura')
-                        ->description('Incluye los detalles principales de la factura')
-                        ->schema([
-                            Forms\Components\TextInput::make('invoice_number')
-                                ->label('Número de Factura')
-                                ->prefix('FEVD')
-                                ->required()
-                                ->numeric()
-                                ->rules([
-                                    'regex:/^\d+$/',
-                                    'not_in:e,E',
-                                ])
-                                ->extraAttributes(['onkeydown' => 'if(event.key === "e" || event.key === "E") event.preventDefault();'])
-                                ->live()
-                                ->debounce(500)
-                                ->afterStateUpdated(function (Get $get, $state, Set $set) {
-                                    $currentId = $get('id');
-                                    $exists = \App\Models\Invoice::where('invoice_number', $state)
-                                        ->when($currentId, fn ($query) => $query->where('id', '!=', $currentId))
-                                        ->exists();
-                    
-                                    if ($exists) {
-                                        $set('invoice_number_error', 'Este número de factura ya está siendo usado.');
-                                    } else {
-                                        $set('invoice_number_error', null);
-                                    }
-                                })
-                                ->hint(fn (Get $get) => $get('invoice_number_error'))
-                                ->hintColor('danger')
-                                ->columnSpan(2),
-                    
-                            Forms\Components\Select::make('client_id')
-                                ->label('Cliente')
-                                ->required()
-                                ->relationship('client', 'name')
-                                ->options(fn () => \App\Models\User::whereHas('roles', fn ($query) => $query->where('name', 'client'))->pluck('name', 'id'))
-                                ->searchable()
-                                ->preload()
-                                ->columnSpan(2),
-                        ])
-                        ->columns(4),
-                    
-                    Forms\Components\Section::make('Fechas')
-                        ->description('Selecciona las fechas relevantes para la factura')
-                        ->schema([
-                            Forms\Components\DatePicker::make('issue_date')
-                                ->label('Fecha de Emisión')
-                                ->required()
-                                ->reactive()
-                                ->default(now())
-                                ->maxDate(now())  // Asegura que la fecha de emisión no sea mayor a la fecha actual
-                                ->afterStateUpdated(function ($state, callable $set) {
-                                    $dueDate = \Carbon\Carbon::parse($state)->addDays(30)->format('Y-m-d');
-                                    $set('due_date', $dueDate);
-                                })
-                                ->columnSpan(2),
-                    
-                            Forms\Components\DatePicker::make('due_date')
-                                ->label('Fecha de Vencimiento')
-                                ->required()
-                                ->disabled()
-                                ->columnSpan(2),
-                        ])
-                        ->columns(4),
-                    
-                        Forms\Components\Section::make('Montos')
-                        ->description('Especifica los montos de la factura')
-                        ->schema([
-                            Forms\Components\TextInput::make('total_amount')
-                            ->label('Monto Total')
-                            ->required()
-                            ->numeric()
-                            ->prefix('$')
-                            ->extraAttributes(['onkeydown' => 'if(event.key === "e" || event.key === "E") event.preventDefault();'])
-                            ->mask(RawJs::make('{
-                                mask: Number,
-                                thousandsSeparator: ".",
-                                radix: ",",
-                                scale: 0, // Set scale to 0 to remove decimals
-                                mapToRadix: []
-                            }'))
-                            ->reactive()  
-                            ->debounce(750)
-                            ->afterStateUpdated(function ($state, callable $set, Get $get) {
-                                $totalPaid = (float)($get('total_paid') ?? 0);
-                                $pendingAmount = (float)$state - $totalPaid;
-                                $set('pending_amount', $pendingAmount);
-                                // Verificar si el monto pendiente es cero
-                                if ($pendingAmount <= 0) {
-                                    $set('status', 'Paid');
-                                }
-                            })
-                            ->columnSpan(2),
-                        
-                    
-                            Forms\Components\TextInput::make('total_paid')
-                                ->label('Monto Pagado')
-                                ->required()
-                                ->numeric()
-                                ->prefix('$')
-                                ->extraAttributes(['onkeydown' => 'if(event.key === "e" || event.key === "E") event.preventDefault();'])
-                                ->reactive()  // Sigue siendo reactivo
-                                ->debounce(750)  // Aumenta el tiempo de espera para reducir los problemas de borrado
-                                ->disabled(fn (callable $get) => empty($get('total_amount')))
-                                ->afterStateUpdated(function ($state, callable $set, Get $get) {
-                                    $totalAmount = (float)($get('total_amount') ?? 0);
-                                    if ((float)$state > $totalAmount) {
-                                        $state = $totalAmount;
-                                        $set('total_paid', $state);
-                                    }
-                                    $pendingAmount = $totalAmount - (float)$state;
-                                    $set('pending_amount', $pendingAmount);
-                                    // Verificar si el monto pendiente es cero
-                                    if ($pendingAmount <= 0) {
-                                        $set('status', 'Paid');
-                                    }
-                                })
-                                ->columnSpan(2),
-                    
-                            Forms\Components\TextInput::make('pending_amount')
-                                ->label('Monto Pendiente')
-                                ->prefix('$')
-                                ->required()
-                                ->disabled()
-                                ->columnSpan(2),
-                        ])
-                        ->columns(4),
-                    
-                    
-                        Forms\Components\Section::make('Información Adicional')
-                            ->description('Agrega el pdf de la factura y una descripcion de la misma')
+                        Section::make('Datos de la Factura')
                             ->schema([
-                                Forms\Components\Select::make('status')
-                                    ->label('Estado')
-                                    ->options([
-                                        'Pending' => 'Pendiente',
-                                        'Paid' => 'Pagada',
-                                        'Cancelled' => 'Cancelada',
-                                        'Partially Paid' => 'Parcialmente Pagada',
-                                    ])
-                                    ->default('Pending')
-                                    ->disabled()
-                                    ->columnSpan(2),
-    
-                                Forms\Components\FileUpload::make('invoice_pdf')
-                                    ->label('Factura PDF')
-                                    ->required()
-                                    ->directory('invoices')
-                                    ->acceptedFileTypes(['application/pdf'])
-                                    ->maxSize(10240)
-                                    ->columnSpanFull(),
-    
-                                Forms\Components\Textarea::make('description')
+                                Grid::make()
+                                    ->columns(2)
+                                    ->schema([
+                                        TextInput::make('invoice_number')
+                                            ->label('Número de Factura')
+                                            ->prefix('FEVD')
+                                            ->required()
+                                            ->numeric()
+                                            ->rules(['regex:/^\d+$/']),
+                                        Select::make('client_id')
+                                            ->label('Cliente')
+                                            ->required()
+                                            ->relationship('client', 'name')
+                                            ->searchable()
+                                            ->preload(),
+                                    ]),
+                                Grid::make()
+                                    ->columns(2)
+                                    ->schema([
+                                        DatePicker::make('issue_date')
+                                            ->label('Fecha de Emisión')
+                                            ->required()
+                                            ->reactive()
+                                            ->maxDate(now())
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                $dueDate = Carbon::parse($state)->addDays(30)->format('Y-m-d');
+                                                $set('due_date', $dueDate);
+                                            }),
+                                        DatePicker::make('due_date')
+                                            ->label('Fecha de Vencimiento')
+                                            ->required()
+                                            ->disabled(),
+                                    ]),
+                            ]),
+                        Section::make('Montos')
+                            ->schema([
+                                Grid::make()
+                                    ->columns(3)
+                                    ->schema([
+                                        TextInput::make('total_amount')
+                                            ->label('Monto Total')
+                                            ->required()
+                                            ->numeric()
+                                            ->prefix('$')
+                                            ->reactive()
+                                            ->debounce(500),
+                                        TextInput::make('total_paid')
+                                            ->label('Monto Pagado')
+                                            ->required()
+                                            ->numeric()
+                                            ->prefix('$')
+                                            ->reactive()
+                                            ->debounce(500),
+                                        TextInput::make('pending_amount')
+                                            ->label('Monto Pendiente')
+                                            ->prefix('$')
+                                            ->disabled(),
+                                    ]),
+                            ]),
+                        Section::make('Información Adicional')
+                            ->schema([
+                                Grid::make()
+                                    ->columns(2)
+                                    ->schema([
+                                        Select::make('status')
+                                            ->label('Estado')
+                                            ->options([
+                                                'Pending' => 'Pendiente',
+                                                'Paid' => 'Pagada',
+                                                'Cancelled' => 'Cancelada',
+                                                'Partially Paid' => 'Parcialmente Pagada',
+                                            ])
+                                            ->disabled(),
+                                        FileUpload::make('invoice_pdf')
+                                            ->label('Factura PDF')
+                                            ->required()
+                                            ->directory('invoices')
+                                            ->acceptedFileTypes(['application/pdf'])
+                                            ->maxSize(10240),
+                                    ]),
+                                Textarea::make('description')
                                     ->label('Descripción')
                                     ->columnSpanFull(),
-    
-                                Forms\Components\Placeholder::make('created_by')
-                                    ->label('Creado por')
-                                    ->content(fn (Invoice $record): string => $record->createdBy?->name ?? '-')
-                                    ->visible(fn (?Invoice $record): bool => $record !== null)
-                                    ->columnSpan(2),
-                            ])
-                            ->columns(4),
+                            ]),
                     ])
-                    ->columnSpanFull(),
-            ])
-            ->columns(4);
+                    ->maxWidth(MaxWidth::FiveExtraLarge)  // Limitar el ancho de la tarjeta
+                    ->extraAttributes([
+                        'class' => 'mx-auto mt-10',  // Centrar la tarjeta en la pantalla
+                    ]),
+            ]);
     }
-    
-    
     
     public static function table(Table $table): Table
     {
@@ -319,3 +247,5 @@ class InvoiceResource extends Resource
         ];
     }
 }
+
+

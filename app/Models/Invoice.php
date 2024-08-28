@@ -44,12 +44,15 @@ class Invoice extends Model
                 $model->pending_amount = $model->total_amount - ($model->total_paid ?? 0);
             }
 
-            if ($model->total_paid >= $model->total_amount) {
+            if ($model->pending_amount <= 0 && $model->total_paid >= $model->total_amount) {
                 $model->status = 'Paid';
+            } else if ($model->total_paid > 0 && $model->pending_amount > 0) {
+                $model->status = 'Partially Paid';
             } else {
                 $model->status = 'Pending';
             }
         });
+    
     }
 
     public function client()

@@ -19,6 +19,10 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 use Filament\Forms\Components\NumericInput;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Support\Enums\MaxWidth;
 
 
 class ClientUserResource extends Resource implements HasMedia
@@ -44,145 +48,140 @@ class ClientUserResource extends Resource implements HasMedia
     {
         return $form
             ->schema([
-                // Encapsulamos todo dentro de un Card
-                Forms\Components\Card::make()
+                Card::make()
                     ->schema([
-                        // Sección de Datos Generales
-                        Forms\Components\Section::make('Datos Generales')
+                        Section::make('Datos Generales')
                             ->description('Incluye los datos principales de tu cliente')
                             ->schema([
-                                // Nombre Completo (2 columnas)
-                                Forms\Components\TextInput::make('name')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->label('Razón social / nombre completo')
-                                    ->columnSpan(2),
+                                Grid::make(3)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('name')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->label('Razón social / nombre completo')
+                                            ->columnSpan(2),
     
-                                // Tipo de Identificación (1 columna)
-                                Forms\Components\Select::make('document_type_id')
-                                    ->label('Tipo de identificación')
-                                    ->relationship('documentType', 'name')
-                                    ->required()
-                                    ->columnSpan(1),
+                                        Forms\Components\Select::make('document_type_id')
+                                            ->label('Tipo de identificación')
+                                            ->relationship('documentType', 'name')
+                                            ->required()
+                                            ->columnSpan(1),
     
-                                // Número de Documento (1 columna)
-                                Forms\Components\TextInput::make('document_number')
-                                    ->label('Número de documento')
-                                    ->required()
-                                    ->rules(['regex:/^[0-9]+$/'])
-                                    ->maxLength(20)
-                                    ->helperText('Solo se permiten números.')
-                                    ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
-                                    ->numeric()
-                                    ->columnSpan(1),
+                                        Forms\Components\TextInput::make('document_number')
+                                            ->label('Número de documento')
+                                            ->required()
+                                            ->rules(['regex:/^[0-9]+$/'])
+                                            ->maxLength(20)
+                                            ->helperText('Solo se permiten números.')
+                                            ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
+                                            ->numeric()
+                                            ->columnSpan(1),
+                                    ]),
                             ])
-                            ->columns(4),
+                            ->columns(1),
     
-                        // Sección de Información de Contacto
-                        Forms\Components\Section::make('Información de Contacto')
+                        Section::make('Información de Contacto')
                             ->description('Agrega los datos de contacto para este cliente')
                             ->schema([
-                                // Correo Electrónico (2 columnas)
-                                Forms\Components\TextInput::make('email')
-                                    ->email()
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->label('Correo electrónico')
-                                    ->columnSpan(2),
+                                Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('email')
+                                            ->email()
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->label('Correo electrónico')
+                                            ->columnSpan(2),
     
-                                // Teléfono (1 columna)
-                                Forms\Components\TextInput::make('phone')
-                                    ->label('Teléfono')
-                                    ->required()
-                                    ->rules(['regex:/^[0-9]+$/'])
-                                    ->maxLength(20)
-                                    ->helperText('Solo se permiten números.')
-                                    ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
-                                    ->numeric()
-                                    ->columnSpan(1),
+                                        Forms\Components\TextInput::make('phone')
+                                            ->label('Teléfono')
+                                            ->required()
+                                            ->rules(['regex:/^[0-9]+$/'])
+                                            ->maxLength(20)
+                                            ->helperText('Solo se permiten números.')
+                                            ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
+                                            ->numeric()
+                                            ->columnSpan(1),
     
-                                // Estado (1 columna)
-                                Forms\Components\Select::make('status')
-                                    ->label('Estado')
-                                    ->options([
-                                        'active' => 'Active',
-                                        'inactive' => 'Inactive',
-                                        'suspended' => 'Suspended',
-                                    ])
-                                    ->default('active')
-                                    ->required()
-                                    ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Resources\ClientUserResource\Pages\CreateClientUser)
-                                    ->columnSpan(1),
+                                        Forms\Components\Select::make('status')
+                                            ->label('Estado')
+                                            ->options([
+                                                'active' => 'Active',
+                                                'inactive' => 'Inactive',
+                                                'suspended' => 'Suspended',
+                                            ])
+                                            ->default('active')
+                                            ->required()
+                                            ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Resources\ClientUserResource\Pages\CreateClientUser)
+                                            ->columnSpan(1),
+                                    ]),
                             ])
-                            ->columns(4),
+                            ->columns(1),
                     ])
-                    ->columnSpanFull(), // El Card ocupa todo el ancho
-            ])
-            ->columns(4); // Distribuye las columnas del formulario
+                    ->maxWidth(MaxWidth::FiveExtraLarge)  // Limita el ancho de la tarjeta
+                    ->extraAttributes([
+                        'class' => 'mx-auto mt-10',  // Centra la tarjeta en la pantalla
+                    ]),
+            ]);
     }
-    
-    
 
     public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->label('nombre')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('document_number')
-                    ->label('Identificación')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('phone')
-                    ->label('Teléfono')
-                    ->searchable()
-                    ->hidden(true),
-                Tables\Columns\TextColumn::make('documentType.name')
-                    ->label('Tipo de identificación')
-                    ->sortable()
-                    ->searchable()
-                    ->hidden(true),
-                Tables\Columns\TextColumn::make('createdBy.name')
-                    ->label('Creado por')
-                    ->placeholder('-')
-                    ->searchable()
-                    ->hidden(true),
-                Tables\Columns\TextColumn::make('status')
-                    ->label('Estado')
-                    ->formatStateUsing(fn ($state): string => Str::headline($state))
-                    ->colors(['info'])
-                    ->badge(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Fecha de creación')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Fecha de actualización')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                // Agrega filtros si es necesario
-            ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-                Tables\Actions\RestoreAction::make(),
-                Impersonate::make('impersonate')
+{
+    return $table
+        ->columns([
+            Tables\Columns\TextColumn::make('name')
+                ->label('Nombre')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('document_number')
+                ->label('Identificación')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('email')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('phone')
+                ->label('Teléfono')
+                ->searchable()
+                ->hidden(true),
+            Tables\Columns\TextColumn::make('documentType.name')
+                ->label('Tipo de identificación')
+                ->sortable()
+                ->searchable()
+                ->hidden(true),
+            Tables\Columns\TextColumn::make('createdBy.name')
+                ->label('Creado por')
+                ->placeholder('-')
+                ->searchable()
+                ->hidden(true),
+            Tables\Columns\TextColumn::make('status')
+                ->label('Estado')
+                ->formatStateUsing(fn ($state): string => Str::headline($state))
+                ->colors(['info'])
+                ->badge(),
+            Tables\Columns\TextColumn::make('created_at')
+                ->label('Fecha de creación')
+                ->dateTime()
+                ->sortable()
+                ->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\TextColumn::make('updated_at')
+                ->label('Fecha de actualización')
+                ->dateTime()
+                ->sortable()
+                ->toggleable(isToggledHiddenByDefault: true),
+        ])
+        ->actions([
+            Tables\Actions\ViewAction::make(),
+            Tables\Actions\EditAction::make(),
+            Tables\Actions\DeleteAction::make(),
+            Tables\Actions\RestoreAction::make(),
+            Impersonate::make('impersonate')
                 ->redirectTo(fn ($record) => $record->hasRole('client') ? '/client' : '/admin'),
-                ])
-                ->bulkActions([
-                    Tables\Actions\BulkActionGroup::make([
-                        Tables\Actions\DeleteBulkAction::make(),
-                        Tables\Actions\RestoreBulkAction::make(),
-                    ]),
-                ]);
-        }
+        ])
+        ->bulkActions([
+            Tables\Actions\BulkActionGroup::make([
+                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\RestoreBulkAction::make(),
+            ]),
+        ]);
+}
+
     
         public static function getPages(): array
         {

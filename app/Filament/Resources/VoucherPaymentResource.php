@@ -15,6 +15,10 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
 use Filament\Tables\Actions\Action;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Support\Enums\MaxWidth;
 
 class VoucherPaymentResource extends Resource
 {
@@ -29,90 +33,96 @@ class VoucherPaymentResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Card::make()
+                Card::make()
                     ->schema([
-                        Forms\Components\Section::make('Información General')
+                        Section::make('Información General')
                             ->description('Detalles generales del pago')
                             ->schema([
-                                Forms\Components\TextInput::make('voucher_number')
-                                    ->default(function () {
-                                        $lastVoucherNumber = VoucherPayment::max('voucher_number');
-                                        return $lastVoucherNumber ? $lastVoucherNumber + 1 : 1;
-                                    })
-                                    ->prefix('SP')
-                                    ->disabled()
-                                    ->columnSpan(1),
+                                Grid::make(3)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('voucher_number')
+                                            ->default(function () {
+                                                $lastVoucherNumber = VoucherPayment::max('voucher_number');
+                                                return $lastVoucherNumber ? $lastVoucherNumber + 1 : 1;
+                                            })
+                                            ->prefix('SP')
+                                            ->disabled()
+                                            ->columnSpan(1),
     
-                                Select::make('client_id')
-                                    ->label('Cliente')
-                                    ->options(User::role('client')->pluck('name', 'id'))
-                                    ->searchable()
-                                    ->required()
-                                    ->reactive()
-                                    ->afterStateUpdated(function (callable $set) {
-                                        $set('invoice_id', []);
-                                    })
-                                    ->columnSpan(1),
+                                        Select::make('client_id')
+                                            ->label('Cliente')
+                                            ->options(User::role('client')->pluck('name', 'id'))
+                                            ->searchable()
+                                            ->required()
+                                            ->reactive()
+                                            ->afterStateUpdated(function (callable $set) {
+                                                $set('invoice_id', []);
+                                            })
+                                            ->columnSpan(1),
     
-                                Select::make('invoice_id')
-                                    ->label('Factura(s)')
-                                    ->options(function (callable $get) {
-                                        $clientId = $get('client_id');
-                                        return $clientId ? Invoice::where('client_id', $clientId)
-                                            ->where('status', 'Pending')
-                                            ->pluck('invoice_number', 'id') : [];
-                                    })
-                                    ->searchable()
-                                    ->required()
-                                    ->multiple()
-                                    ->reactive()
-                                    ->columnSpan(2),
+                                        Select::make('invoice_id')
+                                            ->label('Factura(s)')
+                                            ->options(function (callable $get) {
+                                                $clientId = $get('client_id');
+                                                return $clientId ? Invoice::where('client_id', $clientId)
+                                                    ->where('status', 'Pending')
+                                                    ->pluck('invoice_number', 'id') : [];
+                                            })
+                                            ->searchable()
+                                            ->required()
+                                            ->multiple()
+                                            ->reactive()
+                                            ->columnSpan(2),
+                                    ]),
                             ])
-                            ->columns(3),
+                            ->columns(1),
     
-                        Forms\Components\Section::make('Detalles de Pago')
+                        Section::make('Detalles de Pago')
                             ->description('Ingrese la información del pago')
                             ->schema([
-                                Forms\Components\TextInput::make('amount')
-                                ->label('Monto')
-                                ->required()
-                                ->numeric()
-                                ->mask(RawJs::make('$money($input)'))
-                                ->stripCharacters([',', '.']) // Eliminar puntos y comas
-                                ->prefix('$')
-                                ->reactive()
-                                ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                    $invoiceIds = $get('invoice_id');
-                                    if (!$invoiceIds) return;
-                                    $totalAmount = (int)Invoice::whereIn('id', $invoiceIds)->sum('total_amount');
-                                    if ((int)$state > $totalAmount) {
-                                        $set('amount', $totalAmount);
-                                    }
-                                })
-                                ->columnSpan(1),
-                            
-                                Forms\Components\DatePicker::make('payment_date')
-                                    ->label('Fecha de Pago')
-                                    ->required()
-                                    ->maxDate(now())
-                                    ->default(now())
-                                    ->columnSpan(1),
+                                Grid::make(3)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('amount')
+                                            ->label('Monto')
+                                            ->required()
+                                            ->numeric()
+                                            ->mask(RawJs::make('$money($input)'))
+                                            ->stripCharacters([',', '.']) // Eliminar puntos y comas
+                                            ->prefix('$')
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                                $invoiceIds = $get('invoice_id');
+                                                if (!$invoiceIds) return;
+                                                $totalAmount = (int)Invoice::whereIn('id', $invoiceIds)->sum('total_amount');
+                                                if ((int)$state > $totalAmount) {
+                                                    $set('amount', $totalAmount);
+                                                }
+                                            })
+                                            ->columnSpan(1),
     
-                                Forms\Components\TextInput::make('issue_date')
-                                    ->label('Fecha de Emisión')
-                                    ->default(now()->format('Y-m-d'))
-                                    ->disabled()
-                                    ->columnSpan(1),
+                                        Forms\Components\DatePicker::make('payment_date')
+                                            ->label('Fecha de Pago')
+                                            ->required()
+                                            ->maxDate(now())
+                                            ->default(now())
+                                            ->columnSpan(1),
     
-                                Forms\Components\TextInput::make('due_date')
-                                    ->label('Fecha de Vencimiento')
-                                    ->default(fn (callable $get) => \Carbon\Carbon::parse($get('issue_date'))->addDays(5)->format('Y-m-d'))
-                                    ->disabled()
-                                    ->columnSpan(1),
+                                        Forms\Components\TextInput::make('issue_date')
+                                            ->label('Fecha de Emisión')
+                                            ->default(now()->format('Y-m-d'))
+                                            ->disabled()
+                                            ->columnSpan(1),
+    
+                                        Forms\Components\TextInput::make('due_date')
+                                            ->label('Fecha de Vencimiento')
+                                            ->default(fn (callable $get) => \Carbon\Carbon::parse($get('issue_date'))->addDays(5)->format('Y-m-d'))
+                                            ->disabled()
+                                            ->columnSpan(1),
+                                    ]),
                             ])
-                            ->columns(4),
+                            ->columns(1),
     
-                        Forms\Components\Section::make('Soporte de Pago')
+                        Section::make('Soporte de Pago')
                             ->description('Adjunte el soporte del pago')
                             ->schema([
                                 Forms\Components\FileUpload::make('payment_support')
@@ -123,11 +133,13 @@ class VoucherPaymentResource extends Resource
                                     ->required()
                                     ->preserveFilenames()
                                     ->columnSpanFull(),
-                            ])
+                            ]),
                     ])
-                    ->columnSpanFull(),
-            ])
-            ->columns(2);
+                    ->maxWidth(MaxWidth::FiveExtraLarge)  // Limita el ancho de la tarjeta
+                    ->extraAttributes([
+                        'class' => 'mx-auto mt-10',  // Centra la tarjeta en la pantalla
+                    ]),
+            ]);
     }
     
     public static function table(Table $table): Table
@@ -139,7 +151,7 @@ class VoucherPaymentResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->formatStateUsing(fn (string $state): string => 'SP' . $state),
-                Tables\Columns\TextColumn::make('client.name')  
+                Tables\Columns\TextColumn::make('client.name')
                     ->label('Cliente')
                     ->sortable()
                     ->searchable(),
@@ -152,7 +164,7 @@ class VoucherPaymentResource extends Resource
                     ->label('Fecha de Pago')
                     ->date()
                     ->sortable(),
-                    Tables\Columns\TextColumn::make('amount')
+                Tables\Columns\TextColumn::make('amount')
                     ->label('Monto')
                     ->money('COP')
                     ->sortable()
