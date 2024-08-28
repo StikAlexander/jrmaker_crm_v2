@@ -88,16 +88,16 @@ class ClientLogin extends AuthLogin
 
         $user = $users->first(function ($user) use ($data) {
             // Mostrar el documento encriptado del usuario
-            Log::info('Intentando desencriptar el número de documento del usuario:', ['encrypted_document' => $user->getRawOriginal('document_number')]);
+            //Log::info('Intentando desencriptar el número de documento del usuario:', ['encrypted_document' => $user->getRawOriginal('document_number')]);
 
             // Intentar desencriptar y comparar
             try {
                 $decryptedDocumentNumber = Crypt::decryptString($user->getRawOriginal('document_number'));
-                Log::info('Documento desencriptado:', ['decrypted_document' => $decryptedDocumentNumber]);
+                //Log::info('Documento desencriptado:', ['decrypted_document' => $decryptedDocumentNumber]);
 
                 return $decryptedDocumentNumber === $data['document_number'];
             } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-                Log::error('Error de desencriptación:', ['error' => $e->getMessage()]);
+                //Log::error('Error de desencriptación:', ['error' => $e->getMessage()]);
                 return false;
             }
         });

@@ -64,11 +64,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
     // Desencriptar al acceder
     public function getDocumentNumberAttribute($value)
     {
-        Log::info('Desencriptando document_number', ['value' => $value]);
+        //Log::info('Desencriptando document_number', ['value' => $value]);
         try {
             return Crypt::decryptString($value);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            Log::error('Error de desencriptación en User:', ['exception' => $e]);
+            //Log::error('Error de desencriptación en User:', ['exception' => $e]);
             return null;
         }
     }
