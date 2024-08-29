@@ -24,8 +24,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components\Card;
-use Filament\Forms\Components\Tabs;
-
+use Filament\Support\Enums\ActionSize;
 
 class InvoiceResource extends Resource
 {
@@ -71,7 +70,8 @@ class InvoiceResource extends Resource
             Action::make('edit')
                 ->url(static::getUrl('edit', ['record' => $record])),
         ];
-    }   
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -165,13 +165,13 @@ class InvoiceResource extends Resource
                                     ->columnSpanFull(),
                             ]),
                     ])
-                    ->maxWidth(MaxWidth::FiveExtraLarge)  // Limitar el ancho de la tarjeta
+                    ->maxWidth(MaxWidth::FiveExtraLarge)
                     ->extraAttributes([
-                        'class' => 'mx-auto mt-10',  // Centrar la tarjeta en la pantalla
+                        'class' => 'mx-auto mt-10',
                     ]),
             ]);
     }
-    
+
     public static function table(Table $table): Table
     {
         return $table
@@ -200,10 +200,10 @@ class InvoiceResource extends Resource
                     ->label('Fecha de Vencimiento')
                     ->date()
                     ->sortable(),
-                    TextColumn::make('total_amount')
+                TextColumn::make('total_amount')
                     ->label('Monto Total')
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.')),     
+                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.')),
                 TextColumn::make('total_paid')
                     ->label('Monto Pagado')
                     ->sortable()
@@ -212,7 +212,7 @@ class InvoiceResource extends Resource
                     ->label('Monto Pendiente')
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.')),
-                TextColumn::make('status')
+                    TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -221,17 +221,43 @@ class InvoiceResource extends Resource
                         'Cancelled' => 'danger',
                         'Partially Paid' => 'info',
                         default => 'secondary',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'Pending' => 'Pendiente',
+                        'Paid' => 'Pagada',
+                        'Cancelled' => 'Cancelada',
+                        'Partially Paid' => 'Parcialmente Pagada',
+                        default => $state, 
                     }),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->label('')
+                    ->size(ActionSize::Large)
+                    ->tooltip('Ver Detalles')
+                    ->iconButton(),
+                Tables\Actions\EditAction::make()
+                    ->modalHeading('Editar Factura')
+                    ->modalWidth('4xl')
+                    ->label('')
+                    ->size(ActionSize::Large)
+                    ->modalAutofocus(true)
+                    ->tooltip('Editar Factura')
+                    ->iconButton(),
+                Tables\Actions\DeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->size(ActionSize::Large)
+                    ->tooltip('Eliminar Factura')
+                    ->iconButton(),
                 Action::make('viewPdf')
-                    ->label('Ver PDF')
+                    ->label('')
                     ->icon('heroicon-o-document-text')
+                    ->size(ActionSize::Large)
                     ->url(fn ($record) => Storage::url($record->invoice_pdf))
-                    ->openUrlInNewTab(),
+                    ->openUrlInNewTab()
+                    ->tooltip('Ver PDF')
+                    ->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
@@ -242,10 +268,8 @@ class InvoiceResource extends Resource
     {
         return [
             'index' => Pages\ListInvoices::route('/'),
-            'create' => Pages\CreateInvoice::route('/create'),
-            'edit' => Pages\EditInvoice::route('/{record}/edit'),
+            //'create' => Pages\CreateInvoice::route('/create'),
+            //'edit' => Pages\EditInvoice::route('/{record}/edit'),
         ];
     }
 }
-
-

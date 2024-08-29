@@ -19,6 +19,7 @@ use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\ActionSize;
 
 class VoucherPaymentResource extends Resource
 {
@@ -29,6 +30,7 @@ class VoucherPaymentResource extends Resource
     protected static ?string $singularLabel = 'pago';
     protected static ?string $navigationGroup = 'Contabilidad';
     protected static ?int $navigationSort = 2;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -48,7 +50,7 @@ class VoucherPaymentResource extends Resource
                                             ->prefix('SP')
                                             ->disabled()
                                             ->columnSpan(1),
-    
+
                                         Select::make('client_id')
                                             ->label('Cliente')
                                             ->options(User::role('client')->pluck('name', 'id'))
@@ -59,7 +61,7 @@ class VoucherPaymentResource extends Resource
                                                 $set('invoice_id', []);
                                             })
                                             ->columnSpan(1),
-    
+
                                         Select::make('invoice_id')
                                             ->label('Factura(s)')
                                             ->options(function (callable $get) {
@@ -76,7 +78,7 @@ class VoucherPaymentResource extends Resource
                                     ]),
                             ])
                             ->columns(1),
-    
+
                         Section::make('Detalles de Pago')
                             ->description('Ingrese la información del pago')
                             ->schema([
@@ -87,7 +89,7 @@ class VoucherPaymentResource extends Resource
                                             ->required()
                                             ->numeric()
                                             ->mask(RawJs::make('$money($input)'))
-                                            ->stripCharacters([',', '.']) // Eliminar puntos y comas
+                                            ->stripCharacters([',', '.'])
                                             ->prefix('$')
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
@@ -99,20 +101,20 @@ class VoucherPaymentResource extends Resource
                                                 }
                                             })
                                             ->columnSpan(1),
-    
+
                                         Forms\Components\DatePicker::make('payment_date')
                                             ->label('Fecha de Pago')
                                             ->required()
                                             ->maxDate(now())
                                             ->default(now())
                                             ->columnSpan(1),
-    
+
                                         Forms\Components\TextInput::make('issue_date')
                                             ->label('Fecha de Emisión')
                                             ->default(now()->format('Y-m-d'))
                                             ->disabled()
                                             ->columnSpan(1),
-    
+
                                         Forms\Components\TextInput::make('due_date')
                                             ->label('Fecha de Vencimiento')
                                             ->default(fn (callable $get) => \Carbon\Carbon::parse($get('issue_date'))->addDays(5)->format('Y-m-d'))
@@ -121,7 +123,7 @@ class VoucherPaymentResource extends Resource
                                     ]),
                             ])
                             ->columns(1),
-    
+
                         Section::make('Soporte de Pago')
                             ->description('Adjunte el soporte del pago')
                             ->schema([
@@ -135,13 +137,13 @@ class VoucherPaymentResource extends Resource
                                     ->columnSpanFull(),
                             ]),
                     ])
-                    ->maxWidth(MaxWidth::FiveExtraLarge)  // Limita el ancho de la tarjeta
+                    ->maxWidth(MaxWidth::FiveExtraLarge)
                     ->extraAttributes([
-                        'class' => 'mx-auto mt-10',  // Centra la tarjeta en la pantalla
+                        'class' => 'mx-auto mt-10',
                     ]),
             ]);
     }
-    
+
     public static function table(Table $table): Table
     {
         return $table
@@ -168,21 +170,42 @@ class VoucherPaymentResource extends Resource
                     ->label('Monto')
                     ->money('COP')
                     ->sortable()
-                    ->formatStateUsing(fn($state) => '$' . number_format($state, 0)),                
+                    ->formatStateUsing(fn($state) => '$' . number_format($state, 0)),
                 Tables\Columns\TextColumn::make('createdBy.name')
                     ->label('Creado por')
                     ->sortable()
                     ->searchable(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->label('')
+                    ->tooltip('Ver Detalles')
+                    ->size(ActionSize::Large)
+                    ->iconButton(),
+
+                Tables\Actions\EditAction::make()
+                    ->label('')
+                    ->tooltip('Editar Pago')
+                    ->modalHeading('Editar Pago')
+                    ->modalWidth('4xl')
+                    ->size(ActionSize::Large)
+                    ->iconButton(),
+
+                Tables\Actions\DeleteAction::make()
+                    ->label('')
+                    ->tooltip('Eliminar Pago')
+                    ->icon('heroicon-o-trash')
+                    ->size(ActionSize::Large)
+                    ->iconButton(),
+
                 Action::make('viewPdf')
-                    ->label('Ver PDF')
+                    ->label('')
+                    ->tooltip('Ver PDF')
                     ->icon('heroicon-o-document-text')
                     ->url(fn ($record) => Storage::url($record->payment_support))
-                    ->openUrlInNewTab(),
+                    ->openUrlInNewTab()
+                    ->size(ActionSize::Large)
+                    ->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

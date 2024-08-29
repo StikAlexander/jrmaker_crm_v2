@@ -26,6 +26,8 @@ use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\ActionSize;
+
 
 class AdminUserResource extends Resource implements HasMedia
 {
@@ -55,7 +57,7 @@ class AdminUserResource extends Resource implements HasMedia
                 Card::make()
                     ->schema([
                         Section::make('Datos Generales')
-                            ->description('Incluye los datos principales del colaborador')
+                            ->description('Incluye los datos principales del administrador')
                             ->schema([
                                 Grid::make(3)
                                     ->schema([
@@ -92,7 +94,7 @@ class AdminUserResource extends Resource implements HasMedia
                             ->columns(1),
     
                         Section::make('Información de Contacto')
-                            ->description('Agrega los datos de contacto para este colaborador')
+                            ->description('Agrega los datos de contacto para este Administrador')
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
@@ -178,9 +180,9 @@ class AdminUserResource extends Resource implements HasMedia
                             ->visible(fn (string $operation): bool => in_array($operation, ['view', 'edit']))
                             ->columns(1),
                     ])
-                    ->maxWidth(MaxWidth::FiveExtraLarge)  // Limita el ancho de la tarjeta
+                    ->maxWidth(MaxWidth::FiveExtraLarge)  
                     ->extraAttributes([
-                        'class' => 'mx-auto mt-10',  // Centra la tarjeta en la pantalla
+                        'class' => 'mx-auto mt-10', 
                     ]),
             ]);
     }
@@ -200,15 +202,15 @@ class AdminUserResource extends Resource implements HasMedia
                     
                 Tables\Columns\TextColumn::make('document_number')
                     ->label('Identificación')
-                    ->searchable(),            
-                    
-                Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+                
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable()
+                    ->hidden(true), 
                     
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Teléfono')
-                    ->searchable()
-                    ->hidden(true),
+                    ->searchable(),
                     
                 Tables\Columns\TextColumn::make('documentType.name')
                     ->label('Tipo de identificación')
@@ -221,7 +223,7 @@ class AdminUserResource extends Resource implements HasMedia
                     ->placeholder('-')
                     ->sortable()
                     ->searchable()
-                    ->hidden(true),        
+                    ->hidden(true),
                     
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->label('Fecha verificación email')
@@ -242,29 +244,51 @@ class AdminUserResource extends Resource implements HasMedia
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-                Tables\Actions\RestoreAction::make(),
-
+                Tables\Actions\ViewAction::make()
+                    ->label('')
+                    ->size(ActionSize::Large)
+                    ->tooltip('Ver Detalles')
+                    ->iconButton(),
+    
+                Tables\Actions\EditAction::make()
+                    ->label('') 
+                    ->modalHeading('Editar Administrador') 
+                    ->modalWidth('4xl')
+                    ->size(ActionSize::Large)
+                    ->modalAutofocus(true)
+                    ->tooltip('Editar Administrador')
+                    ->iconButton(),
+    
+                Tables\Actions\DeleteAction::make()
+                    ->label('') 
+                    ->icon('heroicon-o-trash')
+                    ->size(ActionSize::Large)
+                    ->tooltip('Eliminar Administrador')
+                    ->iconButton(),
+                
+                Tables\Actions\RestoreAction::make()
+                    ->label(''), 
+    
                 Tables\Actions\Action::make('toggleStatus')
-                ->icon('heroicon-o-light-bulb')
-                ->label('') 
-                ->action(function ($record) {
-                    $newStatus = $record->status === 'active' ? 'inactive' : 'active';
-                    $record->update(['status' => $newStatus]);
-                })
-                ->color(fn ($record) => $record->status === 'active' ? 'success' : 'danger')
-                ->tooltip(fn ($record) => $record->status === 'active' ? 'Desactivar' : 'Activar'),
+                    ->icon('heroicon-o-light-bulb')
+                    ->label('') 
+                    ->action(function ($record) {
+                        $newStatus = $record->status === 'active' ? 'inactive' : 'active';
+                        $record->update(['status' => $newStatus]);
+                    })
+                    ->color(fn ($record) => $record->status === 'active' ? 'success' : 'danger')
+                    ->tooltip(fn ($record) => $record->status === 'active' ? 'Desactivar' : 'Activar')
+                    ->size(ActionSize::Large)
+                    ->tooltip('Activar o desactivar administrador ')
+                    ->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                Tables\Actions\DeleteBulkAction::make(),
-                Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
     }
-    
 
     public static function getRelations(): array
     {
@@ -277,8 +301,8 @@ class AdminUserResource extends Resource implements HasMedia
     {
         return [
             'index' => Pages\ListAdminUsers::route('/'),
-            'create' => Pages\CreateAdminUser::route('/create'),
-            'edit' => Pages\EditAdminUser::route('/{record}/edit'),
+            //'create' => Pages\CreateAdminUser::route('/create'),
+            //'edit' => Pages\EditAdminUser::route('/{record}/edit'),
         ];
     }
 
@@ -286,21 +310,20 @@ class AdminUserResource extends Resource implements HasMedia
     {
         if (! method_exists($record, 'notify')) {
             $userClass = $record::class;
+
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
         }
-    
+
         $notification = new AuthVerifyEmail();
         $notification->url = Filament::getVerifyEmailUrl($record);
-    
+
         $settings->loadMailSettingsToConfig();
-    
+
         $record->notify($notification);
-    
+
         Notification::make()
             ->title(__('resource.user.notifications.notification_resent.title'))
             ->success()
             ->send();
     }
-    
 }
-

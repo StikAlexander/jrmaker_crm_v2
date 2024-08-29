@@ -16,7 +16,6 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Exception;
 use Filament\Facades\Filament;
 use Filament\Notifications\Auth\VerifyEmail as AuthVerifyEmail;
@@ -25,9 +24,7 @@ use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\MaxWidth;
-
-
-
+use Filament\Support\Enums\ActionSize;
 
 class CollaboratorUserResource extends Resource implements HasMedia
 {
@@ -112,7 +109,6 @@ class CollaboratorUserResource extends Resource implements HasMedia
                                             ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
                                             ->numeric()
                                             ->columnSpan(1),
-    
                                     ]),
                             ])
                             ->columns(1),
@@ -201,15 +197,15 @@ class CollaboratorUserResource extends Resource implements HasMedia
                     
                 Tables\Columns\TextColumn::make('document_number')
                     ->label('Identificación')
-                    ->searchable(),            
-                    
-                Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+                
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable()
+                    ->hidden(true), 
                     
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Teléfono')
-                    ->searchable()
-                    ->hidden(true),
+                    ->searchable(),
                     
                 Tables\Columns\TextColumn::make('documentType.name')
                     ->label('Tipo de identificación')
@@ -217,7 +213,7 @@ class CollaboratorUserResource extends Resource implements HasMedia
                     ->searchable()
                     ->hidden(true),
                     
-                    Tables\Columns\TextColumn::make('createdBy.name')
+                Tables\Columns\TextColumn::make('createdBy.name')
                     ->label('Creado por')
                     ->placeholder('-')
                     ->sortable()
@@ -242,46 +238,59 @@ class CollaboratorUserResource extends Resource implements HasMedia
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                // Agrega filtros si es necesario
-            ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-                Tables\Actions\RestoreAction::make(),
-
+                Tables\Actions\ViewAction::make()
+                    ->label('')
+                    ->size(ActionSize::Large)
+                    ->tooltip('Ver Detalles')
+                    ->iconButton(),
+    
+                Tables\Actions\EditAction::make()
+                    ->label('') 
+                    ->modalHeading('Editar Administrador') 
+                    ->modalWidth('4xl')
+                    ->size(ActionSize::Large)
+                    ->modalAutofocus(true)
+                    ->tooltip('Editar Colaborador')
+                    ->iconButton(),
+    
+                Tables\Actions\DeleteAction::make()
+                    ->label('') 
+                    ->icon('heroicon-o-trash')
+                    ->size(ActionSize::Large)
+                    ->tooltip('Eliminar Colaborador')
+                    ->iconButton(),
+                
+                Tables\Actions\RestoreAction::make()
+                    ->label(''), 
+    
                 Tables\Actions\Action::make('toggleStatus')
-                ->icon('heroicon-o-light-bulb')
-                ->label('') 
-                ->action(function ($record) {
-                    $newStatus = $record->status === 'active' ? 'inactive' : 'active';
-                    $record->update(['status' => $newStatus]);
-                })
-                ->color(fn ($record) => $record->status === 'active' ? 'success' : 'danger')
-                ->tooltip(fn ($record) => $record->status === 'active' ? 'Desactivar' : 'Activar'),
+                    ->icon('heroicon-o-light-bulb')
+                    ->label('') 
+                    ->action(function ($record) {
+                        $newStatus = $record->status === 'active' ? 'inactive' : 'active';
+                        $record->update(['status' => $newStatus]);
+                    })
+                    ->color(fn ($record) => $record->status === 'active' ? 'success' : 'danger')
+                    ->tooltip(fn ($record) => $record->status === 'active' ? 'Desactivar' : 'Activar')
+                    ->size(ActionSize::Large)
+                    ->tooltip('Activar o desactivar colaborador')
+                    ->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                Tables\Actions\DeleteBulkAction::make(),
-                Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            // Agrega relaciones si es necesario
-        ];
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListCollaboratorUsers::route('/'),
-            'create' => Pages\CreateCollaboratorUser::route('/create'),
-            'edit' => Pages\EditCollaboratorUser::route('/{record}/edit'),
+            //'create' => Pages\CreateCollaboratorUser::route('/create'),
+            //'edit' => Pages\EditCollaboratorUser::route('/{record}/edit'),
         ];
     }
 

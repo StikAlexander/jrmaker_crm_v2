@@ -23,7 +23,7 @@ use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\MaxWidth;
-
+use Filament\Support\Enums\ActionSize;
 
 class ClientUserResource extends Resource implements HasMedia
 {
@@ -164,17 +164,30 @@ class ClientUserResource extends Resource implements HasMedia
                 ->toggleable(isToggledHiddenByDefault: true),
         ])
         ->actions([
-            Tables\Actions\ViewAction::make(),
+            Tables\Actions\ViewAction::make()
+            ->label('')
+            ->size(ActionSize::Large)
+            ->tooltip('Ver Detalles')
+            ->iconButton(), 
             
             Tables\Actions\EditAction::make()
-                ->modalHeading('Editar Cliente') // Personaliza el título del modal de edición
-                ->modalWidth('4xl'), // Define el tamaño del modal (Falta el punto y coma aquí)
+                ->modalHeading('Editar Cliente')
+                ->modalWidth('4xl')
+                ->label('')
+                ->size(ActionSize::Large)
+                ->modalAutofocus(true)
+                ->tooltip('Editar Cliente')
+                ->iconButton(),  
         
-            Tables\Actions\DeleteAction::make(),
-            Tables\Actions\RestoreAction::make(),
+            Tables\Actions\DeleteAction::make()
+            ->label('')
+            ->icon('heroicon-o-trash')
+            ->size(ActionSize::Large)
+            ->tooltip('Borrar Cliente')
+            ->iconButton(), 
             
-            Impersonate::make('impersonate')
-                ->redirectTo(fn ($record) => $record->hasRole('client') ? '/client' : '/admin'),
+            
+            Tables\Actions\RestoreAction::make(),
         
             Tables\Actions\Action::make('toggleStatus')
                 ->icon('heroicon-o-light-bulb')
@@ -184,7 +197,14 @@ class ClientUserResource extends Resource implements HasMedia
                     $record->update(['status' => $newStatus]);
                 })
                 ->color(fn ($record) => $record->status === 'active' ? 'success' : 'danger')
-                ->tooltip(fn ($record) => $record->status === 'active' ? 'Desactivar' : 'Activar'),
+                ->tooltip(fn ($record) => $record->status === 'active' ? 'Desactivar' : 'Activar')
+                ->size(ActionSize::Large)
+                ->tooltip('Activar o desactivar cliente')
+                ->iconButton(),
+
+                Impersonate::make('impersonate')
+                ->redirectTo(fn ($record) => $record->hasRole('client') ? '/client' : '/admin')
+                ->tooltip('Suplantar Cliente'),
         ])
         ->bulkActions([
             Tables\Actions\BulkActionGroup::make([
@@ -193,5 +213,12 @@ class ClientUserResource extends Resource implements HasMedia
             ]),
         ]);
     }
-
-}   
+            public static function getPages(): array
+        {
+            return [
+                'index' => Pages\ListClientUsers::route('/'),
+                //'create' => Pages\CreateClientUser::route('/create'),
+                //'edit' => Pages\EditClientUser::route('/{record}/edit'),
+            ];
+        }
+    } 
