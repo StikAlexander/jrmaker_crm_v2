@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AdminUserResource\Pages;
 
 use App\Filament\Resources\AdminUserResource;
+use App\Notifications\CustomVerifyEmail;
 use Filament\Actions;
 use Exception;
 use App\Settings\MailSettings;
@@ -27,13 +28,7 @@ class EditAdminUser extends EditRecord
         $user = $this->record;
         $settings = app(MailSettings::class);
 
-        if (! method_exists($user, 'notify')) {
-            $userClass = $user::class;
-            throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
-        }
-
-        $notification = new VerifyEmail();
-        $notification->url = Filament::getVerifyEmailUrl($user);
+        $notification = new CustomVerifyEmail(Filament::getVerifyEmailUrl($user));
 
         $settings->loadMailSettingsToConfig();
         $user->notify($notification);

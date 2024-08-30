@@ -3,14 +3,14 @@
 namespace App\Filament\Resources\AdminUserResource\Pages;
 
 use App\Filament\Resources\AdminUserResource;
-use App\Settings\MailSettings;
-use Exception;
-use Filament\Facades\Filament;
-use Filament\Notifications\Auth\VerifyEmail;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\CreateRecord;
 use App\Models\User;
+use App\Notifications\CustomVerifyEmail;
+use Filament\Actions;
+use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use App\Settings\MailSettings;
+use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 
 class CreateAdminUser extends CreateRecord
 {
@@ -26,14 +26,7 @@ class CreateAdminUser extends CreateRecord
         $user = $this->record;
         $settings = app(MailSettings::class);
 
-        if (! method_exists($user, 'notify')) {
-            $userClass = $user::class;
-
-            throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
-        }
-
-        $notification = new VerifyEmail();
-        $notification->url = Filament::getVerifyEmailUrl($user);
+        $notification = new CustomVerifyEmail(Filament::getVerifyEmailUrl($user));
 
         $settings->loadMailSettingsToConfig();
 
