@@ -31,6 +31,7 @@
         "laravel/framework": "^11.9",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.8",
+        "laravel/ui": "^4.5",
         "league/commonmark": "^2.4",
         "riodwanto/filament-ace-editor": "^1.0",
         "stechstudio/filament-impersonate": "^3.13",

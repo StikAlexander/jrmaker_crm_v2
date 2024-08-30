@@ -2,11 +2,6 @@
 
 namespace App\Models;
 
-use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Models\Contracts\HasAvatar;
-use Filament\Models\Contracts\HasName;
-use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,36 +11,27 @@ use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
+use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 use Illuminate\Support\Facades\Crypt;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Spatie\Image\Manipulations;
+use App\Notifications\CustomVerifyEmail;
+use Filament\Facades\Filament;
 
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail, HasAvatar, HasName, HasMedia
 {
-    use InteractsWithMedia;
-    use HasRoles;
-    use HasApiTokens, HasFactory, Notifiable;
-    use HasPanelShield;
+    use InteractsWithMedia, HasRoles, HasApiTokens, HasFactory, Notifiable, HasPanelShield;
 
     protected $fillable = [
-        'document_number',
-        'name',
-        'email',
-        'phone',
-        'email_verified_at',
-        'password',
-        'created_at',
-        'updated_at',
-        'deleted_at',
-        'document_type_id',
-        'created_by_id',
-        'status',
+        'document_number', 'name', 'email', 'phone', 'email_verified_at',
+        'password', 'created_at', 'updated_at', 'deleted_at',
+        'document_type_id', 'created_by_id', 'status',
     ];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -121,5 +107,17 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by_id');
+    }
+
+    // Método para enviar la verificación de correo
+    public function sendVerificationEmail(): void
+    {
+        $settings = app(\App\Settings\MailSettings::class);
+
+        $notification = new CustomVerifyEmail(Filament::getVerifyEmailUrl($this));
+
+        $settings->loadMailSettingsToConfig();
+
+        $this->notify($notification);
     }
 }

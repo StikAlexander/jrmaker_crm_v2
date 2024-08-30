@@ -4,38 +4,29 @@ namespace App\Filament\Resources\AdminUserResource\Pages;
 
 use App\Filament\Resources\AdminUserResource;
 use App\Models\User;
-use App\Notifications\CustomVerifyEmail;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Database\Eloquent\Model;
-use App\Settings\MailSettings;
-use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Model;
 
 class CreateAdminUser extends CreateRecord
 {
     protected static string $resource = AdminUserResource::class;
 
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    }
-
     protected function afterCreate(): void
     {
         $user = $this->record;
-        $settings = app(MailSettings::class);
 
-        $notification = new CustomVerifyEmail(Filament::getVerifyEmailUrl($user));
+        if ($user->exists && $user->email) {
+            $user->sendVerificationEmail();
 
-        $settings->loadMailSettingsToConfig();
-
-        $user->notify($notification);
-
-        Notification::make()
-            ->title(__('resource.user.notifications.notification_resent.title'))
-            ->success()
-            ->send();
+            // Mostrar la notificación de que el correo ha sido enviado
+            Notification::make()
+                ->title(__('Correo de verificación enviado'))
+                ->success()
+                ->send();
+        } else {
+            throw new \Exception('El usuario no se creó correctamente o falta el correo electrónico.');
+        }
     }
 
     protected function handleRecordCreation(array $data): Model
