@@ -12,8 +12,8 @@ return new class extends SettingsMigration
         $this->migrator->add('mail.host', 'sandbox.smtp.mailtrap.io');
         $this->migrator->add('mail.port', 2525);
         $this->migrator->add('mail.encryption', 'tls');
-        $this->migrator->addEncrypted('mail.username', 'ab024018081ad1');
-        $this->migrator->addEncrypted('mail.password', 'dd06d3b89754f3');
+        $this->migrator->addEncrypted('mail.username', 'c34db037ba25a7');
+        $this->migrator->addEncrypted('mail.password', '073f8878b00147');
         $this->migrator->add('mail.timeout', null);
         $this->migrator->add('mail.local_domain', null);
     }
