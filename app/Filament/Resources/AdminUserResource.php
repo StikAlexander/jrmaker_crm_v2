@@ -29,19 +29,14 @@ use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Enums\ActionSize;
 
 
-class AdminUserResource extends Resource implements HasMedia
+class AdminUserResource extends Resource
 {
     
-    use InteractsWithMedia;
-
-    protected static ?string $model = AdminUser::class;
+    protected static ?string $model = User::class;
     
-
     public static function getEloquentQuery(): Builder
     {
-        return User::whereHas('roles', function ($q) {
-            $q->where('name', 'admin');
-        });
+        return User::role('admin');
     }
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
@@ -301,8 +296,8 @@ class AdminUserResource extends Resource implements HasMedia
     {
         return [
             'index' => Pages\ListAdminUsers::route('/'),
-            //'create' => Pages\CreateAdminUser::route('/create'),
-            //'edit' => Pages\EditAdminUser::route('/{record}/edit'),
+            'create' => Pages\CreateAdminUser::route('/create'),
+            'edit' => Pages\EditAdminUser::route('/{record}/edit'),
         ];
     }
 

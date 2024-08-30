@@ -26,17 +26,13 @@ use Filament\Forms\Components\Section;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Enums\ActionSize;
 
-class CollaboratorUserResource extends Resource implements HasMedia
+class CollaboratorUserResource extends Resource
 {
-    use InteractsWithMedia;
-
-    protected static ?string $model = CollaboratorUser::class;
+    protected static ?string $model = User::class;
 
     public static function getEloquentQuery(): Builder
     {
-        return User::whereHas('roles', function ($q) {
-            $q->where('name', 'collaborator');
-        });
+        return User::role('Collaborator');
     }
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
@@ -289,8 +285,8 @@ class CollaboratorUserResource extends Resource implements HasMedia
     {
         return [
             'index' => Pages\ListCollaboratorUsers::route('/'),
-            //'create' => Pages\CreateCollaboratorUser::route('/create'),
-            //'edit' => Pages\EditCollaboratorUser::route('/{record}/edit'),
+            'create' => Pages\CreateCollaboratorUser::route('/create'),
+            'edit' => Pages\EditCollaboratorUser::route('/{record}/edit'),
         ];
     }
 

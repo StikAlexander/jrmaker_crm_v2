@@ -25,17 +25,14 @@ use Filament\Forms\Components\Section;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Enums\ActionSize;
 
-class ClientUserResource extends Resource implements HasMedia
+class ClientUserResource extends Resource
 {
-    use InteractsWithMedia;
 
-    protected static ?string $model = ClientUser::class;
+    protected static ?string $model = User::class;
 
     public static function getEloquentQuery(): Builder
     {
-        return User::whereHas('roles', function ($q) {
-            $q->where('name', 'client');
-        });
+        return User::role('client');
     }
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
@@ -217,8 +214,8 @@ class ClientUserResource extends Resource implements HasMedia
         {
             return [
                 'index' => Pages\ListClientUsers::route('/'),
-                //'create' => Pages\CreateClientUser::route('/create'),
-                //'edit' => Pages\EditClientUser::route('/{record}/edit'),
+                'create' => Pages\CreateClientUser::route('/create'),
+                'edit' => Pages\EditClientUser::route('/{record}/edit'),
             ];
         }
     } 

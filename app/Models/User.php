@@ -15,12 +15,10 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Log;
-
-
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Image\Manipulations;
 
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail, HasAvatar, HasName, HasMedia
 {
@@ -28,7 +26,6 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
     use HasRoles;
     use HasApiTokens, HasFactory, Notifiable;
     use HasPanelShield;
-
 
     protected $fillable = [
         'document_number',
@@ -57,54 +54,46 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
 
     protected static function booted()
     {
-        
         static::creating(function ($user) {
-        
             if (is_null($user->status)) {
                 $user->status = 'active';
             }
         });
     }
 
+    // Encriptar el número de documento
     public function setDocumentNumberAttribute($value)
     {
-        // Convertir a cadena si no lo es
         $this->attributes['document_number'] = Crypt::encryptString((string) $value);
     }
 
-    // Desencriptar al acceder
     public function getDocumentNumberAttribute($value)
     {
-        //Log::info('Desencriptando document_number', ['value' => $value]);
         try {
             return Crypt::decryptString($value);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            //Log::error('Error de desencriptación en User:', ['exception' => $e]);
             return null;
         }
     }
-    
-    
-    
 
+    // Métodos de Filament
     public function getFilamentName(): string
     {
         return $this->name;
     }
 
-public function canAccessPanel(Panel $panel): bool
-{
-    if ($panel->getId() === 'admin') {
-        return $this->hasAnyRole(['super_admin', 'admin', 'collaborator']);
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() === 'admin') {
+            return $this->hasAnyRole(['super_admin', 'admin', 'collaborator']);
+        }
+
+        if ($panel->getId() === 'client') {
+            return $this->hasRole('client');
+        }
+
+        return false;
     }
-
-    if ($panel->getId() === 'client') {
-        return $this->hasRole('client');
-    }
-
-    return false;
-}
-
 
     public function getFilamentAvatarUrl(): ?string
     {
@@ -123,6 +112,7 @@ public function canAccessPanel(Panel $panel): bool
             ->nonQueued();
     }
 
+    // Relaciones
     public function documentType()
     {
         return $this->belongsTo(DocumentType::class);
