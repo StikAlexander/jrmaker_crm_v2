@@ -130,6 +130,7 @@ class AdminPanelProvider extends PanelProvider
                         'personal_info' => MyProfileExtended::class,
                         'update_password' => \App\Livewire\UpdatePasswordCustom::class,
                     ]),
+                    \RickDBCN\FilamentEmail\FilamentEmail::make(),
             ]);
     }
 
