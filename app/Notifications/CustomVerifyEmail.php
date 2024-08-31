@@ -17,9 +17,10 @@ class CustomVerifyEmail extends BaseVerifyEmail
     protected function buildMailMessage($url)
     {
         return (new MailMessage)
-            ->subject(__('Verify Your Email Address'))
-            ->line(__('Click the button below to verify your email address.'))
-            ->action(__('Verify Email Address'), $this->url)
-            ->line(__('If you did not create an account, no further action is required.'));
+            ->subject(__('Verifica tu dirección de correo electrónico'))
+            ->line(__('Haz clic en el botón de abajo para verificar tu dirección de correo electrónico.'))
+            ->action(__('Verificar dirección de correo electrónico'), $this->url)
+            ->line(__('Si no creaste una cuenta, no se requiere ninguna acción adicional.'));
     }
 }
+

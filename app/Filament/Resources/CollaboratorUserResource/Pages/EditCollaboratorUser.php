@@ -3,32 +3,31 @@
 namespace App\Filament\Resources\CollaboratorUserResource\Pages;
 
 use App\Filament\Resources\CollaboratorUserResource;
+use App\Notifications\CustomVerifyEmail;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
-use App\Settings\MailSettings;
-use Exception;
 use Filament\Facades\Filament;
-use Filament\Notifications\Auth\VerifyEmail;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\EditRecord;
+
+
 
 class EditCollaboratorUser extends EditRecord
 {
     protected static string $resource = CollaboratorUserResource::class;
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make(),
+        ];
+    }
+
     protected function resendVerificationEmail(): void
     {
         $user = $this->record;
-        $settings = app(MailSettings::class);
 
-        if (! method_exists($user, 'notify')) {
-            $userClass = $user::class;
-            throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
-        }
+        $notification = new CustomVerifyEmail(Filament::getVerifyEmailUrl($user));
 
-        $notification = new VerifyEmail();
-        $notification->url = Filament::getVerifyEmailUrl($user);
-
-        $settings->loadMailSettingsToConfig();
         $user->notify($notification);
 
         Notification::make()

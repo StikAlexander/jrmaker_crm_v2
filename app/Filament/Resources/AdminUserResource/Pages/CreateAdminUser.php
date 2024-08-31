@@ -19,7 +19,6 @@ class CreateAdminUser extends CreateRecord
         if ($user->exists && $user->email) {
             $user->sendVerificationEmail();
 
-            // Mostrar la notificación de que el correo ha sido enviado
             Notification::make()
                 ->title(__('Correo de verificación enviado'))
                 ->success()

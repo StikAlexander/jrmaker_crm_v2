@@ -4,6 +4,9 @@ namespace App\Filament\Resources\AdminUserResource\Pages;
 
 use App\Filament\Resources\AdminUserResource;
 use Filament\Actions;
+use App\Notifications\CustomVerifyEmail;
+use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAdminUser extends EditRecord
@@ -20,12 +23,12 @@ class EditAdminUser extends EditRecord
     protected function resendVerificationEmail(): void
     {
         $user = $this->record;
-        
-        // Enviar la verificación de correo usando el método centralizado
-        $user->sendVerificationEmail();
 
-        // Notificación de éxito
-        \Filament\Notifications\Notification::make()
+        $notification = new CustomVerifyEmail(Filament::getVerifyEmailUrl($user));
+
+        $user->notify($notification);
+
+        Notification::make()
             ->title(__('resource.user.notifications.notification_resent.title'))
             ->success()
             ->send();
