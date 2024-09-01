@@ -16,7 +16,6 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
-use Illuminate\Support\Facades\Crypt;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Notifications\CustomVerifyEmail;
 use Filament\Facades\Filament;
@@ -47,19 +46,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
         });
     }
 
-    // Encriptar el número de documento
-    public function setDocumentNumberAttribute($value)
-    {
-        $this->attributes['document_number'] = Crypt::encryptString((string) $value);
-    }
-
+    // Sin encriptar ni desencriptar el número de documento
     public function getDocumentNumberAttribute($value)
     {
-        try {
-            return Crypt::decryptString($value);
-        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            return null;
-        }
+        return $value;
     }
 
     // Métodos de Filament

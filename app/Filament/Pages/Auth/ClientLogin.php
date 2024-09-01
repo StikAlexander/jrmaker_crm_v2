@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Support\Htmlable;
 
 class ClientLogin extends AuthLogin
@@ -33,7 +32,6 @@ class ClientLogin extends AuthLogin
         ];
     }
 
-    // Define el método getDocumentTypeFormComponent
     protected function getDocumentTypeFormComponent(): Component
     {
         return Select::make('document_type')
@@ -50,14 +48,13 @@ class ClientLogin extends AuthLogin
             ->placeholder(__('Seleccione el Tipo de Identificación'));
     }
 
-    // Define el método getDocumentNumberFormComponent
     protected function getDocumentNumberFormComponent(): Component
     {
         return TextInput::make('document_number')
             ->label(__('Documento de identificación'))
             ->required()
             ->placeholder(__('Ingrese su número de documento'))
-            ->rules('required|min:6|max:20'); // Ajusta las reglas según los tipos de documento.
+            ->rules('required|min:6|max:20');
     }
 
     public function authenticate(): ?LoginResponse
@@ -80,27 +77,10 @@ class ClientLogin extends AuthLogin
         // Verifica si el document_type_id es correcto
         Log::info('ID de tipo de documento:', ['document_type_id' => $documentTypeId]);
 
-        // Buscar usuarios con el tipo de documento
-        $users = \App\Models\User::where('document_type_id', $documentTypeId)->get();
-
-        // Loguear la cantidad de usuarios encontrados
-        Log::info('Usuarios encontrados:', ['count' => $users->count()]);
-
-        $user = $users->first(function ($user) use ($data) {
-            // Mostrar el documento encriptado del usuario
-            //Log::info('Intentando desencriptar el número de documento del usuario:', ['encrypted_document' => $user->getRawOriginal('document_number')]);
-
-            // Intentar desencriptar y comparar
-            try {
-                $decryptedDocumentNumber = Crypt::decryptString($user->getRawOriginal('document_number'));
-                //Log::info('Documento desencriptado:', ['decrypted_document' => $decryptedDocumentNumber]);
-
-                return $decryptedDocumentNumber === $data['document_number'];
-            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-                //Log::error('Error de desencriptación:', ['error' => $e->getMessage()]);
-                return false;
-            }
-        });
+        // Buscar el usuario directamente con el número de documento y el tipo de documento
+        $user = \App\Models\User::where('document_type_id', $documentTypeId)
+            ->where('document_number', $data['document_number'])
+            ->first();
 
         if ($user) {
             Auth::login($user);
@@ -115,7 +95,7 @@ class ClientLogin extends AuthLogin
 
     public function getHeading(): string|Htmlable
     {
-        return __('Panel de Clientes J.R. MAKER'); // Título personalizado para el panel de clientes
+        return __('Panel de Clientes J.R. MAKER');
     }
 
     protected function getFormSchema(): array

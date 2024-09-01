@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id()->primary();
-            $table->string('document_number', 1024);
+            
+            
+            $table->string('document_number', 20); 
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone', 20)->nullable();
@@ -25,7 +27,7 @@ return new class extends Migration
             $table->foreignId('document_type_id')->nullable()->constrained('document_types');
             $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
             
-            // Añadir la columna created_by_id sin el 'after'
+            
             $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete();
         });
     }
@@ -43,3 +45,4 @@ return new class extends Migration
         Schema::dropIfExists('users');
     }
 };
+

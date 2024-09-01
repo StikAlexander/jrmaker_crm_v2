@@ -116,21 +116,18 @@ class UsersTableSeeder extends Seeder
             // Configurar la contraseña según el rol
             $password = $user['role'] !== 'client' ? Hash::make('123') : null;
 
-            // Encriptar el número de documento
-            $documentNumber = Crypt::encryptString($user['document_number']);
-
             $userId = DB::table('users')->insertGetId([
-                'document_number' => $documentNumber,
+                'document_number' => $user['document_number'],  
                 'name' => $user['name'],
                 'email' => $user['email'],
                 'phone' => $user['phone'],
                 'email_verified_at' => now(),
-                'password' => $password, // Asigna la contraseña o null si es un cliente
+                'password' => $password, 
                 'remember_token' => Str::random(10),
                 'created_at' => now(),
                 'updated_at' => now(),
                 'deleted_at' => null,
-                'document_type_id' => $user['document_type_id'], // Tipo de documento según el rol
+                'document_type_id' => $user['document_type_id'], 
                 'status' => 'active',
                 'created_by_id' => $createdById,
             ]);
