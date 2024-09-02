@@ -14,7 +14,6 @@ use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Contracts\Support\Htmlable;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -26,6 +25,10 @@ use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components\Card;
 use Filament\Support\Enums\ActionSize;
 use App\Tables\Columns\ModelLinkColumn;
+use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
+use Filament\GlobalSearch\GlobalSearchResult;
+
 
 class InvoiceResource extends Resource
 {
@@ -36,27 +39,50 @@ class InvoiceResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Contabilidad';
     protected static ?int $navigationSort = 1;
-
-    public static function getEloquentQuery(): Builder
+    public static function getGlobalSearchResults(string $search): Collection
     {
-        return parent::getEloquentQuery()->with(['client', 'createdBy']);
+        
+        if (str_starts_with(strtoupper($search), 'FEVD')) {
+            
+            $search = substr($search, 4);
+    
+            return static::getModel()::query()
+                ->where('invoice_number', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%")
+                ->orWhere('total_amount', 'like', "%{$search}%")
+                ->get()
+                ->map(function (Model $record) {
+                    return new GlobalSearchResult(
+                        title: 'FEVD' . $record->invoice_number,
+                        url: static::getUrl('edit', ['record' => $record]),
+                        details: [
+                            'Monto Total' => '$' . number_format($record->total_amount, 0, ',', '.'),
+                            'Descripción' => $record->description,
+                        ],
+                    );
+                });
+        }
+    
+        
+        return collect([]);
     }
+    
 
     public static function getGloballySearchableAttributes(): array
     {
         return ['invoice_number', 'description', 'total_amount'];
     }
 
-    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+    public static function getGlobalSearchResultTitle(Model $record): string
     {
-        return $record->invoice_number;
+        return 'FEVD' . $record->invoice_number;
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Total Amount' => $record->total_amount,
-            'Description' => $record->description,
+            'Monto Total' => '$' . number_format($record->total_amount, 0, ',', '.'),
+            'Descripción' => $record->description,
         ];
     }
 
