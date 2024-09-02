@@ -38,7 +38,7 @@ class InvoiceResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['client']);
+        return parent::getEloquentQuery()->with(['client', 'createdBy']);
     }
 
     public static function getGloballySearchableAttributes(): array
