@@ -16,8 +16,11 @@ class InvoiceImport implements ToModel, WithValidation, WithHeadingRow
     {
         // Manejo de fecha, convierte si es numérica o parsea si es texto
         $issueDate = $this->parseDate($row['issue_date']);
-        
-        // Busca el cliente por el número de documento directamente, sin encriptación
+
+        // Eliminar el prefijo del número de factura
+        $invoiceNumber = preg_replace('/^FEVD/', '', $row['invoice_number']);
+
+        // Busca el cliente por el número de documento
         $clientId = User::where('document_number', $row['document_number'])->value('id');
 
         // Si el cliente no es encontrado, lanzar una excepción
@@ -27,7 +30,7 @@ class InvoiceImport implements ToModel, WithValidation, WithHeadingRow
 
         // Crear la factura
         return new Invoice([
-            'invoice_number' => $row['invoice_number'],
+            'invoice_number' => $invoiceNumber,  // Guardar solo el número sin el prefijo
             'issue_date' => $issueDate,
             'due_date' => $issueDate->copy()->addDays(30),
             'total_amount' => $row['total_amount'],
