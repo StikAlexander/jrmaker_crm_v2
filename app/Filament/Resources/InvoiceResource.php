@@ -25,6 +25,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components\Card;
 use Filament\Support\Enums\ActionSize;
+use App\Tables\Columns\ModelLinkColumn;
 
 class InvoiceResource extends Resource
 {
@@ -182,10 +183,9 @@ class InvoiceResource extends Resource
                     ->searchable()
                     ->limit(50)
                     ->formatStateUsing(fn (string $state): string => 'FEVD' . $state),
-                TextColumn::make('client.name')
+                    ModelLinkColumn::make('client.name')
                     ->label('Cliente')
-                    ->sortable()
-                    ->searchable(),
+                    ->setViewType('view'), 
                 TextColumn::make('createdBy.name')
                     ->label('Creado por')
                     ->sortable()
