@@ -12,6 +12,7 @@ use App\Models\VoucherPayment;
 use Filament\Forms\Components\DatePicker;
 use EightyNine\Reports\Components\Body\Layout\BodyRow;
 use EightyNine\Reports\Components\Body\Layout\BodyColumn;
+use Illuminate\Support\Carbon;
 
 class VoucherPaymentReport extends Report
 {
@@ -52,7 +53,7 @@ class VoucherPaymentReport extends Report
                 ->schema([
                     Text::make($voucher->voucher_number), // Número de voucher
                     Text::make($voucher->client->name), // Cliente
-                    Text::make($voucher->payment_date->format('Y-m-d')), // Fecha de pago
+                    Text::make(Carbon::parse($voucher->payment_date)->format('Y-m-d')), // Fecha de pago
                     Text::make(number_format($voucher->amount, 2)), // Monto
                     Text::make($voucher->confirmation_status === 'Approved' ? 'Aprobado' : ($voucher->confirmation_status === 'Pending' ? 'Pendiente' : 'Rechazado')), // Estado
                 ]);
@@ -70,7 +71,7 @@ class VoucherPaymentReport extends Report
                                 Text::make('Monto')->title(),
                                 Text::make('Estado')->title(),
                             ]),
-                        ...$voucherRows->toArray(), // Descomprimir el array de filas de vouchers
+                        ...$voucherRows->toArray(), 
                     ]),
             ]);
     }

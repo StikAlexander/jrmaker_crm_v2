@@ -40,7 +40,7 @@ class InvoicesExport implements FromCollection, WithHeadings, WithMapping
     public function map($invoice): array
     {
         return [
-            $invoice->invoice_number,
+            'FEVD' . $invoice->invoice_number,
             $invoice->issue_date->format('Y-m-d'),
             $invoice->due_date->format('Y-m-d'),
             $invoice->total_amount,

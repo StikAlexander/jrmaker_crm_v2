@@ -23,12 +23,12 @@ class ListInvoices extends ListRecords
                 ->label('Importar Facturas')
                 ->hint('Sube un archivo XLSX')
                 ->icon('heroicon-o-arrow-up-tray')
-                ->color('success'),
+                ->color('primary'),
 
             Actions\Action::make('export')
                 ->label('Exportar Facturas')
                 ->icon('heroicon-o-arrow-down-tray')
-                ->color('success')
+                ->color('primary')
                 ->action(function () {
                     return Excel::download(new InvoicesExport, 'invoices.xlsx');
                 }),
