@@ -98,6 +98,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
     {
         return $this->belongsTo(User::class, 'created_by_id');
     }
+    
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class, 'client_id');
+    }
 
     // Método para enviar la verificación de correo
     public function sendVerificationEmail(): void

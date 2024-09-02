@@ -24,6 +24,8 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Enums\ActionSize;
+use App\Filament\Resources\ClientUserResource\RelationManagers\InvoicesRelationManager;
+
 
 class ClientUserResource extends Resource
 {
@@ -209,6 +211,13 @@ class ClientUserResource extends Resource
                 Tables\Actions\RestoreBulkAction::make(),
             ]),
         ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            InvoicesRelationManager::class,
+        ];
     }
             public static function getPages(): array
         {
