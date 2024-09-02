@@ -232,17 +232,15 @@ class InvoiceResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->label('')
-                    ->size(ActionSize::Large)
-                    ->tooltip('Ver Detalles')
+                    ->label('Ver')
+                    ->modalHeading('Detalles de la Factura')
+                    ->modalWidth('4xl')
+                    ->tooltip('Ver detalles de la factura')
                     ->iconButton(),
                 Tables\Actions\EditAction::make()
-                    ->modalHeading('Editar Factura')
-                    ->modalWidth('4xl')
-                    ->label('')
-                    ->size(ActionSize::Large)
-                    ->modalAutofocus(true)
+                    ->label('Editar')
                     ->tooltip('Editar Factura')
+                    ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))
                     ->iconButton(),
                 Tables\Actions\DeleteAction::make()
                     ->label('')
@@ -268,8 +266,8 @@ class InvoiceResource extends Resource
     {
         return [
             'index' => Pages\ListInvoices::route('/'),
-            'create' => Pages\CreateInvoice::route('/create'),
             'edit' => Pages\EditInvoice::route('/{record}/edit'),
+            'create' => Pages\CreateInvoice::route('/create'),
         ];
     }
 }
