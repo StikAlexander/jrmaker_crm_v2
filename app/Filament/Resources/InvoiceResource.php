@@ -25,6 +25,8 @@ use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components\Card;
 use Filament\Support\Enums\ActionSize;
 use App\Tables\Columns\ModelLinkColumn;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Filament\GlobalSearch\GlobalSearchResult;
@@ -98,7 +100,6 @@ class InvoiceResource extends Resource
                 ->url(static::getUrl('edit', ['record' => $record])),
         ];
     }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -115,30 +116,59 @@ class InvoiceResource extends Resource
                                             ->prefix('FEVD')
                                             ->required()
                                             ->numeric()
-                                            ->rules(['regex:/^\d+$/']),
+                                            ->rules([
+                                                'regex:/^\d+$/',
+                                                'not_in:e,E',
+                                            ])
+                                            ->extraAttributes(['onkeydown' => 'if(event.key === "e" || event.key === "E") event.preventDefault();'])
+                                            ->live()
+                                            ->debounce(500)
+                                            ->afterStateUpdated(function (Get $get, $state, Set $set) {
+                                                $currentId = $get('id');
+                                                $exists = \App\Models\Invoice::where('invoice_number', $state)
+                                                    ->when($currentId, fn ($query) => $query->where('id', '!=', $currentId))
+                                                    ->exists();
+    
+                                                if ($exists) {
+                                                    $set('invoice_number_error', 'Este número de factura ya está siendo usado.');
+                                                } else {
+                                                    $set('invoice_number_error', null);
+                                                }
+                                            })
+                                            ->hint(fn (Get $get) => $get('invoice_number_error'))
+                                            ->hintColor('danger'),
                                         Select::make('client_id')
                                             ->label('Cliente')
                                             ->required()
                                             ->relationship('client', 'name')
                                             ->searchable()
-                                            ->preload(),
+                                            ->preload()
+                                            ->options(fn () => \App\Models\User::whereHas('roles', function ($query) {
+                                                $query->where('name', 'client');
+                                            })->pluck('name', 'id')),
                                     ]),
-                                Grid::make()
+                                    Grid::make()
                                     ->columns(2)
                                     ->schema([
                                         DatePicker::make('issue_date')
                                             ->label('Fecha de Emisión')
                                             ->required()
                                             ->reactive()
-                                            ->maxDate(now())
+                                            ->maxDate(Carbon::today())
                                             ->afterStateUpdated(function ($state, callable $set) {
-                                                $dueDate = Carbon::parse($state)->addDays(30)->format('Y-m-d');
-                                                $set('due_date', $dueDate);
+                                                if ($state) {
+                                                    
+                                                    $dueDate = Carbon::parse($state)->addDays(30)->format('Y-m-d');
+                                                    $set('due_date', $dueDate);
+                                                } else {
+                                                    $set('due_date', null);
+                                                }
                                             }),
                                         DatePicker::make('due_date')
                                             ->label('Fecha de Vencimiento')
                                             ->required()
-                                            ->disabled(),
+                                            ->disabled() 
+                                            ->placeholder('Se calculará automáticamente si aplica'),
                                     ]),
                             ]),
                         Section::make('Montos')
@@ -152,14 +182,37 @@ class InvoiceResource extends Resource
                                             ->numeric()
                                             ->prefix('$')
                                             ->reactive()
-                                            ->debounce(500),
+                                            ->debounce(500)
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                $set('total_paid', null);
+                                                $set('pending_amount', $state);
+                                            }),
                                         TextInput::make('total_paid')
                                             ->label('Monto Pagado')
                                             ->required()
                                             ->numeric()
                                             ->prefix('$')
                                             ->reactive()
-                                            ->debounce(500),
+                                            ->debounce(500)
+                                            ->disabled(fn (callable $get) => empty($get('total_amount')))
+                                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                                $totalAmount = (float)($get('total_amount') ?? 0);
+                                                $paidAmount = (float)($state ?? 0);
+    
+                                                if ($paidAmount > $totalAmount) {
+                                                    $paidAmount = $totalAmount;
+                                                    $set('total_paid', $paidAmount);
+                                                }
+    
+                                                $pendingAmount = $totalAmount - $paidAmount;
+                                                $set('pending_amount', $pendingAmount);
+    
+                                                if ($paidAmount < $totalAmount) {
+                                                    $set('status', 'Pending');
+                                                } else {
+                                                    $set('status', 'Paid');
+                                                }
+                                            }),
                                         TextInput::make('pending_amount')
                                             ->label('Monto Pendiente')
                                             ->prefix('$')
@@ -176,8 +229,6 @@ class InvoiceResource extends Resource
                                             ->options([
                                                 'Pending' => 'Pendiente',
                                                 'Paid' => 'Pagada',
-                                                'Cancelled' => 'Cancelada',
-                                                'Partially Paid' => 'Parcialmente Pagada',
                                             ])
                                             ->disabled(),
                                         FileUpload::make('invoice_pdf')
@@ -198,16 +249,18 @@ class InvoiceResource extends Resource
                     ]),
             ]);
     }
-
+    
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('invoice_number')
-                    ->label('Numero de Factura')
+                ModelLinkColumn::make('invoice_number')
+                    ->label('Número de Factura')
+                    ->setViewType('view')
                     ->sortable()
                     ->searchable()
                     ->limit(50)
+                    ->url(fn ($record) => InvoiceResource::getUrl('view', ['record' => $record->getKey()])) 
                     ->formatStateUsing(fn (string $state): string => 'FEVD' . $state),
                     ModelLinkColumn::make('client.name')
                     ->label('Cliente')
@@ -244,8 +297,6 @@ class InvoiceResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Paid' => 'success',
-                        'Cancelled' => 'danger',
-                        'Partially Paid' => 'info',
                         default => 'secondary',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
@@ -294,6 +345,7 @@ class InvoiceResource extends Resource
             'index' => Pages\ListInvoices::route('/'),
             'edit' => Pages\EditInvoice::route('/{record}/edit'),
             'create' => Pages\CreateInvoice::route('/create'),
+            'view' => Pages\ViewInvoice::route('/{record}'),
         ];
     }
 }

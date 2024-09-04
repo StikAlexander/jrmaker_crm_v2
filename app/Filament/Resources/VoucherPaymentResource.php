@@ -61,8 +61,7 @@ class VoucherPaymentResource extends Resource
                                                 $set('invoice_id', []);
                                             })
                                             ->columnSpan(1),
-
-                                        Select::make('invoice_id')
+                                            Select::make('invoice_id')
                                             ->label('Factura(s)')
                                             ->options(function (callable $get) {
                                                 $clientId = $get('client_id');
@@ -74,6 +73,8 @@ class VoucherPaymentResource extends Resource
                                             ->required()
                                             ->multiple()
                                             ->reactive()
+                                            ->disabled(fn (callable $get) => empty($get('client_id'))) // Deshabilita si no se ha seleccionado un cliente
+                                            ->hint(fn (callable $get) => empty($get('client_id')) ? 'Por favor, seleccione un cliente primero.' : null) // Muestra un mensaje si no hay cliente seleccionado
                                             ->columnSpan(2),
                                     ]),
                             ])

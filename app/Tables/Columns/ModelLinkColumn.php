@@ -39,7 +39,6 @@ class ModelLinkColumn extends TextColumn
             }
 
             $name = $this->overwriteName ?? $this->getName();
-
             $relationship = Str::before($name, '.');
             $relatedRecord = $record->{$relationship};
 
@@ -47,15 +46,21 @@ class ModelLinkColumn extends TextColumn
                 return null;
             }
 
+            // Encuentra el recurso correspondiente al modelo relacionado
             $selectedResource = collect(Filament::getResources())
-            ->first(fn ($resource) => $relatedRecord instanceof \App\Models\User && $resource === \App\Filament\Resources\ClientUserResource::class);
-        
-            if ($selectedResource === null) {
+                ->first(function ($resource) use ($relatedRecord) {
+                    $modelClass = $resource::getModel();
+                    return $relatedRecord instanceof $modelClass;
+                });
+
+            if ($selectedResource === null || !method_exists($selectedResource, 'getUrl')) {
                 return null;
             }
 
-            // Imprime el recurso seleccionado para depuración
-            //dd($selectedResource);
+            $availablePages = $selectedResource::getPages();
+            if (!array_key_exists($this->viewType, $availablePages)) {
+                return null;
+            }
 
             return $selectedResource::getUrl($this->viewType, [
                 'record' => $relatedRecord->getKey(),

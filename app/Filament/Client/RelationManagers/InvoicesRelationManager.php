@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ClientUserResource\RelationManagers;
 
-use App\Filament\Resources\InvoiceResource;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use App\Tables\Columns\ModelLinkColumn;
@@ -10,19 +9,20 @@ use App\Tables\Columns\ModelLinkColumn;
 class InvoicesRelationManager extends RelationManager
 {
     protected static string $relationship = 'invoices';
+    protected static ?string $recordTitleAttribute = 'invoice_number';
 
     public function table(Tables\Table $table): Tables\Table
     {
         return $table
             ->columns([
                 ModelLinkColumn::make('invoice_number')
-                    ->label('Número de Factura')
-                    ->setViewType('view')
-                    ->sortable()
-                    ->searchable()
-                    ->limit(50)
-                    ->url(fn ($record) => InvoiceResource::getUrl('view', ['record' => $record->getKey()])) // Genera la URL correctamente
-                    ->formatStateUsing(fn (string $state): string => 'FEVD' . $state),
+                ->label('Número de Factura')
+                ->setViewType('view')
+                ->sortable()
+                ->searchable()
+                ->limit(50)
+                ->url(fn ($record) => route('filament.resources.invoices.view', ['record' => $record->getKey()]))  
+                ->formatStateUsing(fn (string $state): string => 'FEVD' . $state),
                 
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label('Monto Total')

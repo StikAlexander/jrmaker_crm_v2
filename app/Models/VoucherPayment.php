@@ -28,19 +28,19 @@ class VoucherPayment extends Model
         parent::boot();
     
         static::creating(function ($model) {
-            // Establecer el número de voucher
+            
             $lastVoucherNumber = static::max('voucher_number');
             $model->voucher_number = $lastVoucherNumber ? $lastVoucherNumber + 1 : 1;
 
-            // Establecer la fecha de emisión (issue_date) si no está definida
+            
             if (empty($model->issue_date)) {
-                $model->issue_date = Carbon::now()->toDateString(); // Fecha actual
+                $model->issue_date = Carbon::now()->toDateString(); 
             }
 
-            // Convertir issue_date a un objeto Carbon
+            
             $issueDate = Carbon::parse($model->issue_date);
     
-            // Calcular la due_date 5 días después de issue_date
+            
             $model->due_date = $issueDate->addDays(5)->format('Y-m-d');
         });
     }

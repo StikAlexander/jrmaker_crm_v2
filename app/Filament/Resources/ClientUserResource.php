@@ -224,7 +224,7 @@ class ClientUserResource extends Resource
             return [
                 'index' => Pages\ListClientUsers::route('/'),
                 'create' => Pages\CreateClientUser::route('/create'),
-                'view' => Pages\ViewClientUser::route('/{record}'),  // Asegúrate de que esta línea exista
+                'view' => Pages\ViewClientUser::route('/{record}'),  
                 'edit' => Pages\EditClientUser::route('/{record}/edit'),
             ];
         }

@@ -24,7 +24,7 @@ return new class extends Migration
 
             $table->foreignId('client_id')->constrained('users')->onDelete('cascade'); 
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null'); 
-            $table->enum('status', ['Pending', 'Paid', 'Cancelled', 'Under Review'])->default('Pending');
+            $table->enum('status', ['Pending', 'Paid'])->default('Pending');
             $table->string('invoice_pdf')->nullable();
             $table->string('description')->nullable();
             $table->timestamps();

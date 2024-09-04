@@ -297,6 +297,7 @@ class AdminUserResource extends Resource
         return [
             'index' => Pages\ListAdminUsers::route('/'),
             'create' => Pages\CreateAdminUser::route('/create'),
+            'view' => Pages\ViewAdminUser::route('/{record}'), 
             'edit' => Pages\EditAdminUser::route('/{record}/edit'),
         ];
     }

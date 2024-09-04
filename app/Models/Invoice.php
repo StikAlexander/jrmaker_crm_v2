@@ -32,29 +32,26 @@ class Invoice extends Model
     protected static function boot()
     {
         parent::boot();
-
+    
         static::creating(function ($model) {
             if (!empty($model->issue_date)) {
                 $model->due_date = Carbon::parse($model->issue_date)->addDays(30);
             }
+            $model->status = 'Pending'; 
         });
-
+    
         static::saving(function ($model) {
             if (!empty($model->total_amount)) {
                 $model->pending_amount = $model->total_amount - ($model->total_paid ?? 0);
             }
-
-            if ($model->pending_amount <= 0 && $model->total_paid >= $model->total_amount) {
+    
+            if ($model->pending_amount <= 0) {
                 $model->status = 'Paid';
-            } else if ($model->total_paid > 0 && $model->pending_amount > 0) {
-                $model->status = 'Partially Paid';
             } else {
                 $model->status = 'Pending';
             }
         });
-    
     }
-
     public function client()
     {
         return $this->belongsTo(User::class, 'client_id');
