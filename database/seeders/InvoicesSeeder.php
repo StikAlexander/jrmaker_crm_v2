@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class InvoicesSeeder extends Seeder
@@ -65,7 +64,7 @@ class InvoicesSeeder extends Seeder
         if ($totalPaid === 0) {
             return 'Pending';
         } elseif ($totalPaid < $totalAmount) {
-            return 'Pending'; // Cambiado a "Pending" o "Paid" en lugar de "Partially Paid"
+            return 'Pending';
         } else {
             return 'Paid';
         }

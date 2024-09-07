@@ -17,17 +17,11 @@ class VoucherPaymentsSeeder extends Seeder
             $numberOfInvoices = rand(1, 3);
             $selectedInvoices = $invoices->splice(0, $numberOfInvoices);
 
-            $clientId = DB::table('users')
-                ->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-                ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-                ->where('roles.name', 'client')
-                ->where('users.id', $selectedInvoices->first()->client_id)
-                ->value('users.id');
-
+            $clientId = $selectedInvoices->first()->client_id;
             $createdBy = $clientId;
             $totalAmount = $selectedInvoices->sum('total_amount');
             $paymentDate = Carbon::parse($selectedInvoices->first()->issue_date)->addDays(rand(1, 30));
-            $confirmationStatus = $this->randomConfirmationStatus(); // Estado de confirmación aleatorio
+            $confirmationStatus = $this->randomConfirmationStatus();
 
             $voucherPaymentId = DB::table('voucher_payments')->insertGetId([
                 'voucher_number' => $voucherNumber,
@@ -37,8 +31,10 @@ class VoucherPaymentsSeeder extends Seeder
                 'created_by' => $createdBy,
                 'payment_date' => $paymentDate,
                 'amount' => $totalAmount,
-                'confirmation_status' => $confirmationStatus, // Confirmación
-                'payment_support' => 'voucher_payments/' . $voucherNumber . '.pdf',
+                'confirmation_status' => $confirmationStatus,
+                'payment_link' => null,  // Inicialmente null hasta que se genere el link
+                'payment_status' => 'Pending',  // Estado inicial del pago
+                'api_response' => null,  // Respuesta de la API aún no disponible
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

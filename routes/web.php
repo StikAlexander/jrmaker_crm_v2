@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\PasswordChangeController;
+use App\Http\Controllers\PaymentWebhookController;
 
 
 /*
@@ -21,4 +22,6 @@ Route::get('/', function () {
 
 Route::get('/verify-password-change', [PasswordChangeController::class, 'verify'])->name('password.change.verify');
 Route::post('/verify-password-change', [PasswordChangeController::class, 'verifyCode'])->name('password.change.verify_code');
+
+route::post('/payment/callback', [PaymentWebhookController::class, 'handleCallback'])->name('payment.callback');
 

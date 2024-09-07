@@ -19,7 +19,9 @@ class VoucherPayment extends Model
         'client_id',
         'payment_date',
         'amount',
-        'payment_support',
+        'payment_link',  // Nuevo campo para link de pago
+        'payment_status',  // Nuevo campo para estado del pago
+        'api_response',  // Nuevo campo para respuesta API
         'confirmation_status',
     ];
 
@@ -28,23 +30,19 @@ class VoucherPayment extends Model
         parent::boot();
     
         static::creating(function ($model) {
-            
             $lastVoucherNumber = static::max('voucher_number');
             $model->voucher_number = $lastVoucherNumber ? $lastVoucherNumber + 1 : 1;
 
-            
             if (empty($model->issue_date)) {
                 $model->issue_date = Carbon::now()->toDateString(); 
             }
 
-            
             $issueDate = Carbon::parse($model->issue_date);
-    
-            
             $model->due_date = $issueDate->addDays(5)->format('Y-m-d');
         });
     }
 
+    // Relaciones
     public function client()
     {
         return $this->belongsTo(User::class, 'client_id');
@@ -63,5 +61,11 @@ class VoucherPayment extends Model
     public function confirmedBy()
     {
         return $this->belongsTo(User::class, 'confirmed_by');
+    }
+
+    // Relación con PaymentAttempt
+    public function paymentAttempts()
+    {
+        return $this->hasMany(PaymentAttempt::class);
     }
 }
