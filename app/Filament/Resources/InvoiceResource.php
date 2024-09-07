@@ -11,7 +11,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Filament\Forms\Components\Grid;
@@ -30,7 +29,7 @@ use Filament\Forms\Set;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Filament\GlobalSearch\GlobalSearchResult;
-use App\Filament\Client\Resources\InvoiceResource\Widgets\InstructionsWidget;
+
 
 
 class InvoiceResource extends Resource
@@ -340,12 +339,6 @@ class InvoiceResource extends Resource
             ]);
     }
 
-    protected static function getHeaderWidgets(): array
-    {
-        return [
-            InstructionsWidget::class, // Registra tu widget aquí
-        ];
-    }
     public static function getPages(): array
     {
         return [

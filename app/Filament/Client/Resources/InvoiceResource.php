@@ -2,6 +2,7 @@
 
 namespace App\Filament\Client\Resources;
 
+
 use App\Models\Invoice;
 use App\Models\VoucherPayment;
 use Filament\Forms\Form;
@@ -140,6 +141,14 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-credit-card'),
             ]);
     }
+
+        protected static function getHeaderWidgets(): array
+    {
+        return [
+            
+        ];
+    }
+
 
     public static function getRelations(): array
     {
