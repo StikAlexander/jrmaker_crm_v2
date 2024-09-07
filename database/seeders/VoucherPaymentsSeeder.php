@@ -35,6 +35,7 @@ class VoucherPaymentsSeeder extends Seeder
                 'payment_link' => null,  // Inicialmente null hasta que se genere el link
                 'payment_status' => 'Pending',  // Estado inicial del pago
                 'api_response' => null,  // Respuesta de la API aún no disponible
+                'external_reference' => 'ref_' . uniqid(),  // Generar external_reference único
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

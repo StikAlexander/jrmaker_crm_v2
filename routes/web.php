@@ -43,3 +43,5 @@ Route::get('/payment/failure', [PaymentController::class, 'handleFailure'])->nam
 
 // Ruta de estado pendiente: cuando el pago está pendiente de confirmación
 Route::get('/payment/pending', [PaymentController::class, 'handlePending'])->name('payment.pending');
+
+route::post('/payment/callback', [PaymentWebhookController::class, 'handleCallback'])->name('payment.callback');

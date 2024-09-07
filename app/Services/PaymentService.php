@@ -11,7 +11,8 @@ class PaymentService
     public function __construct()
     {
         // Inicializar el SDK de Mercado Pago con tu token de acceso
-        $mpAccessToken = env('MERCADO_PAGO_ACCESS_TOKEN');
+        $mpAccessToken = config('services.mercadopago.access_token');
+        //dd($mpAccessToken);
 
         if (empty($mpAccessToken)) {
             throw new \Exception("El token de acceso de Mercado Pago no está configurado.");
@@ -45,6 +46,7 @@ class PaymentService
                     'pending' => route('payment.pending')
                 ],
                 "auto_return" => 'approved',
+                "notification_url" => "https://1502-200-118-80-78.ngrok-free.app/payment/callback", // Aquí la URL del webhook
             ];
 
             \Log::info("Datos enviados a Mercado Pago:", $preferenceRequest);
