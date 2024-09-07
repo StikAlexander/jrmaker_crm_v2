@@ -104,46 +104,52 @@ class InvoiceResource extends Resource
             ])
             ->bulkActions([
                 BulkAction::make('paySelected')
-                    ->label('Pagar seleccionadas')
-                    ->action(function (Collection $records) {
-                        $invoiceIds = $records->pluck('id')->toArray();
-
-                        $voucherPayment = VoucherPayment::create([
-                            'client_id' => auth()->id(),
-                            'amount' => $records->sum('pending_amount'),
-                            'payment_status' => 'Pending',
-                        ]);
-
-                        foreach ($records as $invoice) {
-                            $voucherPayment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
-                        }
-
-                        $paymentService = app(PaymentService::class);
-                        $paymentLink = $paymentService->generatePaymentLink(
-                            $voucherPayment->amount,
-                            'Pago de varias facturas',
-                            $voucherPayment->invoices,
-                            route('payment.callback')
-                        );
-
-                        if ($paymentLink) {
-                            $voucherPayment->update(['payment_link' => $paymentLink]);
-
-                            Notification::make()
-                                ->title('Enlace de pago generado')
-                                ->body('El enlace de pago para las facturas seleccionadas ha sido generado.')
-                                ->success()
-                                ->send();
-                        } else {
-                            Notification::make()
-                                ->title('Error en el pago')
-                                ->body('No se pudo generar el enlace de pago.')
-                                ->danger()
-                                ->send();
-                        }
-                    })
-                    ->color('success')
-                    ->icon('heroicon-o-credit-card'),
+                ->label('Pagar seleccionadas')
+                ->action(function (Collection $records) {
+                    $invoiceIds = $records->pluck('id')->toArray();
+            
+                    // Crear el VoucherPayment con las facturas seleccionadas
+                    $voucherPayment = VoucherPayment::create([
+                        'client_id' => auth()->id(),
+                        'amount' => $records->sum('pending_amount'),
+                        'payment_status' => 'Pending',
+                    ]);
+            
+                    // Asociar las facturas seleccionadas con el VoucherPayment
+                    foreach ($records as $invoice) {
+                        $voucherPayment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
+                    }
+            
+                    // Llamada al servicio de pago para generar el enlace
+                    $paymentService = app(PaymentService::class);
+                    $paymentLink = $paymentService->generatePaymentLink(
+                        $voucherPayment->amount,
+                        'Pago de varias facturas',
+                        $voucherPayment->invoices,
+                        route('payment.callback')
+                    );
+            
+                    if ($paymentLink) {
+                        $voucherPayment->update(['payment_link' => $paymentLink]);
+            
+                        Notification::make()
+                            ->title('Enlace de pago generado')
+                            ->body('Serás redirigido automáticamente en unos segundos.')
+                            ->success()
+                            ->send();
+            
+                        // Redirigir al usuario al enlace de pago
+                        return redirect()->away($paymentLink); // Redirección sin usar $this
+                    } else {
+                        Notification::make()
+                            ->title('Error en el pago')
+                            ->body('No se pudo generar el enlace de pago.')
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->color('success')
+                ->icon('heroicon-o-credit-card'),
             ]);
     }
 
