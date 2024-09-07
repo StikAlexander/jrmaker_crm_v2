@@ -2,11 +2,10 @@
 
 namespace App\Providers;
 
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Enums\FiltersLayout;
+use Filament\Support\Facades\FilamentAsset;
+use Filament\Support\Assets\Js;
 use Filament\Tables\Table;
 use Illuminate\Support\ServiceProvider;
-use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Configuración de la tabla en español
+        // Configuración global de la tabla en Filament
         Table::configureUsing(function (Table $table): void {
             $table
                 ->emptyStateHeading('Sin datos todavía')
@@ -34,9 +33,9 @@ class AppServiceProvider extends ServiceProvider
                 ->defaultSort('created_at', 'desc');
         });
 
-        // Configuración del cambio de idioma para español
-        //LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
-          //  $switch->locales(['es']); // Solo acepta español
-        //});
+        // Registro del archivo JS personalizado en Filament
+        FilamentAsset::register([
+            Js::make('custom-script', asset('js/custom.js')),
+        ]);
     }
 }

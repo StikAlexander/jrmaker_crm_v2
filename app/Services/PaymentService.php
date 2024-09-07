@@ -12,6 +12,11 @@ class PaymentService
     {
         // Inicializar el SDK de Mercado Pago con tu token de acceso
         $mpAccessToken = env('MERCADO_PAGO_ACCESS_TOKEN');
+
+        if (empty($mpAccessToken)) {
+            throw new \Exception("El token de acceso de Mercado Pago no está configurado.");
+        }
+        
         MercadoPagoConfig::setAccessToken($mpAccessToken);
     }
 
@@ -42,6 +47,8 @@ class PaymentService
                 "auto_return" => 'approved',
             ];
 
+            \Log::info("Datos enviados a Mercado Pago:", $preferenceRequest);
+
             // Generar la preferencia de pago
             $preference = $client->create($preferenceRequest);
 
@@ -50,7 +57,11 @@ class PaymentService
 
         } catch (MPApiException $e) {
             // Manejar el error y registrar en logs
-            \Log::error('Error al generar el enlace de pago: ' . $e->getMessage());
+            \Log::error('Error al generar el enlace de pago: ', [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'response' => $e->getResponseBody(),
+            ]);
             return null;
         }
     }

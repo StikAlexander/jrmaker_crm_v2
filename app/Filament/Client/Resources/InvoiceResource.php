@@ -7,25 +7,25 @@ use App\Models\VoucherPayment;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Support\Collection;
 use Filament\Notifications\Notification;
-use App\Services\PaymentService; // Asegúrate de tener este servicio configurado correctamente
+use App\Services\PaymentService;
 
 class InvoiceResource extends Resource
 {
     protected static ?string $model = Invoice::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    // Filtrar solo las facturas del cliente autenticado
+    // Filtrar solo las facturas del cliente autenticado y con estado Pendiente
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('client_id', auth()->id()); 
+            ->where('client_id', auth()->id())
+            ->where('status', 'Pending'); // Mostrar solo facturas pendientes
     }
 
     public static function form(Form $form): Form
@@ -38,6 +38,7 @@ class InvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->description('Selecciona una o más facturas pendientes para proceder con el pago.') 
             ->columns([
                 TextColumn::make('invoice_number')
                     ->label('Número de Factura')
@@ -71,6 +72,7 @@ class InvoiceResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Paid' => 'success',
+                        'Cancelled' => 'danger',
                         default => 'secondary',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
@@ -86,70 +88,56 @@ class InvoiceResource extends Resource
                     ->modalHeading('Detalles de la Factura')
                     ->modalWidth('4xl')
                     ->tooltip('Ver detalles de la factura'),
-
-                Action::make('pay')
-                    ->label('Pagar')
-                    ->icon('heroicon-o-credit-card')
-                    ->visible(fn ($record) => $record->status === 'Pending')
-                    ->tooltip('Realizar el pago de la factura')
-                    ->requiresConfirmation()
-                    ->color('success')
-                    ->action(function (Invoice $record) {
-                        Notification::make()
-                            ->title('Pago procesado')
-                            ->body("Factura {$record->invoice_number} procesada correctamente.")
-                            ->success()
-                            ->send();
-                    }),
             ])
             ->bulkActions([
                 BulkAction::make('paySelected')
-                ->label('Pagar seleccionadas')
-                ->action(function (Collection $records) {
-                    $invoiceIds = $records->pluck('id')->toArray();
-            
-                    // Crear el VoucherPayment con las facturas seleccionadas
-                    $voucherPayment = VoucherPayment::create([
-                        'client_id' => auth()->id(),
-                        'amount' => $records->sum('pending_amount'),
-                        'payment_status' => 'Pending',
-                    ]);
-            
-                    // Asociar las facturas seleccionadas con el VoucherPayment
-                    foreach ($records as $invoice) {
-                        $voucherPayment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
-                    }
-            
-                    // Llamada al servicio de pago para generar el enlace
-                    $paymentService = app(PaymentService::class);
-                    $paymentLink = $paymentService->generatePaymentLink(
-                        $voucherPayment->amount,
-                        'Pago de varias facturas',
-                        $voucherPayment->invoices,
-                        route('payment.callback')
-                    );
-            
-                    if ($paymentLink) {
-                        $voucherPayment->update(['payment_link' => $paymentLink]);
-            
-                        Notification::make()
-                            ->title('Enlace de pago generado')
-                            ->body('Serás redirigido automáticamente en unos segundos.')
-                            ->success()
-                            ->send();
-            
-                        // Redirigir al usuario al enlace de pago
-                        return redirect()->away($paymentLink); // Redirección sin usar $this
-                    } else {
-                        Notification::make()
-                            ->title('Error en el pago')
-                            ->body('No se pudo generar el enlace de pago.')
-                            ->danger()
-                            ->send();
-                    }
-                })
-                ->color('success')
-                ->icon('heroicon-o-credit-card'),
+                    ->label('Pagar seleccionadas')
+                    ->tooltip('Selecciona las facturas pendientes para proceder con el pago.') // Mensaje claro sobre qué hacer
+                    ->action(function (Collection $records) {
+                        $invoiceIds = $records->pluck('id')->toArray();
+                
+                        // Crear el VoucherPayment con las facturas seleccionadas
+                        $voucherPayment = VoucherPayment::create([
+                            'client_id' => auth()->id(),
+                            'amount' => $records->sum('pending_amount'),
+                            'payment_status' => 'Pending',
+                        ]);
+                
+                        // Asociar las facturas seleccionadas con el VoucherPayment
+                        foreach ($records as $invoice) {
+                            $voucherPayment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
+                        }
+                
+                        // Llamada al servicio de pago para generar el enlace
+                        $paymentService = app(PaymentService::class);
+                        $paymentLink = $paymentService->generatePaymentLink(
+                            $voucherPayment->amount,
+                            'Pago de varias facturas',
+                            $voucherPayment->invoices,
+                            route('payment.callback')
+                        );
+                
+                        if ($paymentLink) {
+                            $voucherPayment->update(['payment_link' => $paymentLink]);
+                
+                            Notification::make()
+                                ->title('Enlace de pago generado')
+                                ->body('Serás redirigido automáticamente en unos segundos.')
+                                ->success()
+                                ->send();
+                
+                            // Redirigir al usuario al enlace de pago
+                            return redirect()->away($paymentLink);
+                        } else {
+                            Notification::make()
+                                ->title('Error en el pago')
+                                ->body('No se pudo generar el enlace de pago.')
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->color('success')
+                    ->icon('heroicon-o-credit-card'),
             ]);
     }
 
