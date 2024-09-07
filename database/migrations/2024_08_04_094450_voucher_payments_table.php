@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('client_id')->constrained('users')->onDelete('cascade');  // Relación con la tabla de usuarios (cliente)
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();  // Usuario que creó el voucher
             $table->foreignId('confirmed_by')->nullable()->constrained('users')->nullOnDelete();  // Usuario que confirmó el voucher
-            $table->date('payment_date');  // Fecha de pago
+            $table->date('payment_date')->default(now());  // Fecha de pago por defecto es el intento de pago actual
             $table->integer('amount');  // Monto del voucher
             $table->enum('confirmation_status', ['Pending', 'Approved', 'Rejected'])->default('Pending');  // Estado de confirmación del voucher
 

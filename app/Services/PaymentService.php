@@ -2,34 +2,55 @@
 
 namespace App\Services;
 
-use GuzzleHttp\Client;
+use MercadoPago\MercadoPagoConfig;
+use MercadoPago\Client\Preference\PreferenceClient;
+use MercadoPago\Exceptions\MPApiException;
 
 class PaymentService
 {
-    protected $client;
-
     public function __construct()
     {
-        $this->client = new Client(); // Inicializa el cliente HTTP
+        // Inicializar el SDK de Mercado Pago con tu token de acceso
+        $mpAccessToken = env('MERCADO_PAGO_ACCESS_TOKEN');
+        MercadoPagoConfig::setAccessToken($mpAccessToken);
     }
 
-    public function generatePaymentLink($amount, $description, $clientId, $callbackUrl)
+    public function generatePaymentLink($amount, $description, $items, $callbackUrl)
     {
         try {
-            $response = $this->client->post('https://api.paymentprovider.com/create-link', [
-                'json' => [
-                    'amount' => $amount,
-                    'description' => $description,
-                    'client_id' => $clientId,
-                    'callback_url' => $callbackUrl,
-                ]
-            ]);
+            // Crear un cliente de preferencias
+            $client = new PreferenceClient();
 
-            $data = json_decode($response->getBody()->getContents(), true);
-            return $data['payment_link'];
-        } catch (\Exception $e) {
-            // Maneja los errores de la API
-            \Log::error('Error generating payment link: ' . $e->getMessage());
+            // Preparar el array de items
+            $preferenceItems = [];
+            foreach ($items as $invoice) {
+                $preferenceItems[] = [
+                    "title" => "Factura " . $invoice->invoice_number,
+                    "quantity" => 1,
+                    "unit_price" => $invoice->pending_amount
+                ];
+            }
+
+            // Crear la preferencia de pago
+            $preferenceRequest = [
+                "items" => $preferenceItems,
+                "back_urls" => [
+                    'success' => route('payment.success'),
+                    'failure' => route('payment.failure'),
+                    'pending' => route('payment.pending')
+                ],
+                "auto_return" => 'approved',
+            ];
+
+            // Generar la preferencia de pago
+            $preference = $client->create($preferenceRequest);
+
+            // Retornar el enlace de pago
+            return $preference->init_point;
+
+        } catch (MPApiException $e) {
+            // Manejar el error y registrar en logs
+            \Log::error('Error al generar el enlace de pago: ' . $e->getMessage());
             return null;
         }
     }
