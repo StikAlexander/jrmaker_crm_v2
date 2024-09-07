@@ -15,6 +15,7 @@ use Filament\Tables\Actions\BulkAction;
 use Illuminate\Support\Collection;
 use Filament\Notifications\Notification;
 
+
 class InvoiceResource extends Resource
 {
     protected static ?string $model = Invoice::class;
@@ -94,7 +95,7 @@ class InvoiceResource extends Resource
                     ->requiresConfirmation()
                     ->color('success')
                     ->action(function (Invoice $record) {
-                        // Lógica para pago único de la factura
+                        // Lógica para pago único de la factura, por ejemplo, redirigir a un enlace de pago
                         Notification::make()
                             ->title('Pago procesado')
                             ->body("Factura {$record->invoice_number} procesada correctamente.")
@@ -120,7 +121,7 @@ class InvoiceResource extends Resource
                             $voucherPayment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
                         }
 
-                        // Llamada a la API externa para generar un enlace de pago
+                        // Llamada a la API externa para generar un enlace de pago (por ejemplo)
                         $paymentLink = $this->generatePaymentLink($voucherPayment);
                         $voucherPayment->update(['payment_link' => $paymentLink]);
 
@@ -139,39 +140,34 @@ class InvoiceResource extends Resource
     // Método para generar el enlace de pago llamando a la API externa
     private function generatePaymentLink(VoucherPayment $voucherPayment)
     {
-        try {
-            // Intento de hacer la solicitud a la API de pago
-            $client = new \GuzzleHttp\Client();
-            $response = $client->post('https://api.paymentprovider.com/create-link', [
-                'json' => [
-                    'amount' => $voucherPayment->amount,
-                    'description' => 'Pago de varias facturas',
-                    'client_id' => $voucherPayment->client_id,
-                    'callback_url' => route('payment.callback'),
-                ]
-            ]);
+        // Ejemplo de llamada a la API para generar el enlace
+        $client = new \GuzzleHttp\Client();
+        $response = $client->post('https://api.paymentprovider.com/create-link', [
+            'json' => [
+                'amount' => $voucherPayment->amount,
+                'description' => 'Pago de varias facturas',
+                'client_id' => $voucherPayment->client_id,
+                'callback_url' => route('payment.callback'),
+            ]
+        ]);
+
+        $data = json_decode($response->getBody()->getContents(), true);
+        return $data['payment_link'];
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => InvoiceResource\Pages\ListInvoices::route('/'),
+            'create' => InvoiceResource\Pages\CreateInvoice::route('/create'),
+            'edit' => InvoiceResource\Pages\EditInvoice::route('/{record}/edit'),
+            //'view' => InvoiceResource\Pages\ViewInvoice::route('/{record}'),
+        ];
+    }
     
-            $data = json_decode($response->getBody()->getContents(), true);
-            
-            // Verificar si la API devolvió un error
-            if (!isset($data['payment_link'])) {
-                throw new \Exception('Error al generar el enlace de pago.');
-            }
-    
-            return $data['payment_link'];
-    
-        } catch (\Exception $e) {
-            // Loguear el error
-            \Log::error('Error al generar el enlace de pago: ' . $e->getMessage());
-    
-            // Notificar al usuario sobre el error
-            Notification::make()
-                ->title('Error en el pago')
-                ->body('No se pudo generar el enlace de pago. Inténtalo más tarde.')
-                ->danger()
-                ->send();
-    
-            return null;
-        }
-    }    
 }
