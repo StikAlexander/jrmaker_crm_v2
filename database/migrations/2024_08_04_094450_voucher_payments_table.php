@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('payment_date')->default(now());
             $table->integer('amount');
             $table->enum('confirmation_status', ['Pending', 'Approved', 'Rejected'])->default('Pending');
-            $table->string('external_reference')->nullable();  // Nueva columna para referencia externa
+            $table->string('external_reference')->nullable(); 
             $table->string('payment_link')->nullable();
             $table->enum('payment_status', ['Pending', 'Completed', 'Failed', 'Cancelled'])->default('Pending');
             $table->json('api_response')->nullable();

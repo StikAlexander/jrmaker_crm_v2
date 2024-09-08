@@ -19,10 +19,11 @@ class VoucherPayment extends Model
         'client_id',
         'payment_date',
         'amount',
-        'payment_link',  // Nuevo campo para link de pago
-        'payment_status',  // Nuevo campo para estado del pago
-        'api_response',  // Nuevo campo para respuesta API
+        'payment_link',  
+        'payment_status',  
+        'api_response',  
         'confirmation_status',
+        'external_reference',  
     ];
 
     protected static function boot()
