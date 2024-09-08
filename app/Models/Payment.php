@@ -14,7 +14,6 @@ class Payment extends Model
         'Payment_number',
         'issue_date',
         'due_date',
-        'created_by',
         'client_id',
         'payment_date',
         'amount',

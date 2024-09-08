@@ -14,7 +14,6 @@ return new class extends Migration
             $table->date('issue_date');
             $table->date('due_date')->nullable();
             $table->foreignId('client_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('confirmed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->date('payment_date')->default(now());
             $table->integer('amount');
