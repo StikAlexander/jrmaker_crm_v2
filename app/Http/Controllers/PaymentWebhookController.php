@@ -10,7 +10,7 @@ class PaymentWebhookController extends Controller
 {
     public function handleCallback(Request $request)
     {
-        Log::info('Webhook recibido:', $request->all());
+        //Log::info('Webhook recibido:', $request->all());
         
         // Obtener el recurso o el id dependiendo del tipo de webhook
         $resourceUrl = $request->input('resource');
@@ -42,13 +42,13 @@ class PaymentWebhookController extends Controller
             ]);
             
             $paymentDetails = json_decode($response->getBody()->getContents(), true);
-            Log::info('Detalles del pago obtenidos:', $paymentDetails);
+            //Log::info('Detalles del pago obtenidos:', $paymentDetails);
             
             // Obtener el external_reference desde los detalles del pago
             $externalReference = $paymentDetails['external_reference'] ?? null;
             
             if (!$externalReference) {
-                Log::error('External reference no encontrado en los detalles del pago.');
+                //Log::error('External reference no encontrado en los detalles del pago.');
                 return response()->json(['message' => 'External reference no encontrado.'], 404);
             }
             
@@ -56,7 +56,7 @@ class PaymentWebhookController extends Controller
             $voucherPayment = VoucherPayment::where('external_reference', (string) $externalReference)->first();
             
             if (!$voucherPayment) {
-                Log::error('Pago no encontrado: ' . $externalReference);
+                //Log::error('Pago no encontrado: ' . $externalReference);
                 return response()->json(['message' => 'Pago no encontrado.'], 404);
             }
             
@@ -64,7 +64,7 @@ class PaymentWebhookController extends Controller
             $paymentStatus = $paymentDetails['status'] ?? 'unknown';
             $this->updatePaymentStatus($voucherPayment, $paymentStatus, $paymentDetails);
             
-            Log::info('Estado del pago actualizado para VoucherPayment ID: ' . $voucherPayment->id);
+            //Log::info('Estado del pago actualizado para VoucherPayment ID: ' . $voucherPayment->id);
         } catch (\Exception $e) {
             Log::error('Error al obtener los detalles del pago: ' . $e->getMessage());
             return response()->json(['message' => 'Error al obtener detalles del pago.'], 500);
@@ -73,7 +73,7 @@ class PaymentWebhookController extends Controller
     
     private function handleMerchantOrder($resourceUrl)
     {
-        Log::info('Procesando merchant_order desde el recurso: ' . $resourceUrl);
+        //Log::info('Procesando merchant_order desde el recurso: ' . $resourceUrl);
 
         $client = new \GuzzleHttp\Client();
         try {
@@ -85,7 +85,7 @@ class PaymentWebhookController extends Controller
             ]);
             
             $orderDetails = json_decode($response->getBody()->getContents(), true);
-            Log::info('Detalles de la merchant_order obtenidos:', $orderDetails);
+            //Log::info('Detalles de la merchant_order obtenidos:', $orderDetails);
             
             // Aquí puedes manejar la lógica que desees con los detalles de la merchant_order
             // Por ejemplo, actualizar información en la base de datos relacionada con la orden
@@ -108,6 +108,6 @@ class PaymentWebhookController extends Controller
             'api_response' => json_encode($apiResponse),
         ]);
 
-        Log::info('Estado del pago actualizado para VoucherPayment ID: ' . $voucherPayment->id);
+        //Log::info('Estado del pago actualizado para VoucherPayment ID: ' . $voucherPayment->id);
     }
 }
