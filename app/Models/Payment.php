@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use App\Events\PaymentCompleted;
 
 class Payment extends Model 
 {
@@ -27,6 +28,7 @@ class Payment extends Model
     {
         parent::boot();
     
+        // Genera el número de pago y las fechas al crear un nuevo pago
         static::creating(function ($model) {
             $lastPaymentNumber = static::max('Payment_number');
             $model->Payment_number = $lastPaymentNumber ? $lastPaymentNumber + 1 : 1;
@@ -37,6 +39,13 @@ class Payment extends Model
 
             $issueDate = Carbon::parse($model->issue_date);
             $model->due_date = $issueDate->addDays(5)->format('Y-m-d');
+        });
+
+        // Dispara el evento cuando se actualiza el estado del pago a "Completed"
+        static::updated(function ($payment) {
+            if ($payment->payment_status === 'Completed') {
+                event(new PaymentCompleted($payment));
+            }
         });
     }
 

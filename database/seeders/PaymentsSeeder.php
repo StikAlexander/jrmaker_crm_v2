@@ -28,7 +28,6 @@ class PaymentsSeeder extends Seeder
                 'issue_date' => $selectedInvoices->first()->issue_date,
                 'due_date' => $selectedInvoices->first()->due_date,
                 'client_id' => $clientId,
-                'created_by' => $createdBy,
                 'payment_date' => $paymentDate,
                 'amount' => $totalAmount,
                 'payment_link' => null,  // Inicialmente null hasta que se genere el link
