@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\VoucherPaymentResource\Pages;
+namespace App\Filament\Resources\PaymentResource\Pages;
 
-use App\Filament\Resources\VoucherPaymentResource;
+use App\Filament\Resources\PaymentResource;
 use App\Models\Invoice;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -11,9 +11,9 @@ use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Support\RawJs;
 
-class EditVoucherPayment extends EditRecord
+class EditPayment extends EditRecord
 {
-    protected static string $resource = VoucherPaymentResource::class;
+    protected static string $resource = PaymentResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -34,7 +34,7 @@ class EditVoucherPayment extends EditRecord
             'amount' => $this->record->amount,
             'payment_support' => $this->record->payment_support,
             'invoice_id' => $this->record->invoices->pluck('id')->toArray(),
-            'voucher_number' => $this->record->voucher_number,  // Agregar el número de voucher aquí
+            'Payment_number' => $this->record->Payment_number,  // Agregar el número de Payment aquí
         ]);
     }
 
@@ -89,13 +89,13 @@ class EditVoucherPayment extends EditRecord
 
             Forms\Components\FileUpload::make('payment_support')
                 ->label('Soporte de Pago')
-                ->directory('voucher_payments')
+                ->directory('Payment_payments')
                 ->acceptedFileTypes(['application/pdf'])
                 ->maxSize(10240)
                 ->required(),
 
-            Forms\Components\TextInput::make('voucher_number')
-                ->label('Número de Voucher')
+            Forms\Components\TextInput::make('Payment_number')
+                ->label('Número de Payment')
                 ->disabled()
                 ->required(),
         ];
@@ -116,7 +116,7 @@ class EditVoucherPayment extends EditRecord
             $invoice = Invoice::find($invoiceId);
             $amountForInvoice = min($remainingAmount, $invoice->pending_amount);
             
-            // Actualizar la relación de las facturas con el voucher
+            // Actualizar la relación de las facturas con el Payment
             $record->invoices()->syncWithoutDetaching([$invoiceId => ['amount' => $amountForInvoice]]);
 
             // Actualizar el estado de la factura

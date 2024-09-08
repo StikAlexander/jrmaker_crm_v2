@@ -62,8 +62,8 @@ class Invoice extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function voucherPayments()
+    public function Payments()
     {
-        return $this->hasMany(VoucherPayment::class);
+        return $this->hasMany(Payment::class);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\VoucherPayment;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -53,18 +53,18 @@ class PaymentWebhookController extends Controller
             }
             
             // Buscar el pago en la base de datos usando el external_reference
-            $voucherPayment = VoucherPayment::where('external_reference', (string) $externalReference)->first();
+            $Payment = Payment::where('external_reference', (string) $externalReference)->first();
             
-            if (!$voucherPayment) {
+            if (!$Payment) {
                 //Log::error('Pago no encontrado: ' . $externalReference);
                 return response()->json(['message' => 'Pago no encontrado.'], 404);
             }
             
             // Actualizar el estado del pago basado en el estado del pago en MercadoPago
             $paymentStatus = $paymentDetails['status'] ?? 'unknown';
-            $this->updatePaymentStatus($voucherPayment, $paymentStatus, $paymentDetails);
+            $this->updatePaymentStatus($Payment, $paymentStatus, $paymentDetails);
             
-            //Log::info('Estado del pago actualizado para VoucherPayment ID: ' . $voucherPayment->id);
+            //Log::info('Estado del pago actualizado para Payment ID: ' . $Payment->id);
         } catch (\Exception $e) {
             Log::error('Error al obtener los detalles del pago: ' . $e->getMessage());
             return response()->json(['message' => 'Error al obtener detalles del pago.'], 500);
@@ -96,9 +96,9 @@ class PaymentWebhookController extends Controller
         }
     }
 
-    private function updatePaymentStatus(VoucherPayment $voucherPayment, $status, $apiResponse)
+    private function updatePaymentStatus(Payment $Payment, $status, $apiResponse)
     {
-        $voucherPayment->update([
+        $Payment->update([
             'payment_status' => match ($status) {
                 'approved' => 'Completed',
                 'rejected' => 'Failed',
@@ -108,6 +108,6 @@ class PaymentWebhookController extends Controller
             'api_response' => json_encode($apiResponse),
         ]);
 
-        //Log::info('Estado del pago actualizado para VoucherPayment ID: ' . $voucherPayment->id);
+        //Log::info('Estado del pago actualizado para Payment ID: ' . $Payment->id);
     }
 }

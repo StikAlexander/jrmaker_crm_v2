@@ -20,13 +20,13 @@ class PaymentService
         MercadoPagoConfig::setAccessToken($mpAccessToken);
     }
 
-    public function generatePaymentLink($voucherPayment, $callbackUrl)
+    public function generatePaymentLink($Payment, $callbackUrl)
     {
         try {
             $client = new PreferenceClient();
     
             // Preparar los items basados en las facturas
-            $preferenceItems = $voucherPayment->invoices->map(function ($invoice) {
+            $preferenceItems = $Payment->invoices->map(function ($invoice) {
                 return [
                     "title" => "Factura " . $invoice->invoice_number,
                     "quantity" => 1,
@@ -52,7 +52,7 @@ class PaymentService
                 ],
                 "auto_return" => 'approved',
                 "notification_url" => env('MERCADOPAGO_NOTIFICATION_URL', 'https://978d-200-118-80-78.ngrok-free.app/payment/callback'),
-                "external_reference" => $voucherPayment->id,
+                "external_reference" => $Payment->id,
             ];
 
             Log::info('Datos enviados a MercadoPago:', $preferenceRequest);

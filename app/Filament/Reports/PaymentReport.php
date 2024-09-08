@@ -8,15 +8,15 @@ use EightyNine\Reports\Components\Footer;
 use EightyNine\Reports\Components\Header;
 use Filament\Forms\Form;
 use EightyNine\Reports\Components\Text;
-use App\Models\VoucherPayment;
+use App\Models\Payment;
 use Filament\Forms\Components\DatePicker;
 use EightyNine\Reports\Components\Body\Layout\BodyRow;
 use EightyNine\Reports\Components\Body\Layout\BodyColumn;
 use Illuminate\Support\Carbon;
 
-class VoucherPaymentReport extends Report
+class PaymentReport extends Report
 {
-    public ?string $heading = "Reporte de Pagos de Voucher";
+    public ?string $heading = "Reporte de Pagos de Payment";
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
     protected static ?string $navigationLabel = 'Soportes de Pago Reporte';
     protected static ?string $navigationGroup = 'Generación de reportes';
@@ -31,10 +31,10 @@ class VoucherPaymentReport extends Report
                     ->schema([
                         Header\Layout\HeaderColumn::make()
                             ->schema([
-                                Text::make("Reporte de Pagos de Voucher")
+                                Text::make("Reporte de Pagos de Payment")
                                     ->title()
                                     ->primary(),
-                                Text::make("Este reporte muestra todos los pagos de voucher realizados dentro del rango de fechas seleccionado.")
+                                Text::make("Este reporte muestra todos los pagos de Payment realizados dentro del rango de fechas seleccionado.")
                                     ->subtitle(),
                             ]),
                     ]),
@@ -46,16 +46,16 @@ class VoucherPaymentReport extends Report
         $startDate = $this->filterData['start_date'] ?? now()->startOfYear();
         $endDate = $this->filterData['end_date'] ?? now()->endOfYear();
 
-        $vouchers = VoucherPayment::whereBetween('payment_date', [$startDate, $endDate])->get();
+        $Payments = Payment::whereBetween('payment_date', [$startDate, $endDate])->get();
 
-        $voucherRows = $vouchers->map(function ($voucher) {
+        $PaymentRows = $Payments->map(function ($Payment) {
             return BodyRow::make()
                 ->schema([
-                    Text::make($voucher->voucher_number), // Número de voucher
-                    Text::make($voucher->client->name), // Cliente
-                    Text::make(Carbon::parse($voucher->payment_date)->format('Y-m-d')), // Fecha de pago
-                    Text::make(number_format($voucher->amount, 2)), // Monto
-                    Text::make($voucher->confirmation_status === 'Approved' ? 'Aprobado' : ($voucher->confirmation_status === 'Pending' ? 'Pendiente' : 'Rechazado')), // Estado
+                    Text::make($Payment->Payment_number), // Número de Payment
+                    Text::make($Payment->client->name), // Cliente
+                    Text::make(Carbon::parse($Payment->payment_date)->format('Y-m-d')), // Fecha de pago
+                    Text::make(number_format($Payment->amount, 2)), // Monto
+                    Text::make($Payment->confirmation_status === 'Approved' ? 'Aprobado' : ($Payment->confirmation_status === 'Pending' ? 'Pendiente' : 'Rechazado')), // Estado
                 ]);
         });
 
@@ -65,13 +65,13 @@ class VoucherPaymentReport extends Report
                     ->schema([
                         BodyRow::make()
                             ->schema([
-                                Text::make('Número de Voucher')->title(),
+                                Text::make('Número de Payment')->title(),
                                 Text::make('Cliente')->title(),
                                 Text::make('Fecha de Pago')->title(),
                                 Text::make('Monto')->title(),
                                 Text::make('Estado')->title(),
                             ]),
-                        ...$voucherRows->toArray(), 
+                        ...$PaymentRows->toArray(), 
                     ]),
             ]);
     }

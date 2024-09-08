@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('voucher_payment_invoice', function (Blueprint $table) {
-            $table->foreignId('voucher_payment_id')->constrained()->onDelete('cascade'); 
+        Schema::create('payment_invoice', function (Blueprint $table) {
+            $table->foreignId('payment_id')->constrained()->onDelete('cascade'); 
             $table->foreignId('invoice_id')->constrained()->onDelete('cascade'); 
             $table->decimal('amount', 10, 2);
-            $table->primary(['voucher_payment_id', 'invoice_id']); 
+            $table->primary(['payment_id', 'invoice_id']); 
         });
     }
 
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('voucher_payment_invoice');
+        Schema::dropIfExists('payment_invoice');
     }
-};
+}; 

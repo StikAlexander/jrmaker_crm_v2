@@ -3,7 +3,7 @@
 namespace App\Filament\Client\Resources;
 
 use App\Models\Invoice;
-use App\Models\VoucherPayment;
+use App\Models\Payment;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Support\Collection;
@@ -97,29 +97,29 @@ class InvoiceResource extends Resource
                     ->action(function (Collection $records) {
                         $totalAmount = $records->sum('pending_amount');
 
-                        // Crear el VoucherPayment
-                        $voucherPayment = VoucherPayment::create([
+                        // Crear el Payment
+                        $Payment = Payment::create([
                             'client_id' => auth()->id(),
                             'amount' => $totalAmount,
                             'payment_status' => 'Pending',
                         ]);
 
-                        // Asignar external_reference al ID del VoucherPayment
-                        $voucherPayment->external_reference = $voucherPayment->id;
-                        $voucherPayment->save(); // Guardar el external_reference en la base de datos   
+                        // Asignar external_reference al ID del Payment
+                        $Payment->external_reference = $Payment->id;
+                        $Payment->save(); // Guardar el external_reference en la base de datos   
 
-                        // Asociar las facturas al VoucherPayment con el campo 'amount' en la tabla pivot
+                        // Asociar las facturas al Payment con el campo 'amount' en la tabla pivot
                         foreach ($records as $invoice) {
-                            $voucherPayment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
+                            $Payment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
                         }
 
                         // Llamada al servicio de pago
                         $paymentService = app(PaymentService::class);
-                        $paymentLink = $paymentService->generatePaymentLink($voucherPayment, route('payment.callback'));
+                        $paymentLink = $paymentService->generatePaymentLink($Payment, route('payment.callback'));
 
                         if ($paymentLink) {
                             // Actualizar el enlace de pago
-                            $voucherPayment->update(['payment_link' => $paymentLink]);
+                            $Payment->update(['payment_link' => $paymentLink]);
 
                             Notification::make()
                                 ->title('Enlace de pago generado')
