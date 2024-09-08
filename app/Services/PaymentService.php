@@ -44,14 +44,14 @@ class PaymentService
             // Crear la preferencia de pago
             $preferenceRequest = [
                 "items" => $preferenceItems,
-                "payer" => $payer,  // Asegúrate de incluir los datos del pagador
+                "payer" => $payer,
                 "back_urls" => [
-                    'success' => "{$callbackUrl}/success",
-                    'failure' => "{$callbackUrl}/failure",
-                    'pending' => "{$callbackUrl}/pending",
+                    'success' => 'https://a031-200-118-80-78.ngrok-free.app/payment/success',
+                    'failure' => 'https://a031-200-118-80-78.ngrok-free.app/payment/failure',
+                    'pending' => 'https://a031-200-118-80-78.ngrok-free.app/payment/pending',
                 ],
                 "auto_return" => 'approved',
-                "notification_url" => env('MERCADOPAGO_NOTIFICATION_URL', 'https://978d-200-118-80-78.ngrok-free.app/payment/callback'),
+                "notification_url" => 'https://a031-200-118-80-78.ngrok-free.app/payment/callback',
                 "external_reference" => $Payment->id,
             ];
 
