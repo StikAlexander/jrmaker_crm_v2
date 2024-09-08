@@ -71,6 +71,30 @@ class PaymentWebhookController extends Controller
         }
     }
     
+    private function handleMerchantOrder($resourceUrl)
+    {
+        Log::info('Procesando merchant_order desde el recurso: ' . $resourceUrl);
+
+        $client = new \GuzzleHttp\Client();
+        try {
+            // Obtener los detalles de la merchant_order
+            $response = $client->request('GET', $resourceUrl, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('services.mercadopago.access_token'),
+                ],
+            ]);
+            
+            $orderDetails = json_decode($response->getBody()->getContents(), true);
+            Log::info('Detalles de la merchant_order obtenidos:', $orderDetails);
+            
+            // Aquí puedes manejar la lógica que desees con los detalles de la merchant_order
+            // Por ejemplo, actualizar información en la base de datos relacionada con la orden
+            
+        } catch (\Exception $e) {
+            Log::error('Error al obtener los detalles de la merchant_order: ' . $e->getMessage());
+            return response()->json(['message' => 'Error al obtener detalles de la merchant_order.'], 500);
+        }
+    }
 
     private function updatePaymentStatus(VoucherPayment $voucherPayment, $status, $apiResponse)
     {

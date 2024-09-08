@@ -31,7 +31,10 @@ Route::post('/verify-password-change', [PasswordChangeController::class, 'verify
 |--------------------------------------------------------------------------
 */
 
-// Ruta para manejar el callback de la pasarela de pagos
+// Ruta para manejar el webhook de MercadoPago (notificaciones automáticas)
+Route::post('/mercadopago/webhook', [PaymentWebhookController::class, 'handleCallback'])->name('mercadopago.webhook');
+
+// Ruta para manejar el callback de la pasarela de pagos (redirección del usuario)
 Route::post('/payment/callback', [PaymentWebhookController::class, 'handleCallback'])->name('payment.callback');
 
 // Ruta de éxito: cuando el pago se completa con éxito
