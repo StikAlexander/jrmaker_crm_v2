@@ -10,23 +10,55 @@ class PaymentWebhookController extends Controller
 {
     public function handleCallback(Request $request)
     {
-        $externalReference = $request->input('external_reference');
-
+        // Registrar el payload completo del webhook para análisis
+        Log::info('Webhook recibido:', $request->all());
+    
+        // Verificar si el payload tiene una URL de recurso
+        $resourceUrl = $request->input('resource');
+        
+        if (!$resourceUrl) {
+            Log::error('No se proporcionó la URL del recurso en el webhook.');
+            return response()->json(['message' => 'URL del recurso no proporcionada.'], 400);
+        }
+    
+        // Realizar una solicitud HTTP a la URL del recurso para obtener detalles completos
+        $client = new \GuzzleHttp\Client();
+        try {
+            $response = $client->request('GET', $resourceUrl, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('services.mercadopago.access_token'),
+                ],
+            ]);
+            $paymentDetails = json_decode($response->getBody()->getContents(), true);
+            Log::info('Detalles del pago obtenidos:', $paymentDetails);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener los detalles del pago desde MercadoPago: ' . $e->getMessage());
+            return response()->json(['message' => 'Error al obtener detalles del pago.'], 500);
+        }
+    
+        // Extraer el external_reference de los detalles del pago
+        $externalReference = $paymentDetails['external_reference'] ?? null;
+    
+        if (!$externalReference) {
+            Log::error('External reference no encontrado en los detalles del pago.');
+            return response()->json(['message' => 'External reference no encontrado.'], 404);
+        }
+    
         // Buscar el VoucherPayment por external_reference
         $voucherPayment = VoucherPayment::where('external_reference', $externalReference)->first();
-
+    
         if (!$voucherPayment) {
             Log::error('Pago no encontrado con la referencia externa: ' . $externalReference);
             return response()->json(['message' => 'Pago no encontrado.'], 404);
         }
-
-        // Procesar el estado del pago
+    
+        // Procesar el estado del pago...
         $paymentStatus = $request->input('status');
         $this->updatePaymentStatus($voucherPayment, $paymentStatus, $request->all());
-
+    
         return response()->json(['message' => 'Estado de pago actualizado correctamente'], 200);
     }
-
+    
     /**
      * Actualiza el estado del pago en la base de datos según la respuesta del webhook.
      */

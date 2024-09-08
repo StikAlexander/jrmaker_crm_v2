@@ -15,6 +15,7 @@ use Filament\Tables\Actions\BulkAction;
 use Illuminate\Support\Collection;
 use Filament\Notifications\Notification;
 use App\Services\PaymentService;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceResource extends Resource
 {
@@ -93,41 +94,52 @@ class InvoiceResource extends Resource
             ->bulkActions([
                 BulkAction::make('paySelected')
                     ->label('Pagar seleccionadas')
-                    ->tooltip('Selecciona las facturas pendientes para proceder con el pago.') // Mensaje claro sobre qué hacer
+                    ->tooltip('Selecciona las facturas pendientes para proceder con el pago.') 
                     ->action(function (Collection $records) {
                         $invoiceIds = $records->pluck('id')->toArray();
-                
+            
                         // Crear el VoucherPayment con las facturas seleccionadas
                         $voucherPayment = VoucherPayment::create([
                             'client_id' => auth()->id(),
                             'amount' => $records->sum('pending_amount'),
                             'payment_status' => 'Pending',
-                            'external_reference' => $voucherPayment->id, // Asignar el ID como external_reference
                         ]);
-                        
+            
+                        // Actualizar el external_reference con el ID del VoucherPayment
+                        $voucherPayment->external_reference = $voucherPayment->id;
+                        $voucherPayment->save();
+            
+                        // Verificar si el external_reference ha sido actualizado correctamente
+                        Log::info('External Reference Actualizado: ' . $voucherPayment->external_reference);
+            
+                        // Recuperar el valor actualizado de external_reference directamente después del guardado
+                        $externalReference = $voucherPayment->external_reference;
+            
                         // Asociar las facturas seleccionadas con el VoucherPayment
                         foreach ($records as $invoice) {
                             $voucherPayment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
                         }
-                
+            
                         // Llamada al servicio de pago para generar el enlace
                         $paymentService = app(PaymentService::class);
                         $paymentLink = $paymentService->generatePaymentLink(
                             $voucherPayment->amount,
                             'Pago de varias facturas',
                             $voucherPayment->invoices,
-                            route('payment.callback')
+                            route('payment.callback'),
+                            $externalReference // PASAR external_reference aquí
                         );
-                
+            
                         if ($paymentLink) {
+                            // Actualizar el campo payment_link con el enlace generado
                             $voucherPayment->update(['payment_link' => $paymentLink]);
-                
+            
                             Notification::make()
                                 ->title('Enlace de pago generado')
                                 ->body('Serás redirigido automáticamente en unos segundos.')
                                 ->success()
                                 ->send();
-                
+            
                             // Redirigir al usuario al enlace de pago
                             return redirect()->away($paymentLink);
                         } else {
@@ -140,7 +152,7 @@ class InvoiceResource extends Resource
                     })
                     ->color('success')
                     ->icon('heroicon-o-credit-card'),
-            ]);
+            ]);                                                         
     }
 
         protected static function getHeaderWidgets(): array

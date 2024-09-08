@@ -22,45 +22,58 @@ class PaymentService
         MercadoPagoConfig::setAccessToken($mpAccessToken);
     }
 
-    public function generatePaymentLink($amount, $description, $items, $callbackUrl)
+    public function generatePaymentLink($amount, $description, $items, $callbackUrl, $externalReference)
     {
         try {
+            // Crear un cliente de preferencias
             $client = new PreferenceClient();
-            
+    
             // Preparar el array de items
             $preferenceItems = [];
             foreach ($items as $invoice) {
                 $preferenceItems[] = [
                     "title" => "Factura " . $invoice->invoice_number,
                     "quantity" => 1,
-                    "unit_price" => $invoice->pending_amount,
+                    "unit_price" => (float)$invoice->pending_amount,
                 ];
             }
-            
-            // Crear la preferencia de pago incluyendo external_reference
+    
+            // Crear la preferencia de pago, incluyendo external_reference
             $preferenceRequest = [
                 "items" => $preferenceItems,
                 "back_urls" => [
-                    'success' => route('payment.success'),
-                    'failure' => route('payment.failure'),
-                    'pending' => route('payment.pending')
+                    'success' => $callbackUrl . "/success",
+                    'failure' => $callbackUrl . "/failure",
+                    'pending' => $callbackUrl . "/pending",
                 ],
                 "auto_return" => 'approved',
-                "notification_url" => $callbackUrl, // URL del webhook
-                "external_reference" => $items->first()->voucher_payment_id, // Pasar el ID de VoucherPayment o cualquier otra referencia
+                "notification_url" => "https://978d-200-118-80-78.ngrok-free.app/payment/callback",
+                "external_reference" => $externalReference,
             ];
+    
+            // Registrar los datos enviados
+            Log::info('Datos enviados a MercadoPago:', $preferenceRequest);
     
             // Crear la preferencia de pago en MercadoPago
             $preference = $client->create($preferenceRequest);
     
+            // Retornar el enlace de pago
             return $preference->init_point;
+    
         } catch (MPApiException $e) {
-            Log::error('Error al generar el enlace de pago: ', [
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'response' => $e->getResponseBody(),
-            ]);
+            // Registrar detalles del error de la API
+            if ($e->getApiResponse()) {
+                Log::error('Error al generar el enlace de pago: ', [
+                    'status_code' => $e->getApiResponse()->getStatusCode(),
+                    'error_content' => $e->getApiResponse()->getContent(),
+                ]);
+            } else {
+                Log::error('Error al generar el enlace de pago: ', [
+                    'message' => $e->getMessage(),
+                    'code' => $e->getCode(),
+                ]);
+            }
             return null;
         }
-    }  
+    }         
 }
