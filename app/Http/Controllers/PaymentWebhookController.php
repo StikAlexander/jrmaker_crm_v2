@@ -13,6 +13,10 @@ class PaymentWebhookController extends Controller
         // Registrar el payload completo del webhook para análisis
         Log::info('Webhook recibido:', $request->all());
     
+        // Verificar el tipo de webhook (merchant_order, payment, etc.)
+        $topic = $request->input('topic');
+        Log::info('Tipo de webhook recibido: ' . $topic);
+        
         // Verificar si el payload tiene una URL de recurso
         $resourceUrl = $request->input('resource');
         
@@ -36,20 +40,30 @@ class PaymentWebhookController extends Controller
             return response()->json(['message' => 'Error al obtener detalles del pago.'], 500);
         }
     
-        // Extraer el external_reference de los detalles del pago
-        $externalReference = $paymentDetails['external_reference'] ?? null;
+        // Extraer el external_reference basado en el tipo de webhook
+        $externalReference = null;
+        if ($topic === 'merchant_order') {
+            $externalReference = $paymentDetails['external_reference'] ?? null;
+        } elseif ($topic === 'payment') {
+            $externalReference = $paymentDetails['collection']['external_reference'] ?? null;
+        }
     
         if (!$externalReference) {
             Log::error('External reference no encontrado en los detalles del pago.');
             return response()->json(['message' => 'External reference no encontrado.'], 404);
         }
     
-        // Buscar el VoucherPayment por external_reference
-        $voucherPayment = VoucherPayment::where('external_reference', $externalReference)->first();
+        // Añadir más detalles sobre la búsqueda en la base de datos
+        Log::info('Buscando en la base de datos con external_reference: ' . $externalReference);
+        
+        // Verificar qué sucede en la base de datos al realizar la búsqueda
+        $voucherPayment = VoucherPayment::where('external_reference', (string) $externalReference)->first();
     
         if (!$voucherPayment) {
-            Log::error('Pago no encontrado con la referencia externa: ' . $externalReference);
+            Log::error('No se encontró el pago con la referencia externa en la base de datos: ' . $externalReference);
             return response()->json(['message' => 'Pago no encontrado.'], 404);
+        } else {
+            Log::info('Pago encontrado: ID = ' . $voucherPayment->id . ', External Reference = ' . $voucherPayment->external_reference);
         }
     
         // Procesar el estado del pago...
