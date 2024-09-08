@@ -46,7 +46,7 @@ class PaymentService
                     'pending' => route('payment.pending')
                 ],
                 "auto_return" => 'approved',
-                "notification_url" => "https://1502-200-118-80-78.ngrok-free.app/payment/callback", // Aquí la URL del webhook
+                "notification_url" => "https://9893-200-118-80-78.ngrok-free.app/payment/callback", // Aquí la URL del webhook
             ];
 
             \Log::info("Datos enviados a Mercado Pago:", $preferenceRequest);
