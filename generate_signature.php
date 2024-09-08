@@ -1,5 +1,4 @@
 <?php
-
 $rawPayload = json_encode([
     'data' => [
         'id' => '123456',
@@ -8,7 +7,6 @@ $rawPayload = json_encode([
     ]
 ], JSON_UNESCAPED_SLASHES);
 
-// Usa echo para imprimir el contenido del payload en lugar de Log
 echo 'Contenido del payload (script generación): ' . $rawPayload . PHP_EOL;
 
 $secretKey = 'e9679d2b72d81cf9abb1fae015f23a31fc0b70d87694467298a2781cd8973651';
