@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
 use MercadoPago\MercadoPagoConfig;
 use MercadoPago\Client\Preference\PreferenceClient;
 use MercadoPago\Exceptions\MPApiException;
@@ -24,20 +25,19 @@ class PaymentService
     public function generatePaymentLink($amount, $description, $items, $callbackUrl)
     {
         try {
-            // Crear un cliente de preferencias
             $client = new PreferenceClient();
-
+            
             // Preparar el array de items
             $preferenceItems = [];
             foreach ($items as $invoice) {
                 $preferenceItems[] = [
                     "title" => "Factura " . $invoice->invoice_number,
                     "quantity" => 1,
-                    "unit_price" => $invoice->pending_amount
+                    "unit_price" => $invoice->pending_amount,
                 ];
             }
-
-            // Crear la preferencia de pago
+            
+            // Crear la preferencia de pago incluyendo external_reference
             $preferenceRequest = [
                 "items" => $preferenceItems,
                 "back_urls" => [
@@ -46,25 +46,21 @@ class PaymentService
                     'pending' => route('payment.pending')
                 ],
                 "auto_return" => 'approved',
-                "notification_url" => "https://9893-200-118-80-78.ngrok-free.app/payment/callback", // Aquí la URL del webhook
+                "notification_url" => $callbackUrl, // URL del webhook
+                "external_reference" => $items->first()->voucher_payment_id, // Pasar el ID de VoucherPayment o cualquier otra referencia
             ];
-
-            \Log::info("Datos enviados a Mercado Pago:", $preferenceRequest);
-
-            // Generar la preferencia de pago
+    
+            // Crear la preferencia de pago en MercadoPago
             $preference = $client->create($preferenceRequest);
-
-            // Retornar el enlace de pago
+    
             return $preference->init_point;
-
         } catch (MPApiException $e) {
-            // Manejar el error y registrar en logs
-            \Log::error('Error al generar el enlace de pago: ', [
+            Log::error('Error al generar el enlace de pago: ', [
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
                 'response' => $e->getResponseBody(),
             ]);
             return null;
         }
-    }
+    }  
 }

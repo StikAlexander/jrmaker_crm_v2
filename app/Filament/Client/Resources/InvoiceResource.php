@@ -102,8 +102,9 @@ class InvoiceResource extends Resource
                             'client_id' => auth()->id(),
                             'amount' => $records->sum('pending_amount'),
                             'payment_status' => 'Pending',
+                            'external_reference' => $voucherPayment->id, // Asignar el ID como external_reference
                         ]);
-                
+                        
                         // Asociar las facturas seleccionadas con el VoucherPayment
                         foreach ($records as $invoice) {
                             $voucherPayment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
