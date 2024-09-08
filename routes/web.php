@@ -32,7 +32,6 @@ Route::post('/verify-password-change', [PasswordChangeController::class, 'verify
 */
 
 // Ruta para manejar el callback de la pasarela de pagos
-// Este callback se recibe después de que el pago ha sido procesado
 Route::post('/payment/callback', [PaymentWebhookController::class, 'handleCallback'])->name('payment.callback');
 
 // Ruta de éxito: cuando el pago se completa con éxito
@@ -43,5 +42,3 @@ Route::get('/payment/failure', [PaymentController::class, 'handleFailure'])->nam
 
 // Ruta de estado pendiente: cuando el pago está pendiente de confirmación
 Route::get('/payment/pending', [PaymentController::class, 'handlePending'])->name('payment.pending');
-
-route::post('/payment/callback', [PaymentWebhookController::class, 'handleCallback'])->name('payment.callback');

@@ -25,7 +25,7 @@ class PaymentService
         try {
             $client = new PreferenceClient();
     
-            // Preparar el array de items basados en el voucher payment
+            // Preparar los items basados en las facturas
             $preferenceItems = $voucherPayment->invoices->map(function ($invoice) {
                 return [
                     "title" => "Factura " . $invoice->invoice_number,
@@ -33,23 +33,31 @@ class PaymentService
                     "unit_price" => (float) $invoice->pending_amount,
                 ];
             })->toArray();
-    
+
+            // Aquí defines los datos del pagador
+            $payer = [
+                "name" => "Test",  // Puedes poner datos reales o dinámicos aquí
+                "surname" => "User",
+                "email" => "test_user@example.com",  // Asegúrate de obtener un email válido
+            ];
+
             // Crear la preferencia de pago
             $preferenceRequest = [
                 "items" => $preferenceItems,
+                "payer" => $payer,  // Asegúrate de incluir los datos del pagador
                 "back_urls" => [
                     'success' => "{$callbackUrl}/success",
                     'failure' => "{$callbackUrl}/failure",
                     'pending' => "{$callbackUrl}/pending",
                 ],
                 "auto_return" => 'approved',
-                // Obtener la URL del webhook desde el archivo .env o utilizar una URL por defecto
                 "notification_url" => env('MERCADOPAGO_NOTIFICATION_URL', 'https://978d-200-118-80-78.ngrok-free.app/payment/callback'),
                 "external_reference" => $voucherPayment->id,
             ];
-    
+
             Log::info('Datos enviados a MercadoPago:', $preferenceRequest);
     
+            // Enviar la solicitud a MercadoPago
             $preference = $client->create($preferenceRequest);
     
             return $preference->init_point ?? null;

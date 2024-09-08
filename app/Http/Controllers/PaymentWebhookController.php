@@ -12,52 +12,65 @@ class PaymentWebhookController extends Controller
     {
         Log::info('Webhook recibido:', $request->all());
         
-        // Obtener el external_reference desde la notificación de pago
+        // Obtener el recurso o el id dependiendo del tipo de webhook
         $resourceUrl = $request->input('resource');
-
-        if (!$resourceUrl) {
-            Log::error('No se proporcionó la URL del recurso en el webhook.');
-            return response()->json(['message' => 'URL del recurso no proporcionada.'], 400);
+        $paymentId = $request->input('data.id');
+        
+        if ($resourceUrl) {
+            // Procesar merchant_order
+            $this->handleMerchantOrder($resourceUrl);
+        } elseif ($paymentId) {
+            // Procesar payment.created
+            $this->handlePaymentCreated($paymentId);
+        } else {
+            Log::error('No se proporcionó la URL del recurso ni el ID de pago en el webhook.');
+            return response()->json(['message' => 'Datos insuficientes en el webhook.'], 400);
         }
-
+        
+        return response()->json(['message' => 'Webhook procesado correctamente.'], 200);
+    }
+    
+    private function handlePaymentCreated($paymentId)
+    {
+        // Obtener detalles del pago desde la API de MercadoPago usando el id del pago
         $client = new \GuzzleHttp\Client();
         try {
-            $response = $client->request('GET', $resourceUrl, [
+            $response = $client->request('GET', "https://api.mercadopago.com/v1/payments/{$paymentId}", [
                 'headers' => [
                     'Authorization' => 'Bearer ' . config('services.mercadopago.access_token'),
                 ],
             ]);
-
+            
             $paymentDetails = json_decode($response->getBody()->getContents(), true);
             Log::info('Detalles del pago obtenidos:', $paymentDetails);
-
+            
             // Obtener el external_reference desde los detalles del pago
             $externalReference = $paymentDetails['external_reference'] ?? null;
-
+            
             if (!$externalReference) {
                 Log::error('External reference no encontrado en los detalles del pago.');
                 return response()->json(['message' => 'External reference no encontrado.'], 404);
             }
-
+            
             // Buscar el pago en la base de datos usando el external_reference
             $voucherPayment = VoucherPayment::where('external_reference', (string) $externalReference)->first();
-
+            
             if (!$voucherPayment) {
                 Log::error('Pago no encontrado: ' . $externalReference);
                 return response()->json(['message' => 'Pago no encontrado.'], 404);
             }
-
-            // Procesar el estado del pago
+            
+            // Actualizar el estado del pago basado en el estado del pago en MercadoPago
             $paymentStatus = $paymentDetails['status'] ?? 'unknown';
             $this->updatePaymentStatus($voucherPayment, $paymentStatus, $paymentDetails);
-
-            return response()->json(['message' => 'Estado de pago actualizado correctamente'], 200);
-
+            
+            Log::info('Estado del pago actualizado para VoucherPayment ID: ' . $voucherPayment->id);
         } catch (\Exception $e) {
             Log::error('Error al obtener los detalles del pago: ' . $e->getMessage());
             return response()->json(['message' => 'Error al obtener detalles del pago.'], 500);
         }
     }
+    
 
     private function updatePaymentStatus(VoucherPayment $voucherPayment, $status, $apiResponse)
     {
@@ -70,5 +83,7 @@ class PaymentWebhookController extends Controller
             },
             'api_response' => json_encode($apiResponse),
         ]);
+
+        Log::info('Estado del pago actualizado para VoucherPayment ID: ' . $voucherPayment->id);
     }
 }
