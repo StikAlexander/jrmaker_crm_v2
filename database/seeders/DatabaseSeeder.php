@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             BannersTableSeeder::class,
             InvoicesSeeder::class,
             PaymentsSeeder::class,
+            JobSeeder::class
         ]);
 
         Artisan::call('shield:generate --all');

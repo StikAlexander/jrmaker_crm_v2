@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('payment_date')->default(now());
             $table->integer('amount');
             $table->string('external_reference')->nullable(); 
+            $table->string('preference_id')->nullable(); 
             $table->string('payment_link')->nullable();
             $table->enum('payment_status', ['Pending', 'Completed', 'Failed', 'Cancelled'])->default('Pending');
             $table->timestamp('expiration_date_from')->nullable();

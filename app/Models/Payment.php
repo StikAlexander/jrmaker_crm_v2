@@ -21,7 +21,10 @@ class Payment extends Model
         'payment_link',  
         'payment_status',  
         'api_response',  
-        'external_reference',  
+        'external_reference',
+        'preference_id',              
+        'expiration_date_from',         
+        'expiration_date_to',   
     ];
 
     protected static function boot()

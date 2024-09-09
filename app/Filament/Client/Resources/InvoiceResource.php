@@ -2,6 +2,7 @@
 
 namespace App\Filament\Client\Resources;
 
+use App\Jobs\CheckPaymentStatus;
 use App\Models\Invoice;
 use App\Models\Payment;
 use Filament\Notifications\Notification;
@@ -120,6 +121,8 @@ class InvoiceResource extends Resource
                         if ($paymentLink) {
                             // Actualizar el enlace de pago
                             $Payment->update(['payment_link' => $paymentLink]);
+
+                            checkpaymentstatus::dispatch($Payment)->delay(now()->addMinutes(2)->addSeconds(30));
 
                             Notification::make()
                                 ->title('Enlace de pago generado')
