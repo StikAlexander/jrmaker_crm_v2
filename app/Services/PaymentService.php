@@ -53,6 +53,8 @@ class PaymentService
                 "auto_return" => 'approved',
                 "notification_url" => 'https://a031-200-118-80-78.ngrok-free.app/payment/callback',
                 "external_reference" => $Payment->id,
+                "expiration_date_from" => now()->format("Y-m-d\TH:i:s.000P"),
+                "expiration_date_to" => now()->addMinutes(2)->format("Y-m-d\TH:i:s.000P"),
             ];
 
             Log::info('Datos enviados a MercadoPago:', $preferenceRequest);

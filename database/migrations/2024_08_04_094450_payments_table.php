@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('external_reference')->nullable(); 
             $table->string('payment_link')->nullable();
             $table->enum('payment_status', ['Pending', 'Completed', 'Failed', 'Cancelled'])->default('Pending');
+            $table->timestamp('expiration_date_from')->nullable();
+            $table->timestamp('expiration_date_to')->nullable();
             $table->json('api_response')->nullable();
 
             $table->timestamps();
