@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Auth\ClientLogin;
 use App\Filament\Pages\Auth\ClientLogin as AuthClientLogin;
+use App\Http\Middleware\AuthenticateClient;
 use App\Livewire\MyProfileClientExtended;
 use App\Settings\GeneralSettings;
 use EightyNine\Reports\ReportsPlugin;
@@ -72,7 +73,7 @@ public function panel(Panel $panel): Panel
             DispatchServingFilamentEvent::class,
         ])
         ->authMiddleware([
-            Authenticate::class,
+            AuthenticateClient::class,
         ])
         ->plugins([
             ReportsPlugin::make(), 
