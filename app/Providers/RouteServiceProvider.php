@@ -27,7 +27,7 @@ class RouteServiceProvider extends ServiceProvider
     {
 
          // Configuración para habilitar la verificación de correo electrónico
-        Auth::routes(['verify' => true]);
+        //Auth::routes(['verify' => true]);
 
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());

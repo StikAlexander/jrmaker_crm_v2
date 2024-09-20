@@ -3,13 +3,23 @@ name: Docker Image CI
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'Dockerfile'
+      - 'composer.json'
+      - 'composer.lock'
+      - '**/package.json'
+      - '**/package-lock.json'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'Dockerfile'
+      - 'composer.json'
+      - 'composer.lock'
+      - '**/package.json'
+      - '**/package-lock.json'
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:

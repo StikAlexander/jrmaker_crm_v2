@@ -3,22 +3,17 @@ FROM elrincondeisma/php-for-laravel:8.3.7
 WORKDIR /app
 COPY . .
 
-# Instala la extensión exif antes de ejecutar composer install
-RUN docker-php-ext-install exif
+RUN docker-php-ext-install exif && \
+    composer install --optimize-autoloader --no-dev && \
+    composer require laravel/octane && \
+    mkdir -p /app/storage/logs
 
-RUN composer install
-RUN composer require laravel/octane
-RUN mkdir -p /app/storage/logs
+RUN apk update && \
+    apk add --no-cache nano curl nodejs npm git && \
+    npm install && npm run build
 
-# Establecer variables de entorno para MySQL
-ENV DB_CONNECTION=mysql
-ENV DB_HOST=mysql_db
-ENV DB_PORT=3306
-ENV DB_DATABASE=jr_maker_sas
-ENV DB_USERNAME=root
-ENV DB_PASSWORD=ae031323
+RUN php artisan octane:install --server=swoole
 
-RUN php artisan octane:install --server="swoole"
+EXPOSE 8001
 
-CMD php artisan octane:start --server="swoole" --host="0.0.0.0"
-EXPOSE 8000
+CMD php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
