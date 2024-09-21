@@ -5,6 +5,7 @@ namespace App\Providers;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Assets\Js;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Forzar el uso de HTTPS en producción
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
+
         // Configuración global de la tabla en Filament
         Table::configureUsing(function (Table $table): void {
             $table
