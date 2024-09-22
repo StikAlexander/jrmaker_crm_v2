@@ -3,8 +3,9 @@ FROM elrincondeisma/php-for-laravel:8.3.7
 WORKDIR /app
 COPY . .
 
-# Instalar dependencias PHP y npm
-RUN docker-php-ext-install exif && \
+# Instalar dependencias PHP y npm ademas editor nano
+RUN apt-get update && apt-get install -y nano && \
+    docker-php-ext-install exif && \
     composer install --optimize-autoloader --no-dev && \
     composer require laravel/octane && \
     npm install && npm run build
