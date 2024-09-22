@@ -9,13 +9,6 @@ RUN docker-php-ext-install exif && \
     composer require laravel/octane && \
     npm install && npm run build
 
-# Crear directorios de caché y asignar permisos
-RUN mkdir -p /app/storage/framework/cache/data && \
-    mkdir -p /app/storage/framework/sessions && \
-    mkdir -p /app/storage/framework/views && \
-    mkdir -p /app/bootstrap/cache && \
-    chmod -R 777 /app/storage /app/bootstrap/cache
-
 # Instalar y configurar Octane
 RUN php artisan octane:install --server=swoole
 
