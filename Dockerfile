@@ -1,4 +1,4 @@
-# Imagen base optimizada para Laravel y Filament con PHP 8.3.7 y Swoole
+# Imagen base optimizada para Laravel y Filament con PHP 8.3.7 y Swoole.
 FROM elrincondeisma/php-for-laravel:8.3.7
 
 # Establece el directorio de trabajo
