@@ -45,5 +45,5 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
-  db_data:
-  storage:
+  db_data: null
+  storage: null
