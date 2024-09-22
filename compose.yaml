@@ -14,18 +14,8 @@ services:
       - DB_PASSWORD=ae031323
     depends_on:
       - db
-    volumes:
-      - ./storage:/app/storage # Persistencia en storage (facturas y archivos subidos)
-    command: >
-      sh -c "mkdir -p /app/storage/framework/views &&
-             mkdir -p /app/storage/framework/cache/data &&
-             mkdir -p /app/storage/framework/sessions &&
-             mkdir -p /app/bootstrap/cache &&
-             mkdir -p /app/storage/octane &&
-             chown -R www-data:www-data /app/storage /app/bootstrap/cache &&
-             chmod -R 775 /app/storage /app/bootstrap/cache &&
-             php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001"
- 
+    command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
+
   db:
     image: mysql:8.0
     container_name: DB_jr_maker_crm
@@ -34,6 +24,7 @@ services:
       MYSQL_DATABASE: jr_maker_sas
     volumes:
       - db_data:/var/lib/mysql
+
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
@@ -44,11 +35,12 @@ services:
       - 8081:80
     depends_on:
       - db
+
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
 volumes:
   db_data: null
-  storage: null
