@@ -13,9 +13,9 @@ RUN docker-php-ext-install exif && \
     composer install --optimize-autoloader --no-dev && \
     npm install && npm run build
 
-# Crear directorios necesarios y ajustar permisos para logs y almacenamiento
-RUN mkdir -p /app/storage/logs && \
-    chmod -R 777 /app/storage /app/public
+# Crear directorios necesarios y ajustar permisos para logs, caché y almacenamiento
+RUN mkdir -p /app/storage/logs /app/storage/framework/cache/data /app/storage/framework/sessions /app/storage/framework/views /app/bootstrap/cache && \
+    chmod -R 777 /app/storage /app/bootstrap/cache /app/public
 
 # Exponer el puerto en el que Octane se ejecutará
 EXPOSE 8001
