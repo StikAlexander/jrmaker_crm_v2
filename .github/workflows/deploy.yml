@@ -3,15 +3,19 @@ name: Docker Image CI
 on:
   push:
     branches: [main]  # Se ejecutará en cualquier commit a la rama main
+    paths:
+      - 'Dockerfile'
+      - 'composer.json'
+      - 'package.json'
   pull_request:
     branches: [main]  # Se ejecutará para cualquier pull request a la rama main
+    paths:
+      - 'Dockerfile'
+      - 'composer.json'
+      - 'package.json'
 
 jobs:
   build:
-    if: |
-      contains(github.event.head_commit.message, 'Dockerfile') || 
-      contains(github.event.head_commit.message, 'composer.json') || 
-      contains(github.event.head_commit.message, 'package.json')
     runs-on: ubuntu-latest
 
     steps:
@@ -53,8 +57,6 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}  # Secreto SSH para el acceso al servidor
           known_hosts: |
             154.38.178.48 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDE1VtZ1Z5+sEFh3uQxZZhUSNQliTcBkIm2IiGxqOoAOZKQZ8YlGwkHGd6kYtbeSEqtJY2eKl8paJuXd828bqgBMi2ccuysTiQWxxEDklKH8zJRja/PlnsOtSbi+oKGQfUT9SMOzOJKQrwa3cMmBxxCWB7ZV0Q9tcgwzj+Hk0hFmnJQ/hPgzCkzDLRNWzb5l1aOIf8OxsBOfext6PqMhRWvlTyUFPyMmGd06kXnuG6BUVnOZOYMf3h8fA1iUypL9vyztGq9RlerWa8ouT4lBkapk8qUgxYI3iNpKJ1XC4PM6xLDgWhkSyYeH49FV5jLWPP1afGwQjwt+EuoERL+0Rq03AO4/3NU1uxYgLJZcV9/Y36AMO2HxHbSM+azgfhW54JlUgYQCWmj2cU0wv/ZxpaLr3+TfuAXWBE/bA5DQBD+QGv6ZIFyO2uJecgHjtU8Ofk/frWDntBNTVPqBGSu58OtAQf58knIRSFTq44NoG5gCTw2g0AjMDG6QvoVT5aX1puw3C1JPdR+n88vQFnZ3pkoxtnb6N7YG6fCrFcRph5OMGrb3U6WyGcbjppVH/Hi9Dvv7VD/NwETYkFWrI6c9G5o43Qakw4tSGcREEj8nGQNUtqKWi8ryw72CjIJrvYCEYozPP9Ee8HB9eygc9vJN6Aavj0HdpPxZ+meS4uGQUwldQ==
-            154.38.178.48 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDKC6MFzdHmC4fAnuxwignf/asN2iPoq7iw/JYeYk/UWTItewbWCn90IdpnZiwcKwFpxAgIRvK9cbiUeOOVtkjQ=
-            154.38.178.48 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMEtQKSKZwuTwngiCQ/Y6+H0CclwQ3cIgVvm6HgTTSeG
 
       - name: Deploy to Production
         run: |
