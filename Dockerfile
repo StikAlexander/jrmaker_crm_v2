@@ -1,4 +1,5 @@
-# Imagen base optimizada para Laravel y Filament con PHP 8.3.7 y Swoole.
+# Este es un comentario para provocar un build.
+
 FROM elrincondeisma/php-for-laravel:8.3.7
 
 # Establece el directorio de trabajo
@@ -8,7 +9,8 @@ WORKDIR /app
 COPY . .
 
 # Instalar dependencias de Composer y npm
-RUN composer install --optimize-autoloader --no-dev && \
+RUN docker-php-ext-install exif && \
+    composer install --optimize-autoloader --no-dev && \
     npm install && npm run build
 
 # Crear directorios necesarios y ajustar permisos para logs y almacenamiento
