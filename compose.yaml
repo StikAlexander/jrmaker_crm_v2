@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   app:
     image: sirnioh/jr_maker_crm:latest
     container_name: jr_maker_crm
     ports:
-      - "8001:8001"
+      - 8001:8001
     environment:
       - APP_ENV=production
       - DB_CONNECTION=mysql
@@ -16,13 +14,10 @@ services:
       - DB_PASSWORD=ae031323
     depends_on:
       - db
-    command: >
-      bash -c "while ! nc -z db 3306; do sleep 5; done &&
-               php artisan migrate --force &&
-               if [ $(php artisan db:seed --class=CheckSeederNeeded) ]; then
-                 php artisan db:seed --force;
-               fi &&
-               php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001"
+    volumes:
+      - ./start-app.sh:/start-app.sh  # Script de arranque
+      - ./storage:/app/storage  # Persistencia en storage (facturas)
+    command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
 
   db:
     image: mysql:8.0
@@ -40,7 +35,7 @@ services:
       PMA_HOST: db
       MYSQL_ROOT_PASSWORD: ae031323
     ports:
-      - "8081:80"
+      - 8081:80
     depends_on:
       - db
 
@@ -52,3 +47,4 @@ services:
 
 volumes:
   db_data:
+  storage:
