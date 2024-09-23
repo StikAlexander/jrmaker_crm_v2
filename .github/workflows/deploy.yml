@@ -2,41 +2,33 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [main]  # Se ejecutará en cualquier commit a la rama main
-    paths:
-      - 'Dockerfile'
-      - 'composer.json'
-      - 'package.json'
+    branches: [main]
   pull_request:
-    branches: [main]  # Se ejecutará para cualquier pull request a la rama main
-    paths:
-      - 'Dockerfile'
-      - 'composer.json'
-      - 'package.json'
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      # 1. Checkout del código
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: all
+      # 2. Verificar si hay cambios en archivos importantes
+      - name: Check if build is required
+        run: |
+          git diff --name-only HEAD^ HEAD | grep -E 'Dockerfile|composer.json|package.json' || exit 0
 
+      # 3. Login en Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Build and push
+      # 4. Build y push de la imagen
+      - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -44,25 +36,3 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/jr_maker_crm:latest
-
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Add SSH Key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.VPS_SSH_KEY }}  # Secreto SSH para el acceso al servidor
-          known_hosts: |
-            154.38.178.48 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDE1VtZ1Z5+sEFh3uQxZZhUSNQliTcBkIm2IiGxqOoAOZKQZ8YlGwkHGd6kYtbeSEqtJY2eKl8paJuXd828bqgBMi2ccuysTiQWxxEDklKH8zJRja/PlnsOtSbi+oKGQfUT9SMOzOJKQrwa3cMmBxxCWB7ZV0Q9tcgwzj+Hk0hFmnJQ/hPgzCkzDLRNWzb5l1aOIf8OxsBOfext6PqMhRWvlTyUFPyMmGd06kXnuG6BUVnOZOYMf3h8fA1iUypL9vyztGq9RlerWa8ouT4lBkapk8qUgxYI3iNpKJ1XC4PM6xLDgWhkSyYeH49FV5jLWPP1afGwQjwt+EuoERL+0Rq03AO4/3NU1uxYgLJZcV9/Y36AMO2HxHbSM+azgfhW54JlUgYQCWmj2cU0wv/ZxpaLr3+TfuAXWBE/bA5DQBD+QGv6ZIFyO2uJecgHjtU8Ofk/frWDntBNTVPqBGSu58OtAQf58knIRSFTq44NoG5gCTw2g0AjMDG6QvoVT5aX1puw3C1JPdR+n88vQFnZ3pkoxtnb6N7YG6fCrFcRph5OMGrb3U6WyGcbjppVH/Hi9Dvv7VD/NwETYkFWrI6c9G5o43Qakw4tSGcREEj8nGQNUtqKWi8ryw72CjIJrvYCEYozPP9Ee8HB9eygc9vJN6Aavj0HdpPxZ+meS4uGQUwldQ==
-
-      - name: Deploy to Production
-        run: |
-          ssh -o StrictHostKeyChecking=no root@154.38.178.48 <<EOF
-            cd /home/jrmaker-dockge/htdocs/dockge.jrmaker.com.co/dockge-stacks/jr-maker-crm
-            docker-compose -f compose.yaml down
-            docker-compose -f compose.yaml pull
-            docker-compose -f compose.yaml up -d
-          EOF
