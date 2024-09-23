@@ -3,7 +3,7 @@ FROM elrincondeisma/php-for-laravel:8.3.7
 WORKDIR /app
 COPY . .
 
-# Instalar nano y dependencias PHP y npm (para Alpine Linux)
+# Instalar nano y dependencias PHP y npm (para Alpine Linux).
 RUN apk --no-cache update && apk add nano && \
     docker-php-ext-install exif && \
     composer install --optimize-autoloader --no-dev && \
