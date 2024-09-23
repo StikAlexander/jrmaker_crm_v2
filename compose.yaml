@@ -12,6 +12,8 @@ services:
       - DB_DATABASE=jr_maker_sas
       - DB_USERNAME=root
       - DB_PASSWORD=ae031323
+    volumes:
+      - /home/jr-crm-storage-no-borrar:/app/storage
     depends_on:
       - db
     command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
@@ -36,11 +38,6 @@ services:
     depends_on:
       - db
 
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-
 volumes:
   db_data: null
+networks: {}
