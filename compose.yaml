@@ -1,3 +1,4 @@
+version: '2'
 services:
   app:
     image: sirnioh/jr_maker_crm:latest
@@ -7,7 +8,7 @@ services:
     environment:
       - APP_ENV=production
       - DB_CONNECTION=mysql
-      - DB_HOST=DB_jr_maker_crm  
+      - DB_HOST=DB_jr_maker_crm
       - DB_PORT=3306
       - DB_DATABASE=jr_maker_sas
       - DB_USERNAME=root
@@ -18,7 +19,8 @@ services:
       - db
     command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
     networks:
-      - nginxpm
+      nginxpm:
+        ipv4_address: 172.18.0.6
 
   db:
     image: mysql:8.0
@@ -29,20 +31,22 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      - nginxpm
+      nginxpm:
+        ipv4_address: 172.18.0.5
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
     environment:
-      PMA_HOST: DB_jr_maker_crm  
+      PMA_HOST: DB_jr_maker_crm
       MYSQL_ROOT_PASSWORD: ae031323
     ports:
       - 8081:80
     depends_on:
       - db
     networks:
-      - nginxpm
+      nginxpm:
+        ipv4_address: 172.18.0.7
 
 volumes:
   db_data: null
@@ -51,3 +55,6 @@ networks:
   nginxpm:
     external:
       name: nginxpm
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
