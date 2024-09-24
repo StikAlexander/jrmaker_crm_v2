@@ -7,7 +7,7 @@ services:
     environment:
       - APP_ENV=production
       - DB_CONNECTION=mysql
-      - DB_HOST=db
+      - DB_HOST=DB_jr_maker_crm  
       - DB_PORT=3306
       - DB_DATABASE=jr_maker_sas
       - DB_USERNAME=root
@@ -35,7 +35,7 @@ services:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
     environment:
-      PMA_HOST: db
+      PMA_HOST: DB_jr_maker_crm  
       MYSQL_ROOT_PASSWORD: ae031323
     ports:
       - 8081:80
