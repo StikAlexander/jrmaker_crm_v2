@@ -1,3 +1,4 @@
+version: '3'
 services:
   app:
     image: sirnioh/jr_maker_crm:latest
@@ -39,5 +40,4 @@ services:
       - db
 
 volumes:
-  db_data: null
-networks: {}
+  db_data: {}
