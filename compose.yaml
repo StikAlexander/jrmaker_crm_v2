@@ -17,6 +17,8 @@ services:
     depends_on:
       - db
     command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
+    networks:
+      - nginxpm
 
   db:
     image: mysql:8.0
@@ -26,6 +28,8 @@ services:
       MYSQL_DATABASE: jr_maker_sas
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - nginxpm
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -37,7 +41,13 @@ services:
       - 8081:80
     depends_on:
       - db
+    networks:
+      - nginxpm
 
 volumes:
   db_data: null
-networks: {}
+
+networks:
+  nginxpm:
+    external:
+      name: nginxpm
