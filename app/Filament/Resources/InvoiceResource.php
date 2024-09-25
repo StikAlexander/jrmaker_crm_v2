@@ -37,7 +37,7 @@ class InvoiceResource extends Resource
     protected static ?string $model = Invoice::class;
     protected static ?string $recordTitleAttribute = 'invoice_number';
     protected static ?string $pluralLabel = 'Facturas';
-    protected static ?string $singularLabel = 'Factura hola';
+    protected static ?string $singularLabel = 'Factura';
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Contabilidad';
     protected static ?int $navigationSort = 1;
