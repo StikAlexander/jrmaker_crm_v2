@@ -39,9 +39,11 @@ class AppServiceProvider extends ServiceProvider
                 ->defaultSort('created_at', 'desc');
         });
 
-        // Registro del archivo JS personalizado en Filament
+        // Comentamos el registro del archivo JS personalizado
+        /*
         FilamentAsset::register([
             Js::make('custom-script', asset('js/custom.js')),
         ]);
+        */
     }
 }
