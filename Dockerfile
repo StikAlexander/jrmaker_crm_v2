@@ -7,7 +7,7 @@ WORKDIR /app
 # Copiar composer.json y composer.lock primero para instalar dependencias
 # Esto asegura que Docker cachee las capas si no cambian las dependencias
 COPY composer.json composer.lock ./
-RUN composer install --optimize-autoloader --no-dev
+RUN composer install --optimize-autoloader --no-dev --ignore-platform-req=ext-exif
 
 # Copiamos el resto de los archivos
 COPY . .
@@ -15,6 +15,10 @@ COPY . .
 # Instalar nano, dependencias PHP, y npm (para Alpine Linux)
 RUN apk --no-cache update && apk add nano && \
     docker-php-ext-install exif && \
+    docker-php-ext-install pdo_mysql && \
+    docker-php-ext-install sockets && \
+    docker-php-ext-install zip && \
+    composer install --optimize-autoloader --no-dev && \
     npm install && npm run build
 
 # Publicar configuración de Octane y otros recursos necesarios
