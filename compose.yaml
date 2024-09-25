@@ -17,7 +17,7 @@ services:
       - /home/jr-crm-storage-no-borrar:/app/storage
     depends_on:
       - db
-    command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
+    command: /bin/sh -c "php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan storage:link && php artisan icons:cache && php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001"
     networks:
       nginxpm:
         ipv4_address: 172.18.0.6
