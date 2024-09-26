@@ -13,8 +13,8 @@ class Login extends BasePage
         parent::mount();
 
         $this->form->fill([
-            'email' => 'stikadmin@gmail.com',
-            'password' => '123',
+            'email' => '',
+            'password' => '',
         ]);
     }
 
