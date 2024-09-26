@@ -44,6 +44,7 @@ jobs:
             ${{ secrets.DOCKER_HUB_USERNAME }}/jr_maker_crm:${{ github.sha }}
 
       - name: Notify Portainer to redeploy
-        uses: distributhor/workflow-webhook@v3
-        with:
-          webhook_url: ${{ secrets.PORTAINER_WEBHOOK_URL }}
+        run: |
+          curl -X POST "$PORTAINER_WEBHOOK_URL"
+        env:
+          PORTAINER_WEBHOOK_URL: ${{ secrets.PORTAINER_WEBHOOK_URL }}
