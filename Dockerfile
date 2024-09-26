@@ -1,4 +1,4 @@
-# Usamos una imagen base de PHP optimizada para Laravel
+# Usamos una imagen base de PHP optimizada para Laravel.
 FROM elrincondeisma/php-for-laravel:8.3.7
 
 # Establecemos el directorio de trabajo
