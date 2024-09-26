@@ -13,6 +13,14 @@ jobs:
       - name: Checkout 
         uses: actions/checkout@v2
 
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
@@ -28,11 +36,10 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/jr_maker_crm:latest
             ${{ secrets.DOCKER_HUB_USERNAME }}/jr_maker_crm:${{ github.sha }}
 
-      - name: Trigger Portainer Webhook for stack update
-        run: |
-          curl -X POST https://portainer.jrmaker.com.co/api/stacks/webhooks/2abed5aa-c929-44be-8d95-c00b61cb8b16
