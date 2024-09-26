@@ -33,3 +33,6 @@ jobs:
             ${{ secrets.DOCKER_HUB_USERNAME }}/jr_maker_crm:latest
             ${{ secrets.DOCKER_HUB_USERNAME }}/jr_maker_crm:${{ github.sha }}
 
+      - name: Trigger Portainer Webhook for stack update
+        run: |
+          curl -X POST https://portainer.jrmaker.com.co/api/stacks/webhooks/2abed5aa-c929-44be-8d95-c00b61cb8b16
