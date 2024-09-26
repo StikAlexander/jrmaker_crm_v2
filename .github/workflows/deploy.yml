@@ -17,7 +17,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-docker-${{ github.sha }}
+          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-docker-
 
@@ -39,6 +39,7 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
           push: true
+          progress: auto  # Corrige el valor de la opción progress
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/jr_maker_crm:latest
             ${{ secrets.DOCKER_HUB_USERNAME }}/jr_maker_crm:${{ github.sha }}
