@@ -35,4 +35,4 @@ jobs:
 
       - name: Trigger Portainer webhook
         run: |
-          curl -X POST "https://portainer.jrmaker.com.co/api/stacks/webhooks/762c31eb-a3f0-4e34-a8de-4e69d2c0759f"
+          curl -X POST "https://portainer.jrmaker.com.co/api/stacks/webhooks/9bd9d2ce-38e5-4acd-9157-8dd511a029d9"
