@@ -42,7 +42,7 @@ class AdminUserResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-user';
     protected static ?string $navigationGroup = 'Usuarios';
     protected static ?int $navigationSort = 3;
-    protected static ?string $pluralLabel = ' big bog';
+    protected static ?string $pluralLabel = ' rait';
     protected static ?string $singularLabel = 'Administrador';
 
     public static function form(Form $form): Form

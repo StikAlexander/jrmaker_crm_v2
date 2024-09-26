@@ -45,6 +45,8 @@ jobs:
 
       - name: Notify Portainer to redeploy
         run: |
-          curl -X POST "$PORTAINER_WEBHOOK_URL"
+          response=$(curl -s -w "\nHTTP Status: %{http_code}\n" -X POST "$PORTAINER_WEBHOOK_URL")
+          echo "Response from Portainer:"
+          echo "$response"
         env:
           PORTAINER_WEBHOOK_URL: ${{ secrets.PORTAINER_WEBHOOK_URL }}
