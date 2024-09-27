@@ -11,13 +11,16 @@ COPY . .
 RUN composer install --optimize-autoloader --no-dev --ignore-platform-req=ext-exif
 
 # Instalar nano, dependencias PHP, nodejs y npm (para Alpine Linux o cualquier sistema base de tu imagen)
-RUN apk --no-cache update && apk add nano nodejs npm && \
+RUN apk --no-cache update && \
+    apk add nano nodejs npm && \
     docker-php-ext-install exif && \
     docker-php-ext-install pdo_mysql && \
     docker-php-ext-install sockets && \
     docker-php-ext-install zip && \
-    pecl install redis && docker-php-ext-enable redis && \  # Instalamos y habilitamos la extensión de Redis
-    npm install && npm run build
+    pecl install redis && docker-php-ext-enable redis
+
+# Instalar dependencias npm y compilar los assets
+RUN npm install && npm run build
 
 # Publicar configuración de Octane y otros recursos necesarios
 RUN php artisan vendor:publish --tag=octane-config && \
