@@ -16,6 +16,7 @@ RUN apk --no-cache update && apk add nano && \
     docker-php-ext-install pdo_mysql && \
     docker-php-ext-install sockets && \
     docker-php-ext-install zip && \
+    pecl install redis && docker-php-ext-enable redis && \  # Aquí instalamos y habilitamos la extensión de Redis
     npm install && npm run build
 
 # Publicar configuración de Octane y otros recursos necesarios
