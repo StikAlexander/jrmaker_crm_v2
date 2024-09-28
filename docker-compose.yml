@@ -12,16 +12,11 @@ services:
       DB_DATABASE: jr_maker_sas
       DB_USERNAME: root
       DB_PASSWORD: ae031323
-    #volumes:
-      #- /home/jr-crm-storage-no-borrar:/app/storage
     depends_on:
       - db
     command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
     networks:
-      nginxpm:
-        ipv4_address: 172.18.0.6
-    mem_limit: 1.5g
-    cpus: '1.5'
+      - nginxpm
 
   db:
     image: mysql:8.0
@@ -32,10 +27,7 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      nginxpm:
-        ipv4_address: 172.18.0.5
-    mem_limit: 1g
-    cpus: '1'
+      - nginxpm
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -46,10 +38,7 @@ services:
     ports:
       - 8081:80
     networks:
-      nginxpm:
-        ipv4_address: 172.18.0.7
-    mem_limit: 256m
-    cpus: '0.2'
+      - nginxpm
 
 volumes:
   db_data: null
@@ -57,7 +46,3 @@ volumes:
 networks:
   nginxpm:
     external: true
-    name: nginxpm
-    ipam:
-      config:
-        - subnet: 172.18.0.0/16
