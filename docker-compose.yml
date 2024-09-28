@@ -72,6 +72,7 @@ services:
     depends_on:
       - db
     command: php artisan queue:work --daemon --sleep=3 --tries=3 --timeout=90
+    restart: unless-stopped 
     networks:
       - nginxpm
 
