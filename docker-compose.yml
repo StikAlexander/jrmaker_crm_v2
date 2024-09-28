@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     image: sirnioh/jr_maker_crm:latest
@@ -19,8 +17,6 @@ services:
       DB_DATABASE: jr_maker_sas
       DB_USERNAME: root
       DB_PASSWORD: ae031323
-    depends_on:
-      - mysql_shared
     command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
     networks:
       - nginxpm
@@ -41,8 +37,6 @@ services:
       DB_DATABASE: jr_maker_sas
       DB_USERNAME: root
       DB_PASSWORD: ae031323
-    depends_on:
-      - mysql_shared
     command: php artisan queue:work --daemon --sleep=3 --tries=3 --timeout=90
     restart: unless-stopped 
     networks:
