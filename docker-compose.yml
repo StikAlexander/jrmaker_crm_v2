@@ -25,12 +25,12 @@ services:
       LOG_DEPRECATIONS_CHANNEL: ${LOG_DEPRECATIONS_CHANNEL}
       LOG_LEVEL: ${LOG_LEVEL}
       # Database config
-      DB_CONNECTION: ${DB_CONNECTION}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql_shared
+      DB_PORT: 3306
+      DB_DATABASE: jr_maker_sas
+      DB_USERNAME: root
+      DB_PASSWORD: ae031323
       # Redis config
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
@@ -44,7 +44,7 @@ services:
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
       MAIL_FROM_NAME: ${MAIL_FROM_NAME}
     depends_on:
-      - db
+      - mysql_shared
     command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
     networks:
       - nginxpm
@@ -63,43 +63,21 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_PORT: ${REDIS_PORT}
       # Database config
-      DB_CONNECTION: ${DB_CONNECTION}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql_shared
+      DB_PORT: 3306
+      DB_DATABASE: jr_maker_sas
+      DB_USERNAME: root
+      DB_PASSWORD: ae031323
     depends_on:
-      - db
+      - mysql_shared
     command: php artisan queue:work --daemon --sleep=3 --tries=3 --timeout=90
     restart: unless-stopped 
     networks:
       - nginxpm
 
-  db:
-    image: mysql:8.0
-    container_name: DB_jr_maker_crm
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-    volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - nginxpm
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
-    environment:
-      PMA_HOST: ${DB_HOST}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    #ports:
-      #- 8081:80
-    networks:
-      - nginxpm
-
 volumes:
-  db_data: null
+  # Eliminado 'db_data'
 
 networks:
   nginxpm:
