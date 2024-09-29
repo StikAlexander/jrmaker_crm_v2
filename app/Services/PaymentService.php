@@ -26,9 +26,8 @@ class PaymentService
         try {
             $client = new PreferenceClient();
 
-            $externalReference = substr(time(), -5) . rand(10, 99);
-            $Payment->update(['external_reference' => $externalReference]);
-    
+            $Payment->update(['external_reference' => $Payment->id]);
+
             // Preparar los items basados en las facturas
             $preferenceItems = $Payment->invoices->map(function ($invoice) {
                 return [
