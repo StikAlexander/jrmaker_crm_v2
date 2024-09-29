@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   app:
     image: sirnioh/jr_maker_crm:latest
@@ -10,6 +12,18 @@ services:
       APP_KEY: ${APP_KEY}
       APP_DEBUG: ${APP_DEBUG}
       APP_URL: ${APP_URL}
+      # MercadoPago keys
+      MERCADO_PAGO_PUBLIC_KEY: ${MERCADO_PAGO_PUBLIC_KEY}
+      MERCADO_PAGO_ACCESS_TOKEN: ${MERCADO_PAGO_ACCESS_TOKEN}
+      MP_SECRET_KEY: ${MP_SECRET_KEY}
+      MERCADOPAGO_NOTIFICATION_URL: ${MERCADOPAGO_NOTIFICATION_URL}
+      # Captcha keys
+      NOCAPTCHA_SECRET: ${NOCAPTCHA_SECRET}
+      NOCAPTCHA_SITEKEY: ${NOCAPTCHA_SITEKEY}
+      # Logging
+      LOG_CHANNEL: ${LOG_CHANNEL}
+      LOG_DEPRECATIONS_CHANNEL: ${LOG_DEPRECATIONS_CHANNEL}
+      LOG_LEVEL: ${LOG_LEVEL}
       # Database config
       DB_CONNECTION: mysql
       DB_HOST: mysql_shared
@@ -17,6 +31,20 @@ services:
       DB_DATABASE: jr_maker_sas
       DB_USERNAME: root
       DB_PASSWORD: ae031323
+      # Redis config
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PORT: ${REDIS_PORT}
+      # Mail config
+      MAIL_MAILER: ${MAIL_MAILER}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+    depends_on:
+      - db
     command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
     networks:
       - nginxpm
@@ -30,6 +58,10 @@ services:
       APP_KEY: ${APP_KEY}
       APP_DEBUG: ${APP_DEBUG}
       APP_URL: ${APP_URL}
+      # Redis config
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PORT: ${REDIS_PORT}
       # Database config
       DB_CONNECTION: mysql
       DB_HOST: mysql_shared
@@ -41,6 +73,29 @@ services:
     restart: unless-stopped 
     networks:
       - nginxpm
+
+  db:
+    image: mysql:8.0
+    container_name: DB_jr_maker_crm
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - nginxpm
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: ${DB_HOST}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    networks:
+      - nginxpm
+
+volumes:
+  db_data: null
 
 networks:
   nginxpm:
