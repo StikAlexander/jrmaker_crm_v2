@@ -2,7 +2,7 @@
 
 namespace App\Providers\Filament;
 
-
+use App\Filament\Pages\Auth\AdminLogin;
 use App\Filament\Pages\Auth\EmailVerification;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RequestPasswordReset;
@@ -30,6 +30,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Support\Enums\MaxWidth;
+use Shanerbaner82\PanelRoles\PanelRoles;
 
 
 
@@ -60,7 +61,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login(Login::class)
+            ->login(AdminLogin::class)
             ->passwordReset(RequestPasswordReset::class)
             ->emailVerification(EmailVerification::class)
             ->favicon(fn (GeneralSettings $settings) => Storage::url($settings->site_favicon))
@@ -132,8 +133,8 @@ class AdminPanelProvider extends PanelProvider
                         'update_password' => \App\Livewire\UpdatePasswordCustom::class,
                     ]),
                     \RickDBCN\FilamentEmail\FilamentEmail::make(),
+                    PanelRoles::make()
+                    ->restrictedRoles(['super_admin', 'admin', 'collaborator']), // Solo permitir estos roles
             ]);
     }
-
-    
 }

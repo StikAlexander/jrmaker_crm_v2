@@ -11,6 +11,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\BadgeColumn;
+
 
 class PaymentResource extends Resource
 {
@@ -67,16 +69,38 @@ class PaymentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            Tables\Columns\TextColumn::make('client.name')->label('Cliente'),  // Opcional, si es relevante ver el cliente
-            Tables\Columns\TextColumn::make('payment_number')->label('Número de Pago'),
-            Tables\Columns\TextColumn::make('issue_date')->label('Fecha de Emisión'),
-            Tables\Columns\TextColumn::make('amount')->label('Monto')->money('COP'),
-            Tables\Columns\TextColumn::make('payment_status')->label('Estado del Pago'),
-            Tables\Columns\TextColumn::make('payment_link')->label('Link de Pago')->hidden(),  // Solo si es necesario
+            Tables\Columns\TextColumn::make('client.name')
+                ->label('Cliente'),  // Mostrar el nombre del cliente
+            Tables\Columns\TextColumn::make('payment_number')
+                ->label('Número de Pago'),
+            Tables\Columns\TextColumn::make('issue_date')
+                ->label('Fecha de Emisión')
+                ->date(),  // Formatear como fecha
+            Tables\Columns\TextColumn::make('amount')
+                ->label('Monto')
+                ->money('COP'),  // Mostrar el monto en la moneda COP
+            BadgeColumn::make('payment_status')
+                ->label('Estado del Pago')
+                ->formatStateUsing(fn (string $state): string => match ($state) {
+                    'Pending' => 'Pendiente',
+                    'Paid' => 'Pagada',
+                    'Failed' => 'Fallida',
+                    'Cancelled' => 'Cancelada',
+                    default => $state,
+                })
+                ->color(fn (string $state): string => match ($state) {
+                    'Pending' => 'warning',  // Color amarillo para pendiente
+                    'Paid' => 'success',     // Color verde para pagada
+                    'Failed' => 'danger',    // Color rojo para fallida
+                    'Cancelled' => 'secondary',  // Color gris para cancelada
+                    default => 'secondary',
+                }),
+            Tables\Columns\TextColumn::make('payment_link')
+                ->label('Link de Pago')
+                ->hidden(),  // Oculto si no es necesario mostrar
         ]);
     }
     
-
     public static function getPages(): array
     {
         return [

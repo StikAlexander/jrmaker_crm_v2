@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c322b5a8c7767c47ac8df5e5d1260aec",
+    "content-hash": "9cf435fdc52a07e39f78b10a3b99211c",
     "packages": [
         {
             "name": "abanoubnassem/filament-grecaptcha-field",
@@ -6953,6 +6953,53 @@
                 }
             ],
             "time": "2024-02-26T18:08:49+00:00"
+        },
+        {
+            "name": "shanerbaner82/panel-roles",
+            "version": "v0.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/shanerbaner82/panel-roles.git",
+                "reference": "86878c598a79eaaf178fbdbaed77cd387434faeb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/shanerbaner82/panel-roles/zipball/86878c598a79eaaf178fbdbaed77cd387434faeb",
+                "reference": "86878c598a79eaaf178fbdbaed77cd387434faeb",
+                "shasum": ""
+            },
+            "require": {
+                "filament/support": "^3.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Shanerbaner82\\PanelRoles\\PanelRolesServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Shanerbaner82\\PanelRoles\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "SD Rosenthal",
+                    "email": "srosenthal82@gmail.com"
+                }
+            ],
+            "description": "Filament Panel Roles is an intuitive way to ensure all users of a specified panel within Filament v3 is assigned a role during registration and has a specified role using Laravel Middleware.",
+            "support": {
+                "issues": "https://github.com/shanerbaner82/panel-roles/issues",
+                "source": "https://github.com/shanerbaner82/panel-roles/tree/v0.0.3"
+            },
+            "time": "2023-10-10T00:33:42+00:00"
         },
         {
             "name": "spatie/backtrace",

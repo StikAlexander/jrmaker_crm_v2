@@ -58,7 +58,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
         return $this->name;
     }
 
-    public function canAccessPanel(Panel $panel): bool
+    /*public function canAccessPanel(Panel $panel): bool
     {
         if ($panel->getId() === 'admin') {
             return $this->hasAnyRole(['super_admin', 'admin', 'collaborator']);
@@ -69,7 +69,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
         }
 
         return false;
-    }
+    }*/
 
     public function getFilamentAvatarUrl(): ?string
     {

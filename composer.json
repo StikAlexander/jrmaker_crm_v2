@@ -37,6 +37,7 @@
         "mercadopago/dx-php": "3.0.8",
         "rickdbcn/filament-email": "^1.6",
         "riodwanto/filament-ace-editor": "^1.0",
+        "shanerbaner82/panel-roles": "^0.0.3",
         "stechstudio/filament-impersonate": "^3.13",
         "yemenopensource/filament-excel": "^0.1.0",
         "z3d0x/filament-logger": "^0.7.2"

@@ -6,7 +6,7 @@ use Filament\Forms\Form;
 use Filament\Pages\Auth\Login as BasePage;
 use Illuminate\Contracts\Support\Htmlable;
 
-class Login extends BasePage
+class AdminLogin extends BasePage
 {
     public function mount(): void
     {

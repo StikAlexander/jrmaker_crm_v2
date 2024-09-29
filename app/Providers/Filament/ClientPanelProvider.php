@@ -25,6 +25,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Shanerbaner82\PanelRoles\PanelRoles;
 
 class ClientPanelProvider extends PanelProvider
 {
@@ -104,8 +105,8 @@ public function panel(Panel $panel): Panel
                 ->myProfileComponents([
                     'personal_info' => MyProfileClientExtended::class,
                 ]),
-        ]);
-}
-
-
-}
+                PanelRoles::make()
+                ->restrictedRoles(['client']), // Solo permitir el rol `client`    
+            ]);
+        }
+    }
