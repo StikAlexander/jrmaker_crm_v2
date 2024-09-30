@@ -20,7 +20,7 @@ use Illuminate\Http\Request;
 
 // Ruta para la página de bienvenida
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->to('https://www.jrmaker.com.co');
 });
 
 /*
