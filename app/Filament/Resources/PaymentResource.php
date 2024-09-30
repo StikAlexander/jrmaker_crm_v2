@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
 
 
 class PaymentResource extends Resource
@@ -65,42 +66,45 @@ class PaymentResource extends Resource
                 ->disabled(),  // Deshabilitado porque lo maneja MercadoPago
         ]);
     }
-
     public static function table(Table $table): Table
     {
         return $table->columns([
             Tables\Columns\TextColumn::make('client.name')
-                ->label('Cliente'),  // Mostrar el nombre del cliente
+                ->label('Cliente')  
+                ->sortable(),  
             Tables\Columns\TextColumn::make('payment_number')
-                ->label('Número de Pago'),
+                ->label('Número de Pago')
+                ->sortable(),  
             Tables\Columns\TextColumn::make('issue_date')
                 ->label('Fecha de Emisión')
-                ->date(),  // Formatear como fecha
+                ->date() 
+                ->sortable(),  
             Tables\Columns\TextColumn::make('amount')
                 ->label('Monto')
-                ->money('COP'),  // Mostrar el monto en la moneda COP
-            BadgeColumn::make('payment_status')
+                ->money('COP')  
+                ->sortable(),  
+            TextColumn::make('payment_status')
                 ->label('Estado del Pago')
-                ->formatStateUsing(fn (string $state): string => match ($state) {
-                    'Pending' => 'Pendiente',
-                    'Paid' => 'Pagada',
-                    'Failed' => 'Fallida',
-                    'Cancelled' => 'Cancelada',
-                    default => $state,
-                })
+                ->badge()  
                 ->color(fn (string $state): string => match ($state) {
                     'Pending' => 'warning',  // Color amarillo para pendiente
-                    'Paid' => 'success',     // Color verde para pagada
-                    'Failed' => 'danger',    // Color rojo para fallida
-                    'Cancelled' => 'secondary',  // Color gris para cancelada
+                    'Completed' => 'success', // Verde para completado
+                    'Failed' => 'danger',    // Rojo para fallido
+                    'Cancelled' => 'gray',   // Gris para cancelado
                     default => 'secondary',
+                })
+                ->formatStateUsing(fn (string $state): string => match ($state) {
+                    'Pending' => 'Pendiente',
+                    'Completed' => 'Completado',
+                    'Failed' => 'Fallido',
+                    'Cancelled' => 'Cancelado',
+                    default => $state,
                 }),
             Tables\Columns\TextColumn::make('payment_link')
                 ->label('Link de Pago')
                 ->hidden(),  // Oculto si no es necesario mostrar
         ]);
     }
-    
     public static function getPages(): array
     {
         return [

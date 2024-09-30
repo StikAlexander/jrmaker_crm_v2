@@ -94,7 +94,7 @@ public function panel(Panel $panel): Panel
                     'default' => 1,
                     'sm' => 2,
                 ]),
-            \Jeffgreco13\FilamentBreezy\BreezyCore::make()
+                \Jeffgreco13\FilamentBreezy\BreezyCore::make()
                 ->myProfile(
                     shouldRegisterUserMenu: true,
                     shouldRegisterNavigation: false,
@@ -102,11 +102,14 @@ public function panel(Panel $panel): Panel
                     hasAvatars: true,
                     slug: 'my-profile'
                 )
+                ->withoutMyProfileComponents([
+                    'update_password' // Excluir el componente de actualización de contraseñas
+                ])
                 ->myProfileComponents([
-                    'personal_info' => MyProfileClientExtended::class,
+                    'personal_info' => MyProfileClientExtended::class, // Solo información personal
                 ]),
-                PanelRoles::make()
-                ->restrictedRoles(['client']), // Solo permitir el rol `client`    
+            PanelRoles::make()
+                ->restrictedRoles(['client']),             
             ]);
         }
     }
