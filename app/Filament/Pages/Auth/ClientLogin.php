@@ -60,39 +60,42 @@ class ClientLogin extends AuthLogin
     public function authenticate(): ?LoginResponse
     {
         $data = $this->form->getState();
-
-        // Verifica los datos recibidos
-        Log::info('Datos recibidos del formulario:', $data);
-
+    
         // Obtener el ID del tipo de documento
         $documentTypeId = DB::table('document_types')
             ->where('name', $data['document_type'])
             ->value('id');
-
+    
         if (!$documentTypeId) {
             $this->addError('document_type', __('Tipo de documento no válido.'));
             return null;
         }
-
-        // Verifica si el document_type_id es correcto
-        Log::info('ID de tipo de documento:', ['document_type_id' => $documentTypeId]);
-
+    
         // Buscar el usuario directamente con el número de documento y el tipo de documento
         $user = \App\Models\User::where('document_type_id', $documentTypeId)
             ->where('document_number', $data['document_number'])
             ->first();
-
+    
         if ($user) {
+            // Verificar si el usuario tiene el rol de "client"
+            if (!$user->hasRole('client')) {
+                // Rechazar acceso si no es cliente
+                $this->addError('document_number', __('Solo los clientes pueden acceder a este panel.'));
+                return null; // No iniciar sesión, no autenticar
+            }
+    
+            // Si es un cliente válido, iniciar sesión
             Auth::login($user);
-            session()->regenerate();
-
+            session()->regenerate(); // Regenerar la sesión para evitar problemas de fijación de sesión
+    
             return app(LoginResponse::class);
         }
-
+    
+        // Si el usuario no existe o no tiene permiso
         $this->addError('document_number', __('Este documento no se encuentra en nuestros registros.'));
         return null;
     }
-
+    
     public function getHeading(): string|Htmlable
     {
         return __('Panel de Clientes J.R. MAKER');
