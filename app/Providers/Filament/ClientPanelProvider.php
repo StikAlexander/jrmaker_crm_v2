@@ -8,7 +8,6 @@ use App\Filament\Pages\Auth\ClientLogin as AuthClientLogin;
 use App\Http\Middleware\AuthenticateClient;
 use App\Livewire\MyProfileClientExtended;
 use App\Settings\GeneralSettings;
-use EightyNine\Reports\ReportsPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -77,7 +76,6 @@ public function panel(Panel $panel): Panel
             AuthenticateClient::class,
         ])
         ->plugins([
-            ReportsPlugin::make(), 
             \BezhanSalleh\FilamentExceptions\FilamentExceptionsPlugin::make(),
             \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
                 ->gridColumns([

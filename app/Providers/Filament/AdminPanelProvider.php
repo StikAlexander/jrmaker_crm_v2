@@ -11,7 +11,6 @@ use App\Filament\Widgets\InvoicesGeneratedWidget;
 use App\Livewire\MyProfileExtended;
 use App\Livewire\UpdatePasswordCustom;
 use App\Settings\GeneralSettings;
-use EightyNine\Reports\ReportsPlugin;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -103,7 +102,6 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->plugins([
-                ReportsPlugin::make(),
                 \BezhanSalleh\FilamentExceptions\FilamentExceptionsPlugin::make(),
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
                     ->gridColumns([
