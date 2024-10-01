@@ -6,10 +6,9 @@ use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Auth\Login as AuthLogin;
-use AbanoubNassem\FilamentGRecaptchaField\Forms\Components\GRecaptcha;
+use Coderflex\FilamentTurnstile\Forms\Components\Turnstile; 
 use Illuminate\Support\Facades\Auth;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -23,9 +22,11 @@ class ClientLogin extends AuthLogin
                     ->schema([
                         $this->getDocumentTypeFormComponent(),
                         $this->getDocumentNumberFormComponent(),
-                        GRecaptcha::make('captcha')
+                        // Reemplazamos GRecaptcha con Turnstile
+                        Turnstile::make('captcha') 
                             ->label('Captcha')
-                            ->rules('required'),  
+                            ->theme('auto') // Puedes usar 'light', 'dark', o 'auto'
+                            ->language('es'),    
                     ])
                     ->statePath('data'),
             ),
@@ -79,14 +80,13 @@ class ClientLogin extends AuthLogin
         if ($user) {
             // Verificar si el usuario tiene el rol de "client"
             if (!$user->hasRole('client')) {
-                // Rechazar acceso si no es cliente
                 $this->addError('document_number', __('Solo los clientes pueden acceder a este panel.'));
-                return null; // No iniciar sesión, no autenticar
+                return null;
             }
     
             // Si es un cliente válido, iniciar sesión
             Auth::login($user);
-            session()->regenerate(); // Regenerar la sesión para evitar problemas de fijación de sesión
+            session()->regenerate(); // Regenerar la sesión
     
             return app(LoginResponse::class);
         }
@@ -108,5 +108,12 @@ class ClientLogin extends AuthLogin
             $this->getPasswordFormComponent(),
             $this->getRememberFormComponent(),
         ];
+    }
+
+    // Si quieres reiniciar el captcha tras un error de validación
+    protected function throwFailureValidationException(): never
+    {
+        $this->dispatch('reset-captcha');
+        parent::throwFailureValidationException();
     }
 }
