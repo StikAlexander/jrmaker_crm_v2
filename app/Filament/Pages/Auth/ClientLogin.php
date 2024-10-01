@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Support\Htmlable;
+use Livewire\Livewire;
+use Illuminate\Validation\ValidationException;
 
 class ClientLogin extends AuthLogin
 {
@@ -22,11 +24,12 @@ class ClientLogin extends AuthLogin
                     ->schema([
                         $this->getDocumentTypeFormComponent(),
                         $this->getDocumentNumberFormComponent(),
-                        // Reemplazamos GRecaptcha con Turnstile
-                        Turnstile::make('captcha') 
+                        // Usamos Turnstile en lugar de GRecaptcha
+                        Turnstile::make('captcha')
                             ->label('Captcha')
-                            ->theme('auto') // Puedes usar 'light', 'dark', o 'auto'
-                            ->language('es'),    
+                            ->theme('light') // Puedes usar 'light', 'dark', o 'auto'
+                            ->language('es') 
+                            ->size('normal'), 
                     ])
                     ->statePath('data'),
             ),
@@ -61,41 +64,48 @@ class ClientLogin extends AuthLogin
     public function authenticate(): ?LoginResponse
     {
         $data = $this->form->getState();
-    
+
         // Obtener el ID del tipo de documento
         $documentTypeId = DB::table('document_types')
             ->where('name', $data['document_type'])
             ->value('id');
-    
+
         if (!$documentTypeId) {
             $this->addError('document_type', __('Tipo de documento no válido.'));
+            // Emitir evento para reiniciar el CAPTCHA
+            $this->dispatch('reset-captcha');
             return null;
         }
-    
+
         // Buscar el usuario directamente con el número de documento y el tipo de documento
         $user = \App\Models\User::where('document_type_id', $documentTypeId)
             ->where('document_number', $data['document_number'])
             ->first();
-    
+
         if ($user) {
             // Verificar si el usuario tiene el rol de "client"
             if (!$user->hasRole('client')) {
                 $this->addError('document_number', __('Solo los clientes pueden acceder a este panel.'));
+                // Emitir evento para reiniciar el CAPTCHA
+                $this->dispatch('reset-captcha');
                 return null;
             }
-    
+
             // Si es un cliente válido, iniciar sesión
             Auth::login($user);
-            session()->regenerate(); // Regenerar la sesión
-    
+            session()->regenerate(); // Regenerar la sesión para evitar problemas
+
             return app(LoginResponse::class);
         }
-    
+
         // Si el usuario no existe o no tiene permiso
         $this->addError('document_number', __('Este documento no se encuentra en nuestros registros.'));
+        // Emitir evento para reiniciar el CAPTCHA
+        $this->dispatch('reset-captcha');
+
         return null;
     }
-    
+
     public function getHeading(): string|Htmlable
     {
         return __('Panel de Clientes J.R. MAKER');
@@ -110,10 +120,18 @@ class ClientLogin extends AuthLogin
         ];
     }
 
-    // Si quieres reiniciar el captcha tras un error de validación
-    protected function throwFailureValidationException(): never
+    /**
+     * 
+     *
+     * @param \Illuminate\Validation\ValidationException $exception
+     * @return void
+     */
+    protected function onValidationError(ValidationException $exception): void
     {
+        // Emitir evento para reiniciar el CAPTCHA
         $this->dispatch('reset-captcha');
-        parent::throwFailureValidationException();
+
+        // Llamar al método de la clase padre para manejar los errores de validación
+        parent::onValidationError($exception);
     }
 }
