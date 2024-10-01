@@ -30,7 +30,7 @@ class AdminLogin extends BasePage
 
     public function getHeading(): string | Htmlable
     {
-        return 'Panel Administrativo J.R. MAKER';
+        return 'Panel Administrativo J.R. Maker';
     }
     
 }
