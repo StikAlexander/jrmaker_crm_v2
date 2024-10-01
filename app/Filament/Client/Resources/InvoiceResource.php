@@ -93,54 +93,51 @@ class InvoiceResource extends Resource
             ])
             ->bulkActions([
                 BulkAction::make('paySelected')
-                    ->label('Pagar seleccionadas')
-                    ->tooltip('Selecciona las facturas pendientes para proceder con el pago.')
-                    ->action(function (Collection $records) {
-                        $totalAmount = $records->sum('pending_amount');
-
-                        // Crear el Payment
-                        $Payment = Payment::create([
-                            'client_id' => auth()->id(),
-                            'amount' => $totalAmount,
-                            'payment_status' => 'Pending',
-                        ]);
-
-                        // Asignar external_reference al ID del Payment
-                        $Payment->external_reference = $Payment->id;
-                        $Payment->save(); // Guardar el external_reference en la base de datos   
-
-                        // Asociar las facturas al Payment con el campo 'amount' en la tabla pivot
-                        foreach ($records as $invoice) {
-                            $Payment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
-                        }
-
-                        // Llamada al servicio de pago
-                        $paymentService = app(PaymentService::class);
-                        $paymentLink = $paymentService->generatePaymentLink($Payment, route('payment.callback'));
-
-                        if ($paymentLink) {
-                            // Actualizar el enlace de pago
-                            $Payment->update(['payment_link' => $paymentLink]);
-
-                            checkpaymentstatus::dispatch($Payment)->delay(now()->addMinutes(2)->addSeconds(30));
-
-                            Notification::make()
-                                ->title('Enlace de pago generado')
-                                ->body('Serás redirigido automáticamente.')
-                                ->success()
-                                ->send();
-
-                            return redirect()->away($paymentLink);
-                        } else {
-                            Notification::make()
-                                ->title('Error en el pago')
-                                ->body('No se pudo generar el enlace de pago.')
-                                ->danger()
-                                ->send();
-                        }
-                    })
-                    ->color('success')
-                    ->icon('heroicon-o-credit-card'),
+                ->label('Pagar seleccionadas')
+                ->tooltip('Selecciona las facturas pendientes para proceder con el pago.')
+                ->action(function (Collection $records) {
+                    $totalAmount = $records->sum('pending_amount');
+            
+                    // Crear el Payment
+                    $Payment = Payment::create([
+                        'client_id' => auth()->id(),
+                        'amount' => $totalAmount,
+                        'payment_status' => 'Pending',
+                    ]);
+            
+                    // Asignar external_reference al ID del Payment
+                    $Payment->external_reference = $Payment->id;
+                    $Payment->save(); // Guardar el external_reference en la base de datos   
+            
+                    // Asociar las facturas al Payment con el campo 'amount' en la tabla pivot
+                    foreach ($records as $invoice) {
+                        $Payment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
+                    }
+            
+                    // Llamada al servicio de pago
+                    $paymentService = app(PaymentService::class);
+                    $paymentLink = $paymentService->generatePaymentLink($Payment, route('payment.callback'));
+            
+                    if ($paymentLink) {
+                        // Actualizar el enlace de pago
+                        $Payment->update(['payment_link' => $paymentLink]);
+            
+                        
+                        CheckPaymentStatus::dispatch($Payment)->delay(now()->addMinutes(2)->addSeconds(30));
+            
+                        return redirect()->away($paymentLink);
+                    } else {
+                        
+                        Notification::make()
+                            ->title('Error en el pago')
+                            ->body('No se pudo generar el enlace de pago.')
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->color('success')
+                ->icon('heroicon-o-credit-card'),
+            
             ]);
     }
 
