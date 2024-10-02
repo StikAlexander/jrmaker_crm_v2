@@ -9,7 +9,6 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Support\Collection;
 use App\Services\PaymentService;
-use Illuminate\Support\Facades\Log;
 use Filament\Resources\Resource;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -51,27 +50,33 @@ class InvoiceResource extends Resource
                     ->label('Número de Factura')
                     ->sortable()
                     ->searchable()
-                    ->limit(50),
+                    ->limit(50)
+                    ->alignCenter(), 
+                    
 
                 TextColumn::make('issue_date')
                     ->label('Fecha de Emisión')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(), 
 
                 TextColumn::make('due_date')
                     ->label('Fecha de Vencimiento')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(), 
 
                 TextColumn::make('total_amount')
                     ->label('Monto Total')
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
+                    ->alignCenter(), 
 
                 TextColumn::make('pending_amount')
                     ->label('Monto Pendiente')
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
+                    ->alignCenter(), 
 
                 TextColumn::make('status')
                     ->label('Estado')
@@ -82,12 +87,19 @@ class InvoiceResource extends Resource
                         'Cancelled' => 'danger',
                         default => 'secondary',
                     })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'Pending' => 'heroicon-o-clock', // Ícono de reloj para estado 'Pendiente'
+                        'Paid' => 'heroicon-o-check-circle',
+                        'Cancelled' => 'heroicon-o-x-circle',
+                        default => 'heroicon-o-question-mark-circle',
+                    })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'Pending' => 'Pendiente',
                         'Paid' => 'Pagada',
                         'Cancelled' => 'Cancelada',
                         default => $state,
-                    }),
+                    })
+                    ->alignCenter(), 
             ])
             ->actions([
                 ViewAction::make()
@@ -98,51 +110,49 @@ class InvoiceResource extends Resource
             ])
             ->bulkActions([
                 BulkAction::make('paySelected')
-                ->label('Pagar seleccionadas')
-                ->tooltip('Selecciona las facturas pendientes para proceder con el pago.')
-                ->action(function (Collection $records) {
-                    $totalAmount = $records->sum('pending_amount');
-            
-                    // Crear el Payment
-                    $Payment = Payment::create([
-                        'client_id' => auth()->id(),
-                        'amount' => $totalAmount,
-                        'payment_status' => 'Pending',
-                    ]);
-            
-                    // Asignar external_reference al ID del Payment
-                    $Payment->external_reference = $Payment->id;
-                    $Payment->save(); // Guardar el external_reference en la base de datos   
-            
-                    // Asociar las facturas al Payment con el campo 'amount' en la tabla pivot
-                    foreach ($records as $invoice) {
-                        $Payment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
-                    }
-            
-                    // Llamada al servicio de pago
-                    $paymentService = app(PaymentService::class);
-                    $paymentLink = $paymentService->generatePaymentLink($Payment, route('payment.callback'));
-            
-                    if ($paymentLink) {
-                        // Actualizar el enlace de pago
-                        $Payment->update(['payment_link' => $paymentLink]);
-            
-                        
-                        CheckPaymentStatus::dispatch($Payment)->delay(now()->addMinutes(2)->addSeconds(30));
-            
-                        return redirect()->away($paymentLink);
-                    } else {
-                        
-                        Notification::make()
-                            ->title('Error en el pago')
-                            ->body('No se pudo generar el enlace de pago.')
-                            ->danger()
-                            ->send();
-                    }
-                })
-                ->color('success')
-                ->icon('heroicon-o-credit-card'),
-            
+                    ->label('Pagar seleccionadas')
+                    ->tooltip('Selecciona las facturas pendientes para proceder con el pago.')
+                    ->action(function (Collection $records) {
+                        $totalAmount = $records->sum('pending_amount');
+
+                        // Crear el Payment
+                        $Payment = Payment::create([
+                            'client_id' => auth()->id(),
+                            'amount' => $totalAmount,
+                            'payment_status' => 'Pending',
+                        ]);
+
+                        // Asignar external_reference al ID del Payment
+                        $Payment->external_reference = $Payment->id;
+                        $Payment->save(); // Guardar el external_reference en la base de datos   
+
+                        // Asociar las facturas al Payment con el campo 'amount' en la tabla pivot
+                        foreach ($records as $invoice) {
+                            $Payment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
+                        }
+
+                        // Llamada al servicio de pago
+                        $paymentService = app(PaymentService::class);
+                        $paymentLink = $paymentService->generatePaymentLink($Payment, route('payment.callback'));
+
+                        if ($paymentLink) {
+                            // Actualizar el enlace de pago
+                            $Payment->update(['payment_link' => $paymentLink]);
+
+                            CheckPaymentStatus::dispatch($Payment)->delay(now()->addMinutes(2)->addSeconds(30));
+
+                            return redirect()->away($paymentLink);
+                        } else {
+                            Notification::make()
+                                ->title('Error en el pago')
+                                ->body('No se pudo generar el enlace de pago.')
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->requiresConfirmation('¿Estás seguro de que deseas pagar las facturas seleccionadas?') // Confirmación adicional
+                    ->color('success')
+                    ->icon('heroicon-o-credit-card'),
             ]);
     }
 
