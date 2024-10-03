@@ -150,7 +150,7 @@ class InvoiceResource extends Resource
                                 ->send();
                         }
                     })
-                    ->requiresConfirmation('¿Estás seguro de que deseas pagar las facturas seleccionadas?') // Confirmación adicional
+                    //->requiresConfirmation('¿Estás seguro de que deseas pagar las facturas seleccionadas?') // Confirmación adicional
                     ->color('success')
                     ->icon('heroicon-o-credit-card'),
             ]);

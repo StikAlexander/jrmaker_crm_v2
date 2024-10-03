@@ -260,11 +260,11 @@ class InvoiceResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->limit(50)
-                    ->url(fn ($record) => InvoiceResource::getUrl('view', ['record' => $record->getKey()])) 
+                    ->url(fn ($record) => InvoiceResource::getUrl('view', ['record' => $record->getKey()]))
                     ->formatStateUsing(fn (string $state): string => 'FEVD' . $state),
-                    ModelLinkColumn::make('client.name')
+                ModelLinkColumn::make('client.name')
                     ->label('Cliente')
-                    ->setViewType('view'), 
+                    ->setViewType('view'),
                 TextColumn::make('createdBy.name')
                     ->label('Creado por')
                     ->sortable()
@@ -291,40 +291,37 @@ class InvoiceResource extends Resource
                     ->label('Monto Pendiente')
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.')),
-                    TextColumn::make('status')
+                TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'Pending' => 'warning',
-                        'Paid' => 'success',
+                        'Pending' => 'warning',    // Amarillo para pendiente
+                        'Paid' => 'success',       // Verde para pagada
+                        'Cancelled' => 'danger',   // Rojo para cancelada
                         default => 'secondary',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'Pending' => 'Pendiente',
                         'Paid' => 'Pagada',
                         'Cancelled' => 'Cancelada',
-                        'Partially Paid' => 'Parcialmente Pagada',
-                        default => $state, 
+                        default => $state,
                     }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->label('Ver')
-                    ->modalHeading('Detalles de la Factura')
-                    ->modalWidth('4xl')
-                    ->tooltip('Ver detalles de la factura')
-                    ->iconButton(),
-                Tables\Actions\EditAction::make()
-                    ->label('Editar')
-                    ->tooltip('Editar Factura')
-                    ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))
-                    ->iconButton(),
-                Tables\Actions\DeleteAction::make()
                     ->label('')
-                    ->icon('heroicon-o-trash')
                     ->size(ActionSize::Large)
-                    ->tooltip('Eliminar Factura')
+                    ->tooltip('Ver Detalles')
                     ->iconButton(),
+            
+                Tables\Actions\EditAction::make()
+                    ->modalHeading('Editar Factura')
+                    ->modalWidth('4xl')
+                    ->label('')
+                    ->size(ActionSize::Large)
+                    ->tooltip('Editar Factura')
+                    ->iconButton(),
+            
                 Action::make('viewPdf')
                     ->label('')
                     ->icon('heroicon-o-document-text')
@@ -333,11 +330,43 @@ class InvoiceResource extends Resource
                     ->openUrlInNewTab()
                     ->tooltip('Ver PDF')
                     ->iconButton(),
+            
+                Action::make('cancelInvoice')
+                    ->label('')
+                    ->icon('heroicon-o-x-circle')
+                    ->size(ActionSize::Large)
+                    ->color(fn (Invoice $record) => $record->status === 'Cancelled' ? 'secondary' : 'danger')
+                    ->disabled(fn (Invoice $record) => $record->status === 'Cancelled')
+                    ->tooltip(fn (Invoice $record) => $record->status === 'Cancelled' ? 'Factura Anulada' : 'Anular Factura')
+                    ->iconButton()
+                    ->requiresConfirmation(function () {
+                        return [
+                            'title' => '¿Estás seguro de que deseas anular esta factura?',
+                            'description' => 'Una vez anulada, no se podrá revertir esta acción.',
+                            'icon' => 'heroicon-o-exclamation',
+                        ];
+                    })
+                    ->action(function (Invoice $record) {
+                        $record->status = 'Cancelled';
+                        $record->save();
+                    }),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkAction::make('cancelInvoices')
+                    ->label('Anular Seleccionadas')
+                    ->action(function (Collection $records) {
+                        foreach ($records as $invoice) {
+                            if ($invoice->status !== 'Cancelled') {
+                                $invoice->update(['status' => 'Cancelled']);
+                            }
+                        }
+                    })
+                    ->requiresConfirmation()
+                    ->color('danger')
+                    ->icon('heroicon-o-x-circle'),
             ]);
     }
+    
 
     public static function getPages(): array
     {

@@ -44,6 +44,10 @@ class Invoice extends Model
             if (!empty($model->total_amount)) {
                 $model->pending_amount = $model->total_amount - ($model->total_paid ?? 0);
             }
+
+            if ($model->status === 'Cancelled') {
+                return;
+            }
     
             if ($model->pending_amount <= 0) {
                 $model->status = 'Paid';
