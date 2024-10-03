@@ -40,31 +40,54 @@ class PaymentWebhookController extends Controller
                     'Authorization' => 'Bearer ' . config('services.mercadopago.access_token'),
                 ],
             ]);
-            
+    
             $paymentDetails = json_decode($response->getBody()->getContents(), true);
-            //Log::info('Detalles del pago obtenidos:', $paymentDetails);
-            
+    
             // Obtener el external_reference desde los detalles del pago
             $externalReference = $paymentDetails['external_reference'] ?? null;
-            
-            if (!$externalReference) {
-                //Log::error('External reference no encontrado en los detalles del pago.');
-                return response()->json(['message' => 'External reference no encontrado.'], 404);
-            }
-            
+    
             // Buscar el pago en la base de datos usando el external_reference
             $Payment = Payment::where('external_reference', (string) $externalReference)->first();
-            
+    
             if (!$Payment) {
-                //Log::error('Pago no encontrado: ' . $externalReference);
+                Log::error('Pago no encontrado: ' . $externalReference);
                 return response()->json(['message' => 'Pago no encontrado.'], 404);
             }
-            
+    
             // Actualizar el estado del pago basado en el estado del pago en MercadoPago
             $paymentStatus = $paymentDetails['status'] ?? 'unknown';
             $this->updatePaymentStatus($Payment, $paymentStatus, $paymentDetails);
-            
-            //Log::info('Estado del pago actualizado para Payment ID: ' . $Payment->id);
+    
+            // Distribuir el monto del pago entre las facturas asociadas
+            if ($paymentStatus === 'approved') {
+                $remainingAmount = $Payment->amount; // Monto total del pago
+    
+                foreach ($Payment->invoices as $invoice) {
+                    $invoicePendingAmount = $invoice->pending_amount;
+    
+                    // Calcular cuánto se abonará a esta factura, sin exceder el monto pendiente
+                    $paymentAmount = min($remainingAmount, $invoicePendingAmount);
+    
+                    // Actualizar la factura con el monto pagado
+                    $invoice->total_paid += $paymentAmount;
+                    $invoice->pending_amount = max($invoice->total_amount - $invoice->total_paid, 0);
+    
+                    // Si el monto pendiente es 0, marcar la factura como "Paid"
+                    if ($invoice->pending_amount === 0) {
+                        $invoice->status = 'Paid';
+                    }
+    
+                    $invoice->save(); // Guardar los cambios en la factura
+    
+                    // Reducir el monto restante del pago
+                    $remainingAmount -= $paymentAmount;
+    
+                    // Si no queda más dinero para distribuir, terminamos
+                    if ($remainingAmount <= 0) {
+                        break;
+                    }
+                }
+            }
         } catch (\Exception $e) {
             Log::error('Error al obtener los detalles del pago: ' . $e->getMessage());
             return response()->json(['message' => 'Error al obtener detalles del pago.'], 500);
