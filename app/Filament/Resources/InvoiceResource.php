@@ -336,16 +336,13 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-x-circle')
                     ->size(ActionSize::Large)
                     ->color(fn (Invoice $record) => $record->status === 'Cancelled' ? 'secondary' : 'danger')
-                    ->disabled(fn (Invoice $record) => $record->status === 'Cancelled')
-                    ->tooltip(fn (Invoice $record) => $record->status === 'Cancelled' ? 'Factura Anulada' : 'Anular Factura')
-                    ->iconButton()
-                    ->requiresConfirmation(function () {
-                        return [
-                            'title' => '¿Estás seguro de que deseas anular esta factura?',
-                            'description' => 'Una vez anulada, no se podrá revertir esta acción.',
-                            'icon' => 'heroicon-o-exclamation',
-                        ];
+                    ->disabled(fn (Invoice $record) => $record->status === 'Cancelled' || $record->status === 'Paid') // Deshabilita si está cancelada o pagada
+                    ->tooltip(fn (Invoice $record) => match ($record->status) {
+                        'Paid' => 'No se puede anular una factura pagada',  // Tooltip si está pagada
+                        'Cancelled' => 'Factura Anulada',  // Tooltip si está cancelada
+                        default => 'Anular Factura'  // Tooltip estándar
                     })
+                    ->iconButton()
                     ->action(function (Invoice $record) {
                         $record->status = 'Cancelled';
                         $record->save();
@@ -356,7 +353,7 @@ class InvoiceResource extends Resource
                     ->label('Anular Seleccionadas')
                     ->action(function (Collection $records) {
                         foreach ($records as $invoice) {
-                            if ($invoice->status !== 'Cancelled') {
+                            if ($invoice->status !== 'Cancelled' && $invoice->status !== 'Paid') { // No anula si está pagada o cancelada
                                 $invoice->update(['status' => 'Cancelled']);
                             }
                         }
@@ -365,6 +362,7 @@ class InvoiceResource extends Resource
                     ->color('danger')
                     ->icon('heroicon-o-x-circle'),
             ]);
+            
     }
     
 
