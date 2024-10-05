@@ -50,4 +50,4 @@ jobs:
           echo "Response from Portainer:"
           echo "$response"
         env:
-          #PORTAINER_WEBHOOK_URL: ${{ secrets.PORTAINER_WEBHOOK_URL }}
+          PORTAINER_WEBHOOK_URL: ${{ secrets.PORTAINER_WEBHOOK_URL }}
