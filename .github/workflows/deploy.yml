@@ -39,10 +39,10 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
           push: true
-          progress: auto  # Corrige el valor de la opción progress
+          progress: auto
           tags: |
             jrmakercrmv2/jr_maker_crm_v2:latest
-            jrmakercrmv2/jr_maker_crm_v2:${{ github.sha }}
+            jrmakercrmv2/jr_maker_crm_v2:${{ github.sha }}  
 
       - name: Notify Portainer to redeploy
         run: |
