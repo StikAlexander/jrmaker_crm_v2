@@ -35,7 +35,7 @@ RUN composer require laravel/octane && \
     php artisan octane:install --server=swoole
 
 # Exponer el puerto para Octane
-EXPOSE 8001
+EXPOSE 8002
 
 # Comando para iniciar Laravel Octane
-CMD ["php", "artisan", "octane:start", "--server=swoole", "--host=0.0.0.0", "--port=8001"]
+CMD ["php", "artisan", "octane:start", "--server=swoole", "--host=0.0.0.0", "--port=8002"]
