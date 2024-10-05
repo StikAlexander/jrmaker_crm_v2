@@ -41,8 +41,8 @@ jobs:
           push: true
           progress: auto  # Corrige el valor de la opción progress
           tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/jr_maker_crm_v2:latest
-            ${{ secrets.DOCKER_HUB_USERNAME }}/jr_maker_crm_v2:${{ github.sha }}
+            jrmakercrmv2/jr_maker_crm_v2:latest
+            jrmakercrmv2/jr_maker_crm_v2:${{ github.sha }}
 
       - name: Notify Portainer to redeploy
         run: |

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app_v2:
-    image: sirnioh/jr_maker_crm:latest
+    image: jrmakercrmv2/jr_maker_crm_v2:tagname
     container_name: jr_maker_crm_v2
     ports:
       - "8002:8002"
@@ -56,7 +56,7 @@ services:
       - nginxpm
 
   worker_v2:
-    image: sirnioh/jr_maker_crm:latest
+    image: jrmakercrmv2/jr_maker_crm_v2:tagname
     container_name: jr_maker_crm_worker_v2
     environment:
       APP_NAME: ${APP_NAME}
