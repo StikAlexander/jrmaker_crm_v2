@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4581d13e8af7b48fcb695c2f4c333f46",
+    "content-hash": "10cc429ece640591fd41526e29400602",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -125,6 +125,61 @@
                 "source": "https://github.com/Bacon/BaconQrCode/tree/v3.0.0"
             },
             "time": "2024-04-18T11:16:25+00:00"
+        },
+        {
+            "name": "bancolombia-dev/wompi-php",
+            "version": "1.0.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/oscar-rey-mosquera/wompi-php.git",
+                "reference": "3d253468d3f68a2422fb75e306f0dda9b5e12db0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/oscar-rey-mosquera/wompi-php/zipball/3d253468d3f68a2422fb75e306f0dda9b5e12db0",
+                "reference": "3d253468d3f68a2422fb75e306f0dda9b5e12db0",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.4",
+                "php": "7.2.5 || ^8.0"
+            },
+            "require-dev": {
+                "fakerphp/faker": "^1.19",
+                "pestphp/pest": "^1.21"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Bancolombia\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Oscar Rey",
+                    "email": "oscarhumberto1311@gmail.com"
+                }
+            ],
+            "description": "Paquete para php wompi Bancolombia",
+            "homepage": "https://github.com/oscar-rey-mosquera/wompi-php",
+            "keywords": [
+                "Bancolombia",
+                "Wompi",
+                "nequi",
+                "online",
+                "pagos",
+                "php",
+                "wompi-php"
+            ],
+            "support": {
+                "issues": "https://github.com/oscar-rey-mosquera/wompi-php/issues",
+                "source": "https://github.com/oscar-rey-mosquera/wompi-php/tree/1.0.7"
+            },
+            "time": "2022-06-12T18:37:14+00:00"
         },
         {
             "name": "barryvdh/laravel-dompdf",

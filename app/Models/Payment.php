@@ -12,20 +12,22 @@ class Payment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'Payment_number',
+        'payment_number',
         'issue_date',
         'due_date',
         'client_id',
         'payment_date',
         'amount',
-        'payment_link',  
-        'payment_status',  
-        'api_response',  
+        'payment_link',
+        'payment_status',
+        'api_response',
         'external_reference',
-        'preference_id',              
-        'expiration_date_from',         
-        'expiration_date_to',   
+        'transaction_id',  
+        'payment_method_type',  
+        'reference',  
+        'payment_link_id',  
     ];
+    
 
     protected static function boot()
     {
@@ -33,8 +35,8 @@ class Payment extends Model
     
         // Genera el número de pago y las fechas al crear un nuevo pago
         static::creating(function ($model) {
-            $lastPaymentNumber = static::max('Payment_number');
-            $model->Payment_number = $lastPaymentNumber ? $lastPaymentNumber + 1 : 1;
+            $lastPaymentNumber = static::max('payment_number');
+            $model->payment_number = $lastPaymentNumber ? $lastPaymentNumber + 1 : 1;
 
             if (empty($model->issue_date)) {
                 $model->issue_date = Carbon::now()->toDateString(); 

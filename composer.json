@@ -16,6 +16,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "bancolombia-dev/wompi-php": "^1.0",
         "barryvdh/laravel-dompdf": "^3.0",
         "bezhansalleh/filament-exceptions": "^2.1",
         "bezhansalleh/filament-shield": "^3.2",
