@@ -11,6 +11,6 @@ class JobSeeder extends Seeder
     public function run()
     {
         $payment = Payment::first(); // Ejemplo, cambia según tu necesidad
-        CheckPaymentStatus::dispatch($payment)->delay(now()->addMinutes(2));
+        
     }
 }

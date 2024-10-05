@@ -34,7 +34,6 @@
         "laravel/ui": "^4.5",
         "league/commonmark": "^2.4",
         "maatwebsite/excel": "^3.1",
-        "mercadopago/dx-php": "3.0.8",
         "rickdbcn/filament-email": "^1.6",
         "riodwanto/filament-ace-editor": "^1.0",
         "shanerbaner82/panel-roles": "^0.0.3",

@@ -63,7 +63,7 @@ class PaymentResource extends Resource
                     'Failed' => 'Fallido',
                     'Cancelled' => 'Cancelado',
                 ])
-                ->disabled(),  // Deshabilitado porque lo maneja MercadoPago
+                ->disabled(),  // lo maneja la pasarela de pago 
         ]);
     }
     public static function table(Table $table): Table

@@ -108,7 +108,7 @@ class ClientLogin extends AuthLogin
 
     public function getHeading(): string|Htmlable
     {
-        return __('Ingreso Clientes J.R. Maker');
+        return __('Beta Clientes J.R. Maker');
     }
 
     protected function getFormSchema(): array
