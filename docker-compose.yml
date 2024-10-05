@@ -1,11 +1,11 @@
 services:
-  app:
+  app_v2:
     image: sirnioh/jr_maker_crm:latest
-    container_name: jr_maker_crm
+    container_name: jr_maker_crm_v2
     ports:
-      - 8001:8001
+      - 8002:8002
     volumes:
-      - /home/jr-crm-storage-no-borrar:/app/storage/app/public
+      - /home/jr-crm-storage-no-borrar-v2:/app/storage/app/public
     environment:
       APP_NAME: ${APP_NAME}
       APP_ENV: ${APP_ENV}
@@ -24,11 +24,11 @@ services:
       LOG_CHANNEL: ${LOG_CHANNEL}
       LOG_DEPRECATIONS_CHANNEL: ${LOG_DEPRECATIONS_CHANNEL}
       LOG_LEVEL: ${LOG_LEVEL}
-      # Database config
+      # Database config (nueva base de datos para evitar conflictos)
       DB_CONNECTION: mysql
       DB_HOST: mysql_shared
       DB_PORT: 3306
-      DB_DATABASE: jr_maker_sas
+      DB_DATABASE: jr_maker_sas_v2  
       DB_USERNAME: root
       DB_PASSWORD: ae031323
       # Redis config
@@ -43,24 +43,24 @@ services:
       MAIL_PASSWORD: ${MAIL_PASSWORD}
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
       MAIL_FROM_NAME: ${MAIL_FROM_NAME}
-    command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8001
+    command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8002
     networks:
       - nginxpm
 
-  worker:
+  worker_v2:
     image: sirnioh/jr_maker_crm:latest
-    container_name: jr_maker_crm_worker
+    container_name: jr_maker_crm_worker_v2
     environment:
       APP_NAME: ${APP_NAME}
       APP_ENV: ${APP_ENV}
       APP_KEY: ${APP_KEY}
       APP_DEBUG: ${APP_DEBUG}
       APP_URL: ${APP_URL}
-      # Database config
+      # Database config (misma configuración de la nueva base de datos)
       DB_CONNECTION: mysql
       DB_HOST: mysql_shared
       DB_PORT: 3306
-      DB_DATABASE: jr_maker_sas
+      DB_DATABASE: jr_maker_sas_v2  
       DB_USERNAME: root
       DB_PASSWORD: ae031323
       # Redis config
