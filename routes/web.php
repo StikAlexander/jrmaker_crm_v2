@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\WompiController;
+use App\Http\Controllers\WompiWebhookController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 
