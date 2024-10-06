@@ -26,7 +26,7 @@ class PaymentService
                 'amount_in_cents' => $payment->amount * 100,
                 'currency' => 'COP',
                 'single_use' => true,
-                'expires_at' => now()->addDays(7)->toISOString(),
+                'expires_at' => now()->addMinutes(2)->toISOString(),
                 'redirect_url' => $callbackUrl,
                 'collect_shipping' => false,
             ];
