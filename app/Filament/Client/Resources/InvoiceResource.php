@@ -51,32 +51,21 @@ class InvoiceResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->limit(50)
-                    ->alignCenter(), 
-                    
+                    ->alignCenter(),
 
-                TextColumn::make('issue_date')
-                    ->label('Fecha de Emisión')
-                    ->date()
-                    ->sortable()
-                    ->alignCenter(), 
-
-                TextColumn::make('due_date')
-                    ->label('Fecha de Vencimiento')
-                    ->date()
-                    ->sortable()
-                    ->alignCenter(), 
+                // Eliminadas las columnas de 'issue_date' y 'due_date'
 
                 TextColumn::make('total_amount')
                     ->label('Monto Total')
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
-                    ->alignCenter(), 
+                    ->alignCenter(),
 
                 TextColumn::make('pending_amount')
                     ->label('Monto Pendiente')
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
-                    ->alignCenter(), 
+                    ->alignCenter(),
 
                 TextColumn::make('status')
                     ->label('Estado')
@@ -99,7 +88,7 @@ class InvoiceResource extends Resource
                         'Cancelled' => 'Cancelada',
                         default => $state,
                     })
-                    ->alignCenter(), 
+                    ->alignCenter(),
             ])
             ->actions([
                 ViewAction::make()
@@ -114,29 +103,29 @@ class InvoiceResource extends Resource
                 ->tooltip('Selecciona las facturas pendientes para proceder con el pago.')
                 ->action(function (Collection $records) {
                     $totalAmount = $records->sum('pending_amount');
-            
+
                     // Crear el Payment
                     $payment = Payment::create([
                         'client_id' => auth()->id(),
                         'amount' => $totalAmount,
                         'payment_status' => 'Pending',
                         'reference' => 'PAYMENT_' . uniqid(),
-                        'external_reference' => 'ref_' . uniqid(),
+                        'external_reference' => 'ref_' . uniqid(), 
                     ]);
-            
+
                     // Asociar las facturas al Payment con el campo 'amount' en la tabla pivot
                     foreach ($records as $invoice) {
                         $payment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
                     }
-            
+
                     // Llamada al servicio de pago
                     $paymentService = app(PaymentService::class);
                     $paymentLink = $paymentService->generatePaymentLink($payment, route('payment.callback'));
-            
+
                     if ($paymentLink) {
                         // Actualizar el enlace de pago
                         $payment->update(['payment_link' => $paymentLink]);
-            
+
                         // Redirigir al usuario al enlace de pago
                         return redirect()->away($paymentLink);
                     } else {
@@ -149,7 +138,6 @@ class InvoiceResource extends Resource
                 })
                 ->color('success')
                 ->icon('heroicon-o-credit-card')
-            
             ]);
     }
 

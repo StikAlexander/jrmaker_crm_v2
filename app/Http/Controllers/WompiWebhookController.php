@@ -11,18 +11,19 @@ class WompiWebhookController extends Controller
     public function handle(Request $request)
     {
         try {
-            // Registrar la respuesta del webhook para revisión
+            // Registrar la respuesta completa del webhook para fines de depuración
             Log::info('Webhook recibido:', [
                 'response' => $request->all()
             ]);
 
-            // Obtener el ID del link de pago, el estado de la transacción y otros detalles
+            // Obtener los datos de la transacción desde el webhook
             $paymentLinkId = $request->input('data.transaction.payment_link_id');
             $status = $request->input('data.transaction.status');
-            $statusMessage = $request->input('data.transaction.status_message'); // Obtener el mensaje de estado
-            $returnCode = $request->input('data.transaction.payment_method.extra.return_code'); // Obtener el código de retorno
-            $reference = $request->input('data.transaction.reference'); // Obtener la referencia de la transacción
-            $transactionId = $request->input('data.transaction.id'); // Obtener la ID de la transacción
+            $transactionId = $request->input('data.transaction.id');
+            $reference = $request->input('data.transaction.reference');
+            $amount = $request->input('data.transaction.amount_in_cents') / 100; // Convertir de centavos a la moneda real
+            $paymentMethodType = $request->input('data.transaction.payment_method_type');
+            $apiResponse = $request->all(); // Guardar la respuesta completa de la API
 
             // Verificar si se recibió el ID del link de pago
             if ($paymentLinkId) {
@@ -36,54 +37,21 @@ class WompiWebhookController extends Controller
                         return response()->json(['status' => 'success'], 200);
                     }
 
-                    // Actualizar el estado del pago según el estado de la transacción
-                    switch ($status) {
-                        case 'APPROVED':
-                            $payment->update([
-                                'payment_status' => 'Completed',
-                                'status_message' => $statusMessage,
-                                'return_code' => $returnCode,
-                                'reference' => $reference,
-                                'transaction_id' => $transactionId, // Guardar la transacción procesada
-                            ]);
-                            break;
-                        case 'DECLINED':
-                            $payment->update([
-                                'payment_status' => 'Declined',
-                                'status_message' => $statusMessage,
-                                'return_code' => $returnCode,
-                                'reference' => $reference,
-                                'transaction_id' => $transactionId, // Guardar la transacción procesada
-                            ]);
-                            break;
-                        case 'CANCELLED':
-                            $payment->update([
-                                'payment_status' => 'Cancelled',
-                                'status_message' => $statusMessage,
-                                'return_code' => $returnCode,
-                                'reference' => $reference,
-                                'transaction_id' => $transactionId, // Guardar la transacción procesada
-                            ]);
-                            break;
-                        case 'ERROR':
-                            $payment->update([
-                                'payment_status' => 'Error',
-                                'status_message' => $statusMessage,
-                                'return_code' => $returnCode,
-                                'reference' => $reference,
-                                'transaction_id' => $transactionId, // Guardar la transacción procesada
-                            ]);
-                            break;
-                        default:
-                            $payment->update([
-                                'payment_status' => 'Pending',
-                                'status_message' => $statusMessage,
-                                'return_code' => $returnCode,
-                                'reference' => $reference,
-                                'transaction_id' => $transactionId, // Guardar la transacción procesada
-                            ]);
-                            break;
-                    }
+                    // Actualizar el estado del pago y otros detalles relevantes
+                    $payment->update([
+                        'payment_status' => match ($status) {
+                            'APPROVED' => 'Completed',
+                            'DECLINED' => 'Declined',
+                            'CANCELLED' => 'Cancelled',
+                            'ERROR' => 'Error',
+                            default => 'Pending',
+                        },
+                        'transaction_id' => $transactionId,
+                        'amount' => $amount,
+                        'reference' => $reference,
+                        'payment_method_type' => $paymentMethodType,
+                        'api_response' => json_encode($apiResponse),
+                    ]);
 
                     Log::info('Webhook procesado correctamente', [
                         'payment_link_id' => $paymentLinkId,

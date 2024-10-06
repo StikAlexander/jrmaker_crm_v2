@@ -26,7 +26,7 @@ class PaymentResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\TextInput::make('Payment_number')
+            Forms\Components\TextInput::make('payment_number')
                 ->prefix('SP')
                 ->disabled(),
 
@@ -63,9 +63,10 @@ class PaymentResource extends Resource
                     'Failed' => 'Fallido',
                     'Cancelled' => 'Cancelado',
                 ])
-                ->disabled(),  // lo maneja la pasarela de pago 
+                ->disabled(),  // lo maneja la pasarela de pago
         ]);
     }
+
     public static function table(Table $table): Table
     {
         return $table->columns([
@@ -74,11 +75,10 @@ class PaymentResource extends Resource
                 ->sortable(),  
             Tables\Columns\TextColumn::make('payment_number')
                 ->label('Número de Pago')
-                ->sortable(),  
-            Tables\Columns\TextColumn::make('issue_date')
-                ->label('Fecha de Emisión')
-                ->date() 
-                ->sortable(),  
+                ->sortable(),
+            
+            // Eliminada la columna 'issue_date' ya que no existe en la tabla 'payments'
+
             Tables\Columns\TextColumn::make('amount')
                 ->label('Monto')
                 ->money('COP')  
@@ -105,6 +105,7 @@ class PaymentResource extends Resource
                 ->hidden(),  // Oculto si no es necesario mostrar
         ]);
     }
+
     public static function getPages(): array
     {
         return [
