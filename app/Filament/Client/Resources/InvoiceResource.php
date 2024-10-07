@@ -20,10 +20,9 @@ class InvoiceResource extends Resource
 {
     protected static ?string $model = Invoice::class;
     protected static ?string $recordTitleAttribute = 'invoice_number';
-    protected static ?string $pluralLabel = 'Facturas';
-    protected static ?string $singularLabel = 'Factura';
+    protected static ?string $pluralLabel = 'Facturas Pendientes';
+    protected static ?string $singularLabel = 'Factura Pendiente';
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
-    protected static ?string $navigationGroup = 'Contabilidad';
     protected static ?int $navigationSort = 1;
 
     // Filtrar facturas del cliente autenticado
