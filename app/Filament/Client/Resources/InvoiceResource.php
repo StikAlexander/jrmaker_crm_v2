@@ -30,10 +30,10 @@ class InvoiceResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('client_id', auth()->id()) // Solo mostrar facturas del cliente autenticado
-            ->where('status', '!=', 'Cancelled'); // Opcional: evitar mostrar facturas anuladas
+            ->where('client_id', auth()->id()) 
+            ->where('status', 'Pending'); 
     }
-
+    
     public static function form(Form $form): Form
     {
         return $form->schema([

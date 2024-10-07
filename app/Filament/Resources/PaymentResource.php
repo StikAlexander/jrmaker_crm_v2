@@ -41,6 +41,7 @@ class PaymentResource extends Resource
                 TextColumn::make('payment_status')
                     ->label('Estado del Pago')
                     ->badge()
+                    ->sortable()
                     ->color(fn (string $state): string => match ($state) {
                         'Pending' => 'warning', // Amarillo para pendiente
                         'Completed' => 'success', // Verde para completado
@@ -57,7 +58,6 @@ class PaymentResource extends Resource
                     }),
                 TextColumn::make('payment_link')
                     ->label('Link de Pago')
-                    ->sortable()
                     ->hidden(), // Oculto si no es necesario mostrar
             ]);
 
