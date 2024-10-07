@@ -45,14 +45,6 @@ class ClientPanelProvider extends PanelProvider
                 'warning' => 'rgb(255, 186, 93)',   // Amarillo para advertencias
                 'accent' => 'rgb(171, 83, 79)',     // Rojo terracota para acentos
             ])
-            ->styles([
-                'button' => [
-                    'color' => 'rgb(255, 255, 255)', // Color del texto en los botones (blanco)
-                ],
-                'link' => [
-                    'color' => 'rgb(255, 255, 255)', // Color del texto en los enlaces
-                ],
-            ])
             ->favicon(fn (GeneralSettings $settings) => Storage::url($settings->site_favicon))
             ->brandName(fn (GeneralSettings $settings) => $settings->brand_name)
             ->brandLogo(fn (GeneralSettings $settings) => Storage::url($settings->brand_logo))
@@ -60,7 +52,7 @@ class ClientPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Client/Resources'), for: 'App\\Filament\\Client\\Resources')
             ->discoverPages(in: app_path('Filament/Client/Pages'), for: 'App\\Filament\\Client\\Pages')
             ->pages([
-                \App\Filament\Client\Pages\Dashboard::class,  // Asegúrate de incluir esta línea
+                \App\Filament\Client\Pages\Dashboard::class,  
             ])
             ->discoverWidgets(in: app_path('Filament/Client/Widgets'), for: 'App\\Filament\\Client\\Widgets')
             ->viteTheme('resources/css/filament/client/theme.css')
