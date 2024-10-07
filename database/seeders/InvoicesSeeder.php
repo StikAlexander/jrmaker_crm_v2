@@ -40,8 +40,9 @@ class InvoicesSeeder extends Seeder
 
         $issueDate = Carbon::now()->subMonths(rand(0, 12))->subDays(rand(0, 30));
         $dueDate = (clone $issueDate)->addDays(rand(15, 60));
-        $totalAmount = rand(500, 5000);
+        $totalAmount = rand(100000, 500000); // Ajuste de monto
         $totalPaid = rand(0, $totalAmount);
+        $description = $this->generateDescription(); // Descripción aleatoria
 
         return [
             'invoice_number' => $invoiceNumber,
@@ -53,10 +54,27 @@ class InvoicesSeeder extends Seeder
             'status' => $this->randomStatus($totalAmount, $totalPaid),
             'pending_amount' => $totalAmount - $totalPaid,
             'total_paid' => $totalPaid,
+            'description' => $description, // Añadiendo descripción
             'invoice_pdf' => 'invoices/' . $invoiceNumber . '.pdf',
             'created_at' => now(),
             'updated_at' => now(),
         ];
+    }
+
+    private function generateDescription()
+    {
+        $descriptions = [
+            'Instalación de vidrios templados',
+            'Puertas corredizas de aluminio',
+            'Marcos de ventanas de madera',
+            'Reparación de cerraduras de puertas',
+            'Diseño de ornamentos de hierro',
+            'Instalación de mamparas de vidrio',
+            'Cambio de puertas de madera',
+            'Decoración de ventanales'
+        ];
+
+        return $descriptions[array_rand($descriptions)];
     }
 
     private function randomStatus($totalAmount, $totalPaid)

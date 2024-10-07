@@ -96,13 +96,13 @@ class InvoiceResource extends Resource
                     ->alignCenter(),
             ])
             ->actions([
-                Action::make('viewPdf') // Acción para ver el PDF de la factura
+                Action::make('viewPdf') 
                     ->label('Ver PDF de la factura')
                     ->icon('heroicon-o-document-text')
-                    ->url(fn ($record) => Storage::url($record->invoice_pdf)) // Enlace al PDF
+                    ->url(fn ($record) => Storage::url($record->invoice_pdf)) 
                     ->openUrlInNewTab()
-                    ->tooltip('Ver PDF de la factura')
-                    ->iconButton(),
+                    ->tooltip('Haz clic para ver el PDF de la factura')
+                    ->button(),
             ])
             ->bulkActions([
                 BulkAction::make('paySelected') // Acción en masa para pagar las facturas seleccionadas
