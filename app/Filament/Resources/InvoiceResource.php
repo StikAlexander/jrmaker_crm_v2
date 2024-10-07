@@ -300,6 +300,7 @@ class InvoiceResource extends Resource
                         'Cancelled' => 'danger',   // Rojo para cancelada
                         default => 'secondary',
                     })
+                    ->sortable()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'Pending' => 'Pendiente',
                         'Paid' => 'Pagada',
