@@ -1,6 +1,6 @@
 services:
   app_v2:
-    image: jrmakercrmv2/jr_maker_crm_v2:latest  # Cambiado a la etiqueta 'latest'
+    image: jrmakercrmv2/jr_maker_crm_v2:latest
     container_name: jr_maker_crm_v2
     ports:
       - "8002:8002"
@@ -19,7 +19,7 @@ services:
       WOMPI_INTEGRITY_SECRET: ${WOMPI_INTEGRITY_SECRET}
       WOMPI_ENV: ${WOMPI_ENV}
       
-      # CLOUDFLARE CAPTCHA KEYS
+      # Cloudflare CAPTCHA keys
       TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY}
       TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
       
@@ -28,13 +28,13 @@ services:
       LOG_DEPRECATIONS_CHANNEL: ${LOG_DEPRECATIONS_CHANNEL}
       LOG_LEVEL: ${LOG_LEVEL}
       
-      # Database config (nueva base de datos para evitar conflictos)
+      # Database config
       DB_CONNECTION: mysql
-      DB_HOST: mysql_shared
-      DB_PORT: 3306
-      DB_DATABASE: jr_maker_sas_v2  
-      DB_USERNAME: root
-      DB_PASSWORD: ae031323
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
       
       # Redis config
       REDIS_HOST: ${REDIS_HOST}
@@ -46,7 +46,8 @@ services:
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
       MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}  
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION}
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
       MAIL_FROM_NAME: ${MAIL_FROM_NAME}
     command: php artisan octane:start --server=swoole --host=0.0.0.0 --port=8002
@@ -54,7 +55,7 @@ services:
       - nginxpm
 
   worker_v2:
-    image: jrmakercrmv2/jr_maker_crm_v2:latest  # Cambiado a la etiqueta 'latest'
+    image: jrmakercrmv2/jr_maker_crm_v2:latest
     container_name: jr_maker_crm_worker_v2
     environment:
       APP_NAME: ${APP_NAME}
@@ -63,13 +64,13 @@ services:
       APP_DEBUG: ${APP_DEBUG}
       APP_URL: ${APP_URL}
       
-      # Database config (misma configuración de la nueva base de datos)
+      # Database config
       DB_CONNECTION: mysql
-      DB_HOST: mysql_shared
-      DB_PORT: 3306
-      DB_DATABASE: jr_maker_sas_v2  
-      DB_USERNAME: root
-      DB_PASSWORD: ae031323
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
       
       # Redis config
       REDIS_HOST: ${REDIS_HOST}
