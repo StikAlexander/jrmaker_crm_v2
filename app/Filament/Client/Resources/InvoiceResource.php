@@ -53,8 +53,8 @@ class InvoiceResource extends Resource
                     ->searchable()
                     ->limit(20) 
                     ->alignStart() 
-                    ->columnSpan('full'), 
-
+                    ->columnSpan('full'),
+    
                 // Descripción
                 TextColumn::make('description')
                     ->label('Descripción')
@@ -64,7 +64,7 @@ class InvoiceResource extends Resource
                     ->tooltip(fn ($record) => $record->description) 
                     ->alignStart()
                     ->columnSpan('full'),
-
+    
                 // Monto Total
                 TextColumn::make('total_amount')
                     ->label('Monto Total')
@@ -72,7 +72,7 @@ class InvoiceResource extends Resource
                     ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
                     ->alignStart()
                     ->columnSpan('full'),
-
+    
                 // Monto Abonado
                 TextColumn::make('total_paid') 
                     ->label('Monto Abonado')
@@ -80,7 +80,7 @@ class InvoiceResource extends Resource
                     ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
                     ->alignStart()
                     ->columnSpan('full'),
-
+    
                 // Monto Pendiente
                 TextColumn::make('pending_amount') 
                     ->label('Monto Pendiente')
@@ -88,7 +88,7 @@ class InvoiceResource extends Resource
                     ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
                     ->alignStart()
                     ->columnSpan('full'),
-
+    
                 // Estado de la Factura
                 TextColumn::make('status')
                     ->label('Estado')
@@ -109,7 +109,6 @@ class InvoiceResource extends Resource
                     ->alignStart()
                     ->columnSpan('full'),
             ])
-            ->extraAttributes(['class' => 'table-auto text-sm w-full overflow-hidden'])  
             ->actions([
                 Action::make('viewPdf') 
                     ->label('Ver PDF')
@@ -119,15 +118,15 @@ class InvoiceResource extends Resource
                     ->tooltip('Haz clic para ver el PDF de la factura')
                     ->button()
                     ->color('danger') 
-                    ->extraAttributes(['class' => 'text-white']), 
+                    ->extraAttributes(['class' => 'text-white']),
             ])
             ->bulkActions([
-                BulkAction::make('paySelected') // Acción en masa para pagar las facturas seleccionadas
+                BulkAction::make('paySelected')
                     ->label('Pagar seleccionadas')
                     ->tooltip('Selecciona las facturas pendientes para proceder con el pago.')
                     ->action(function (Collection $records) {
                         $totalAmount = $records->sum('pending_amount');
-
+    
                         // Crear el pago
                         $payment = Payment::create([
                             'client_id' => auth()->id(),
@@ -136,20 +135,20 @@ class InvoiceResource extends Resource
                             'reference' => 'PAYMENT_' . uniqid(),
                             'external_reference' => 'ref_' . uniqid(),
                         ]);
-
+    
                         // Asociar las facturas al pago
                         foreach ($records as $invoice) {
                             $payment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
                         }
-
+    
                         // Generar el enlace de pago
                         $paymentService = app(PaymentService::class);
                         $paymentLink = $paymentService->generatePaymentLink($payment, route('payment.callback'));
-
+    
                         if ($paymentLink) {
                             // Actualizar el enlace de pago
                             $payment->update(['payment_link' => $paymentLink]);
-
+    
                             // Redirigir al enlace de pago
                             return redirect()->away($paymentLink);
                         } else {
@@ -164,6 +163,7 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-credit-card'),
             ]);
     }
+    
 
     public static function getHeaderWidgets(): array
     {
