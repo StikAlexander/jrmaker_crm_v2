@@ -36,7 +36,7 @@ class InvoiceResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            // Aquí puedes agregar campos del formulario si es necesario
+            // Campos del formulario si es necesario
         ]);
     }
 
@@ -45,38 +45,51 @@ class InvoiceResource extends Resource
         return $table
             ->description('Selecciona una o más facturas pendientes para proceder con el pago.')
             ->columns([
+                // Número de Factura
                 TextColumn::make('invoice_number')
                     ->label('Número de Factura')
                     ->prefix('FEVD')
                     ->sortable()
                     ->searchable()
-                    ->limit(50)
-                    ->alignCenter(),
+                    ->limit(20) 
+                    ->alignStart() 
+                    ->columnSpan('full'), 
 
-                TextColumn::make('description') // Columna de Descripción
+                // Descripción
+                TextColumn::make('description')
                     ->label('Descripción')
                     ->sortable()
                     ->searchable()
-                    ->alignCenter(),
+                    ->limit(30) // Limitar caracteres
+                    ->tooltip(fn ($record) => $record->description) 
+                    ->alignStart()
+                    ->columnSpan('full'),
 
+                // Monto Total
                 TextColumn::make('total_amount')
                     ->label('Monto Total')
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
-                    ->alignCenter(),
+                    ->alignStart()
+                    ->columnSpan('full'),
 
+                // Monto Abonado
                 TextColumn::make('total_paid') 
                     ->label('Monto Abonado')
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
-                    ->alignCenter(),
+                    ->alignStart()
+                    ->columnSpan('full'),
 
+                // Monto Pendiente
                 TextColumn::make('pending_amount') 
                     ->label('Monto Pendiente')
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
-                    ->alignCenter(),
+                    ->alignStart()
+                    ->columnSpan('full'),
 
+                // Estado de la Factura
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
@@ -93,8 +106,10 @@ class InvoiceResource extends Resource
                         'Cancelled' => 'Cancelada',
                         default => $state,
                     })
-                    ->alignCenter(),
+                    ->alignStart()
+                    ->columnSpan('full'),
             ])
+            ->extraAttributes(['class' => 'table-auto text-sm w-full overflow-hidden'])  
             ->actions([
                 Action::make('viewPdf') 
                     ->label('Ver PDF')
