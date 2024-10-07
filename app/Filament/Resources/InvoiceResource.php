@@ -30,8 +30,6 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Filament\GlobalSearch\GlobalSearchResult;
 
-
-
 class InvoiceResource extends Resource
 {
     protected static ?string $model = Invoice::class;
@@ -41,13 +39,11 @@ class InvoiceResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Contabilidad';
     protected static ?int $navigationSort = 1;
+
     public static function getGlobalSearchResults(string $search): Collection
     {
-        
         if (str_starts_with(strtoupper($search), 'FEVD')) {
-            
             $search = substr($search, 4);
-    
             return static::getModel()::query()
                 ->where('invoice_number', 'like', "%{$search}%")
                 ->orWhere('description', 'like', "%{$search}%")
@@ -64,11 +60,8 @@ class InvoiceResource extends Resource
                     );
                 });
         }
-    
-        
         return collect([]);
     }
-    
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -100,6 +93,7 @@ class InvoiceResource extends Resource
                 ->url(static::getUrl('edit', ['record' => $record])),
         ];
     }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -128,7 +122,7 @@ class InvoiceResource extends Resource
                                                 $exists = \App\Models\Invoice::where('invoice_number', $state)
                                                     ->when($currentId, fn ($query) => $query->where('id', '!=', $currentId))
                                                     ->exists();
-    
+
                                                 if ($exists) {
                                                     $set('invoice_number_error', 'Este número de factura ya está siendo usado.');
                                                 } else {
@@ -147,7 +141,7 @@ class InvoiceResource extends Resource
                                                 $query->where('name', 'client');
                                             })->pluck('name', 'id')),
                                     ]),
-                                    Grid::make()
+                                Grid::make()
                                     ->columns(2)
                                     ->schema([
                                         DatePicker::make('issue_date')
@@ -157,7 +151,6 @@ class InvoiceResource extends Resource
                                             ->maxDate(Carbon::today())
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 if ($state) {
-                                                    
                                                     $dueDate = Carbon::parse($state)->addDays(30)->format('Y-m-d');
                                                     $set('due_date', $dueDate);
                                                 } else {
@@ -167,7 +160,7 @@ class InvoiceResource extends Resource
                                         DatePicker::make('due_date')
                                             ->label('Fecha de Vencimiento')
                                             ->required()
-                                            ->disabled() 
+                                            ->disabled()
                                             ->placeholder('Se calculará automáticamente si aplica'),
                                     ]),
                             ]),
@@ -198,15 +191,15 @@ class InvoiceResource extends Resource
                                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                                 $totalAmount = (float)($get('total_amount') ?? 0);
                                                 $paidAmount = (float)($state ?? 0);
-    
+
                                                 if ($paidAmount > $totalAmount) {
                                                     $paidAmount = $totalAmount;
                                                     $set('total_paid', $paidAmount);
                                                 }
-    
+
                                                 $pendingAmount = $totalAmount - $paidAmount;
                                                 $set('pending_amount', $pendingAmount);
-    
+
                                                 if ($paidAmount < $totalAmount) {
                                                     $set('status', 'Pending');
                                                 } else {
@@ -249,7 +242,7 @@ class InvoiceResource extends Resource
                     ]),
             ]);
     }
-    
+
     public static function table(Table $table): Table
     {
         return $table
@@ -295,9 +288,9 @@ class InvoiceResource extends Resource
                     ->label('Estado')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'Pending' => 'warning',    // Amarillo para pendiente
-                        'Paid' => 'success',       // Verde para pagada
-                        'Cancelled' => 'danger',   // Rojo para cancelada
+                        'Pending' => 'warning',
+                        'Paid' => 'success',
+                        'Cancelled' => 'danger',
                         default => 'secondary',
                     })
                     ->sortable()
@@ -314,7 +307,7 @@ class InvoiceResource extends Resource
                     ->size(ActionSize::Large)
                     ->tooltip('Ver Detalles')
                     ->iconButton(),
-            
+
                 Tables\Actions\EditAction::make()
                     ->modalHeading('Editar Factura')
                     ->modalWidth('4xl')
@@ -322,7 +315,7 @@ class InvoiceResource extends Resource
                     ->size(ActionSize::Large)
                     ->tooltip('Editar Factura')
                     ->iconButton(),
-            
+
                 Action::make('viewPdf')
                     ->label('')
                     ->icon('heroicon-o-document-text')
@@ -331,18 +324,21 @@ class InvoiceResource extends Resource
                     ->openUrlInNewTab()
                     ->tooltip('Ver PDF')
                     ->iconButton(),
-            
+
                 Action::make('cancelInvoice')
                     ->label('')
                     ->icon('heroicon-o-x-circle')
                     ->size(ActionSize::Large)
                     ->color(fn (Invoice $record) => $record->status === 'Cancelled' ? 'secondary' : 'danger')
-                    ->disabled(fn (Invoice $record) => $record->status === 'Cancelled' || $record->status === 'Paid') // Deshabilita si está cancelada o pagada
+                    ->disabled(fn (Invoice $record) => $record->status === 'Cancelled' || $record->status === 'Paid')
                     ->tooltip(fn (Invoice $record) => match ($record->status) {
-                        'Paid' => 'No se puede anular una factura pagada',  // Tooltip si está pagada
-                        'Cancelled' => 'Factura Anulada',  // Tooltip si está cancelada
-                        default => 'Anular Factura'  // Tooltip estándar
+                        'Paid' => 'No se puede anular una factura pagada',
+                        'Cancelled' => 'Factura Anulada',
+                        default => 'Anular Factura'
                     })
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Estás seguro de que deseas anular esta factura?')
+                    ->modalSubheading('Esta acción no se puede deshacer.')
                     ->iconButton()
                     ->action(function (Invoice $record) {
                         $record->status = 'Cancelled';
@@ -354,7 +350,7 @@ class InvoiceResource extends Resource
                     ->label('Anular Seleccionadas')
                     ->action(function (Collection $records) {
                         foreach ($records as $invoice) {
-                            if ($invoice->status !== 'Cancelled' && $invoice->status !== 'Paid') { // No anula si está pagada o cancelada
+                            if ($invoice->status !== 'Cancelled' && $invoice->status !== 'Paid') {
                                 $invoice->update(['status' => 'Cancelled']);
                             }
                         }
@@ -363,9 +359,7 @@ class InvoiceResource extends Resource
                     ->color('danger')
                     ->icon('heroicon-o-x-circle'),
             ]);
-            
     }
-    
 
     public static function getPages(): array
     {
