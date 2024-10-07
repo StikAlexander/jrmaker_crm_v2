@@ -98,7 +98,7 @@ class InvoiceResource extends Resource
             ])
             ->actions([
                 Action::make('viewPdf') // Acción para ver el PDF de la factura
-                    ->label('')
+                    ->label('Ver PDF de la factura')
                     ->icon('heroicon-o-document-text')
                     ->url(fn ($record) => Storage::url($record->invoice_pdf)) // Enlace al PDF
                     ->openUrlInNewTab()
