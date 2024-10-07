@@ -33,6 +33,7 @@ class PaymentResource extends Resource
                     ->label('Cliente'),
                 TextColumn::make('payment_number')
                     ->label('Número de Pago')
+                    ->prefix('FEVD')
                     ->sortable(),
                 TextColumn::make('amount')
                     ->label('Monto')
@@ -58,8 +59,13 @@ class PaymentResource extends Resource
                     }),
                 TextColumn::make('payment_link')
                     ->label('Link de Pago')
-                    ->hidden(), // Oculto si no es necesario mostrar
+                    ->hidden(),
+                TextColumn::make('payment_method_type')
+                    ->label('Metodo de Pago')
+                    ->sortable(),
+                
             ]);
+
 
         // No agregar acciones de edición o creación para mantenerlo como solo lectura
     }
