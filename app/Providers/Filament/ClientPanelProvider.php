@@ -22,6 +22,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Shanerbaner82\PanelRoles\PanelRoles;
+use Filament\Support\Enums\MaxWidth;
 
 class ClientPanelProvider extends PanelProvider
 {
@@ -29,6 +30,8 @@ class ClientPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->maxContentWidth(MaxWidth::Full) // ScreenExtraLarge
+            ->sidebarFullyCollapsibleOnDesktop()
             ->id('client')
             ->path('client')
             ->login(AuthClientLogin::class)
