@@ -57,7 +57,7 @@ class PaymentResource extends Resource
                     }),
                 TextColumn::make('payment_link')
                     ->label('Link de Pago')
-                    ->sorteable()
+                    ->sortable()
                     ->hidden(), // Oculto si no es necesario mostrar
             ]);
 
