@@ -6,14 +6,20 @@ return new class extends SettingsMigration
 {
     public function up(): void
     {
+        // Almacenamos la configuración del correo
         $this->migrator->add('mail.from_address', 'makercolombia@hotmail.com');
         $this->migrator->add('mail.from_name', 'J.R. MAKER S.A.S.');
         $this->migrator->add('mail.driver', 'smtp');
-        $this->migrator->add('mail.host', 'sandbox.smtp.mailtrap.io');
-        $this->migrator->add('mail.port', 2525);
-        $this->migrator->add('mail.encryption', 'tls');
-        $this->migrator->addEncrypted('mail.username', 'c34db037ba25a7');
-        $this->migrator->addEncrypted('mail.password', '073f8878b00147');
+        
+        // Cambia a Outlook como servicio de correo
+        $this->migrator->add('mail.host', 'smtp-mail.outlook.com');
+        $this->migrator->add('mail.port', 587);
+        $this->migrator->add('mail.encryption', 'starttls');
+        
+        // Ciframos las credenciales sensibles
+        $this->migrator->addEncrypted('mail.username', 'makercolombia@hotmail.com');
+        $this->migrator->addEncrypted('mail.password', 'vhyewhclplcazmao');
+        
         $this->migrator->add('mail.timeout', null);
         $this->migrator->add('mail.local_domain', null);
     }
