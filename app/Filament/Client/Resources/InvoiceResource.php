@@ -97,12 +97,14 @@ class InvoiceResource extends Resource
             ])
             ->actions([
                 Action::make('viewPdf') 
-                    ->label('Ver PDF de la factura')
+                    ->label('Ver PDF')
                     ->icon('heroicon-o-document-text')
                     ->url(fn ($record) => Storage::url($record->invoice_pdf)) 
                     ->openUrlInNewTab()
                     ->tooltip('Haz clic para ver el PDF de la factura')
-                    ->button(),
+                    ->button()
+                    ->color('danger') 
+                    ->extraAttributes(['class' => 'text-white']), 
             ])
             ->bulkActions([
                 BulkAction::make('paySelected') // Acción en masa para pagar las facturas seleccionadas
