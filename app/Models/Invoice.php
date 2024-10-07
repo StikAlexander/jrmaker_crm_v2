@@ -41,11 +41,14 @@ class Invoice extends Model
         });
     
         static::saving(function ($model) {
-            // Evita cambios si la factura está en estado 'Paid'
-            if ($model->status === 'Paid' && $model->isDirty('status')) {
-                throw new \Exception('No se puede modificar o anular una factura que ya está pagada.');
+            // Obtén el estado actual de la factura desde la base de datos
+            $currentStatus = $model->getOriginal('status');
+        
+            // Evita cambios si la factura está realmente en estado 'Paid' en la base de datos
+            if ($model->getOriginal('status') === 'Paid' && $model->isDirty('status')) {
+                throw new \Exception('No se puede cambiar el estado de una factura que ya está pagada.');
             }
-
+            
             if (!empty($model->total_amount)) {
                 $model->pending_amount = $model->total_amount - ($model->total_paid ?? 0);
             }
