@@ -36,7 +36,7 @@ class PaymentResource extends Resource
                 TextColumn::make('updated_at') 
                     ->label('Fecha de Pago')
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => \Carbon\Carbon::parse($state)->format('d/m/Y H:i')),
+                    ->formatStateUsing(fn (string $state): string => \Carbon\Carbon::parse($state)->format('d/m/Y g:i A')),
                 TextColumn::make('payment_status')
                     ->label('Estado del Pago')
                     ->badge()
