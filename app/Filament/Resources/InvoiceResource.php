@@ -284,6 +284,10 @@ class InvoiceResource extends Resource
                     ->label('Monto Pendiente')
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.')),
+                TextColumn::make('updated_at') 
+                    ->label('Fecha de Pago')
+                    ->sortable()
+                    ->formatStateUsing(fn (string $state): string => \Carbon\Carbon::parse($state)->format('d/m/Y H:i')),
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()

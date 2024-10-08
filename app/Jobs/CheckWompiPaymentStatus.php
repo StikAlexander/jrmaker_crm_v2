@@ -35,31 +35,52 @@ class CheckWompiPaymentStatus implements ShouldQueue
     public function handle()
     {
         try {
-            // Verifica que el estado actual del pago sea "Pending"
-            if ($this->payment->payment_status === 'Pending') {
+            // 1. Verificar si el payment tiene un transaction_id
+            if (!empty($this->payment->transaction_id)) {
+                // Hacer la solicitud a la API de Wompi para verificar el estado de la transacción
                 $response = Http::withHeaders([
                     'Authorization' => 'Bearer ' . env('WOMPI_PRIVATE_KEY'),
                     'Content-Type' => 'application/json',
-                ])->get(env('WOMPI_ENV') === 'production' ? 'https://production.wompi.co/v1/transactions/' : 'https://sandbox.wompi.co/v1/transactions/', [
-                    'reference' => $this->payment->reference
-                ]);
+                ])->get(env('WOMPI_ENV') === 'production' ? 'https://production.wompi.co/v1/transactions/' . $this->payment->transaction_id : 'https://sandbox.wompi.co/v1/transactions/' . $this->payment->transaction_id);
+
+                Log::info('Respuesta completa de Wompi:', $response->json());
 
                 if ($response->successful()) {
-                    $transactionData = $response->json();
+                    $transactionData = $response->json()['data'];
 
-                    // Evaluar el estado de la transacción
-                    $status = $transactionData['data']['status'];
-                    if ($status === 'APPROVED') {
-                        $this->payment->update(['payment_status' => 'Completed']);
-                    } elseif ($status === 'DECLINED' || $status === 'CANCELLED') {
-                        $this->payment->update(['payment_status' => 'Cancelled']);
-                    } elseif ($status === 'PENDING' && now()->greaterThan($this->payment->created_at->addMinutes(2))) {
-                        // Si el link ha expirado, cancela el pago
-                        $this->payment->update(['payment_status' => 'Cancelled']);
-                        Log::info('Pago cancelado debido a que el link ha expirado. Payment ID: ' . $this->payment->id);
+                    // Manejar el estado de la transacción
+                    $status = $transactionData['status'];
+                    switch ($status) {
+                        case 'APPROVED':
+                            $this->payment->update(['payment_status' => 'Completed']);
+                            break;
+                        case 'DECLINED':
+                        case 'CANCELLED':
+                            $this->payment->update(['payment_status' => 'Cancelled']);
+                            break;
+                        case 'PENDING':
+                            // Si sigue en estado PENDING y ha pasado el tiempo de expiración, cancela el pago
+                            if (now()->greaterThan($this->payment->created_at->addMinutes(3))) {
+                                $this->payment->update(['payment_status' => 'Cancelled']);
+                                Log::info('Pago cancelado por expiración del link. Payment ID: ' . $this->payment->id);
+                            }
+                            break;
+                        default:
+                            Log::warning('Estado inesperado en Wompi: ' . $status);
+                            break;
                     }
                 } else {
                     Log::error('Error al consultar el estado de la transacción en Wompi. Respuesta: ' . $response->body());
+                }
+            } 
+            // 2. Si no hay transaction_id, manejar como transacción abandonada
+            else {
+                Log::warning('El pago no tiene un transaction_id. Verificando el link de pago para Payment ID: ' . $this->payment->id);
+                
+                // Verificar si el link ha expirado y cancelar el pago
+                if (now()->greaterThan($this->payment->created_at->addMinutes(3))) {
+                    $this->payment->update(['payment_status' => 'Cancelled']);
+                    Log::info('Pago cancelado por expiración del link. Payment ID: ' . $this->payment->id);
                 }
             }
         } catch (\Exception $e) {
