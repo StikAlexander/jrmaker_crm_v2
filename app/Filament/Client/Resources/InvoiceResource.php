@@ -2,6 +2,7 @@
 
 namespace App\Filament\Client\Resources;
 
+use App\Jobs\CheckWompiPaymentStatus;
 use App\Models\Invoice;
 use App\Models\Payment;
 use Filament\Notifications\Notification;
@@ -148,6 +149,9 @@ class InvoiceResource extends Resource
                         if ($paymentLink) {
                             // Actualizar el enlace de pago
                             $payment->update(['payment_link' => $paymentLink]);
+
+                            // preguntar en 3 minutos si el link ya vencio 
+                            CheckWompiPaymentStatus::dispatch($payment)->delay(now()->addMinutes(3));
     
                             // Redirigir al enlace de pago
                             return redirect()->away($paymentLink);
