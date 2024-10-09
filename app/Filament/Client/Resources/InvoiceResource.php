@@ -150,8 +150,8 @@ class InvoiceResource extends Resource
                             // Actualizar el enlace de pago
                             $payment->update(['payment_link' => $paymentLink]);
 
-                            // preguntar en 3 minutos si el link ya vencio 
-                            CheckWompiPaymentStatus::dispatch($payment)->delay(now()->addMinutes(3));
+                            // preguntar en 2 minutos si el link ya vencio 
+                            CheckWompiPaymentStatus::dispatch($payment)->delay(now()->addMinutes(2)->addSeconds(15));
     
                             // Redirigir al enlace de pago
                             return redirect()->away($paymentLink);
