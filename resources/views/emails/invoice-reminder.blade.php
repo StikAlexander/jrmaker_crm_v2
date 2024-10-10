@@ -1,19 +1,21 @@
-@component('mail::message')
-# {{ $subject }}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recordatorio de Factura</title>
+</head>
+<body>
+    <h1>{{ $subject }}</h1>
 
-Estimado {{ $invoice->client->name }},
+    <p>Estimado {{ $invoice->client->name }},</p>
 
-Te recordamos que la factura **#{{ $invoice->invoice_number }}** con un monto de **${{ number_format($invoice->total_amount, 2) }}** tiene la siguiente situación:
+    <p>Le recordamos que su factura #{{ $invoice->invoice_number }} con un monto de ${{ $invoice->total_amount }} tiene una fecha de vencimiento de {{ $invoice->due_date->format('d-m-Y') }}.</p>
 
-@if ($invoice->due_date < now())
-- **Fecha de vencimiento**: {{ $invoice->due_date->format('d-m-Y') }} (¡Ya vencida!)
-@else
-- **Fecha de vencimiento**: {{ $invoice->due_date->format('d-m-Y') }}
-@endif
+    @if ($invoice->due_date < now())
+        <p>La factura ya ha vencido, le rogamos realizar el pago lo antes posible para evitar recargos adicionales.</p>
+    @else
+        <p>Le recomendamos realizar el pago antes de la fecha de vencimiento para evitar retrasos.</p>
+    @endif
 
-Por favor, asegúrate de realizar el pago lo antes posible para evitar problemas adicionales.
-
-Gracias por tu atención,
-
-{{ config('app.name') }}
-@endcomponent
+    <p>Gracias por su atención.</p>
+</body>
+</html>
