@@ -40,12 +40,8 @@ class InvoicesSeeder extends Seeder
 
         $issueDate = Carbon::now()->subMonths(rand(0, 12))->subDays(rand(0, 30));
         $dueDate = (clone $issueDate)->addDays(rand(15, 60));
-        $totalAmount = rand(100000, 500000); // Ajuste de monto
+        $totalAmount = rand(500, 5000);
         $totalPaid = rand(0, $totalAmount);
-        $description = $this->generateDescription(); // Descripción aleatoria
-
-        // Simulamos que algunas facturas no han recibido recordatorio
-        $lastReminderSentAt = $this->randomLastReminder(); 
 
         return [
             'invoice_number' => $invoiceNumber,
@@ -57,28 +53,11 @@ class InvoicesSeeder extends Seeder
             'status' => $this->randomStatus($totalAmount, $totalPaid),
             'pending_amount' => $totalAmount - $totalPaid,
             'total_paid' => $totalPaid,
-            'description' => $description,
             'invoice_pdf' => 'invoices/' . $invoiceNumber . '.pdf',
-            'last_reminder_sent_at' => $lastReminderSentAt, // Añadimos el campo de recordatorio
             'created_at' => now(),
             'updated_at' => now(),
+            'last_reminder_sent_at' => null, // Aquí aseguramos que sea null
         ];
-    }
-
-    private function generateDescription()
-    {
-        $descriptions = [
-            'Instalación de vidrios templados',
-            'Puertas corredizas de aluminio',
-            'Marcos de ventanas de madera',
-            'Reparación de cerraduras de puertas',
-            'Diseño de ornamentos de hierro',
-            'Instalación de mamparas de vidrio',
-            'Cambio de puertas de madera',
-            'Decoración de ventanales'
-        ];
-
-        return $descriptions[array_rand($descriptions)];
     }
 
     private function randomStatus($totalAmount, $totalPaid)
@@ -90,12 +69,5 @@ class InvoicesSeeder extends Seeder
         } else {
             return 'Paid';
         }
-    }
-
-    // Generar valor aleatorio para el campo last_reminder_sent_at
-    private function randomLastReminder()
-    {
-        // 50% de probabilidad de tener una fecha de recordatorio previa
-        return rand(0, 1) ? Carbon::now()->subDays(rand(1, 30)) : null;
     }
 }
