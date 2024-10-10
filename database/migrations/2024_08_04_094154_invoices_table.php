@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('invoice_pdf')->nullable();
             $table->string('description')->nullable();
             $table->timestamps();
+            $table->timestamp('last_reminder_sent_at')->nullable();
             $table->softDeletes();
         });
         

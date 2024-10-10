@@ -44,6 +44,9 @@ class InvoicesSeeder extends Seeder
         $totalPaid = rand(0, $totalAmount);
         $description = $this->generateDescription(); // Descripción aleatoria
 
+        // Simulamos que algunas facturas no han recibido recordatorio
+        $lastReminderSentAt = $this->randomLastReminder(); 
+
         return [
             'invoice_number' => $invoiceNumber,
             'issue_date' => $issueDate,
@@ -54,8 +57,9 @@ class InvoicesSeeder extends Seeder
             'status' => $this->randomStatus($totalAmount, $totalPaid),
             'pending_amount' => $totalAmount - $totalPaid,
             'total_paid' => $totalPaid,
-            'description' => $description, // Añadiendo descripción
+            'description' => $description,
             'invoice_pdf' => 'invoices/' . $invoiceNumber . '.pdf',
+            'last_reminder_sent_at' => $lastReminderSentAt, // Añadimos el campo de recordatorio
             'created_at' => now(),
             'updated_at' => now(),
         ];
@@ -86,5 +90,12 @@ class InvoicesSeeder extends Seeder
         } else {
             return 'Paid';
         }
+    }
+
+    // Generar valor aleatorio para el campo last_reminder_sent_at
+    private function randomLastReminder()
+    {
+        // 50% de probabilidad de tener una fecha de recordatorio previa
+        return rand(0, 1) ? Carbon::now()->subDays(rand(1, 30)) : null;
     }
 }
