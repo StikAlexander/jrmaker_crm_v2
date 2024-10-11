@@ -28,7 +28,7 @@ class ContactanosMailable extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('hello@example.com', 'stik gamb'),	
+            from: new Address('operaciones@jrmaker.com.co', 'stik gamb'),	
             subject: 'Contactanos Mailable',
         );
     }
