@@ -66,7 +66,7 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'operaciones@jrmaker.com.co'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'name' => env('MAIL_FROM_NAME', 'J.R. MAKER S.A.S.'),
     ],
 
     'markdown' => [
