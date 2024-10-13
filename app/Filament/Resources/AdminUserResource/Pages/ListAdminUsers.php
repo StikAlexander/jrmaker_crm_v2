@@ -16,7 +16,7 @@ class ListAdminUsers extends ListRecords
             Actions\CreateAction::make()
                 ->label('Crear Administrador')  
                 ->icon('heroicon-o-user-plus')
-                ->color('success'),
+                ->color('primary'),
         ];
     }
 }

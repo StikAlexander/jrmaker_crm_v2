@@ -16,7 +16,7 @@ class ListClientUsers extends ListRecords
             Actions\CreateAction::make()
             ->label('Crear Cliente')  
             ->icon('heroicon-o-user-plus')
-            ->color('success'),
+            ->color('primary'),
         ];
     }
 }

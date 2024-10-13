@@ -16,7 +16,7 @@ class ListCollaboratorUsers extends ListRecords
             Actions\CreateAction::make()
                 ->label('Crear Colaborador')  
                 ->icon('heroicon-o-user-plus')
-                ->color('success'),
+                ->color('primary'),
         ];
     }
 }
