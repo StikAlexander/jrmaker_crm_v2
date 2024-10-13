@@ -13,7 +13,10 @@ class ListClientUsers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+            ->label('Crear Cliente')  
+            ->icon('heroicon-o-user-plus')
+            ->color('success'),
         ];
     }
 }

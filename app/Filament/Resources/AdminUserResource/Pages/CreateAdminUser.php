@@ -12,6 +12,11 @@ class CreateAdminUser extends CreateRecord
 {
     protected static string $resource = AdminUserResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Crear Administrador';
+    }
+
     protected function afterCreate(): void
     {
         $user = $this->record;

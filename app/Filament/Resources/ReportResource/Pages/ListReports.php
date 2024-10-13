@@ -13,7 +13,10 @@ class ListReports extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Generar Reporte')  
+                ->icon('heroicon-o-chart-bar')
+                ->color('primary'),
         ];
     }
 }

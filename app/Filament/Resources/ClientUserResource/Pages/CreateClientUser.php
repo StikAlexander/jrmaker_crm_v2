@@ -17,6 +17,11 @@ class CreateClientUser extends CreateRecord
 {
     protected static string $resource = ClientUserResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Crear Cliente';
+    }
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

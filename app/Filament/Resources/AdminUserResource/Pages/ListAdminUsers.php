@@ -13,7 +13,10 @@ class ListAdminUsers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Crear Administrador')  
+                ->icon('heroicon-o-user-plus')
+                ->color('success'),
         ];
     }
 }

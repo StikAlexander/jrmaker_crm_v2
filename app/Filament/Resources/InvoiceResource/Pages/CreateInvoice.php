@@ -14,6 +14,11 @@ class CreateInvoice extends CreateRecord
 {
     protected static string $resource = InvoiceResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Crear Factura';
+    }
+
     protected function handleRecordCreation(array $data): Model
     {
         // Validar la unicidad del número de factura

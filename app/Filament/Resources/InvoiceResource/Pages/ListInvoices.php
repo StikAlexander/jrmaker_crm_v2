@@ -7,8 +7,8 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use YOS\FilamentExcel\Actions\Import;
 use App\Imports\InvoiceImport;
-use Maatwebsite\Excel\Facades\Excel; // Importa la fachada de Excel
-use App\Exports\InvoicesExport; // Asegúrate de que la clase de exportación esté en el lugar correcto
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\InvoicesExport;
 
 class ListInvoices extends ListRecords
 {
@@ -32,7 +32,12 @@ class ListInvoices extends ListRecords
                 ->action(function () {
                     return Excel::download(new InvoicesExport, 'invoices.xlsx');
                 }),
-                Actions\CreateAction::make(),
+
+            
+            Actions\CreateAction::make()
+                ->label('Crear Factura')  
+                ->icon('heroicon-o-document-plus')
+                ->color('primary'),
         ];
     }
 }

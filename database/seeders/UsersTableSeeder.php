@@ -6,7 +6,6 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Crypt; // Importar Crypt para la encriptación
 
 class UsersTableSeeder extends Seeder
 {
@@ -106,11 +105,16 @@ class UsersTableSeeder extends Seeder
         $userIds = [];
 
         foreach ($users as $user) {
+            // Si el rol es 'client', añadimos 'test' al final del nombre
+            if ($user['role'] === 'client') {
+                $user['name'] .= ' test';
+            }
+
             $createdById = match ($user['role']) {
                 'admin' => $userIds['super_admin'] ?? null,
                 'collaborator' => $userIds['admin'] ?? null,
                 'client' => $userIds['collaborator'] ?? null,
-                default => null, // El super_admin se crea a sí mismo
+                default => null,
             };
 
             // Configurar la contraseña según el rol

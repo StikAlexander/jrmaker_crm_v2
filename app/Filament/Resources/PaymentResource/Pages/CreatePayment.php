@@ -20,6 +20,11 @@ class CreatePayment extends CreateRecord
 {
     protected static string $resource = PaymentResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Crear Pago';
+    }
+
     protected function handleRecordCreation(array $data): Model
     {
         // Añade el ID del usuario autenticado

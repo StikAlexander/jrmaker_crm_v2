@@ -12,6 +12,11 @@ class CreateCollaboratorUser extends CreateRecord
 {
     protected static string $resource = CollaboratorUserResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Crear Colaborador';
+    }
+
     protected function afterCreate(): void
     {
         $user = $this->record;
