@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('communication_id')->constrained('user_communications')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->timestamps();
+            $table->timestamps();  // Campos created_at y updated_at
         });
     }
 

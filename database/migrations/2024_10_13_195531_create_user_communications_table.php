@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('user_communications', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->nullable();  
-            $table->text('message')->nullable();  
-            $table->timestamps();  
+            $table->string('template_id');  // Campo para guardar la plantilla seleccionada
+            $table->string('title')->nullable();  // Campo para el título del correo
+            $table->text('message')->nullable();  // Campo para el mensaje del correo
+            $table->timestamps();  // Campos created_at y updated_at
         });
     }
 
