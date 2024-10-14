@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class UserCommunication extends Model
 {
-    // use HasFactory;
+    // Aquí defines los campos que se pueden asignar masivamente
+    protected $fillable = [
+        'template_id',  
+        'title',        
+        'message',      
+    ];
 }
