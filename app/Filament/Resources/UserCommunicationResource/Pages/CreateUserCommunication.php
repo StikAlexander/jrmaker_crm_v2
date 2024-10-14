@@ -15,9 +15,11 @@ class CreateUserCommunication extends CreateRecord
 {
     protected static string $resource = UserCommunicationResource::class;
 
-    /**
-     * Sobrescribir el método para manejar el envío del correo y la creación del registro
-     */
+    public function getTitle(): string
+    {
+        return 'Crear Comunicado';
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         try {
@@ -35,10 +37,7 @@ class CreateUserCommunication extends CreateRecord
                     ->send(new UserCommunicationMail($cliente, $data['template_id']));
             }
 
-            // Opción de logging en caso de éxito
-            Log::info('El comunicado ha sido enviado a los clientes seleccionados.');
-
-            // Notificación de éxito en la UI
+            // Notificación de éxito
             Notification::make()
                 ->title('Comunicado Enviado')
                 ->body('El comunicado ha sido enviado exitosamente a los clientes seleccionados.')
@@ -57,6 +56,6 @@ class CreateUserCommunication extends CreateRecord
                 ->send();
         }
 
-        return $data; // Devolver los datos para que se cree el registro en la base de datos
+        return $data;
     }
 }

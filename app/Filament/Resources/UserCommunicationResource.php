@@ -15,16 +15,16 @@ class UserCommunicationResource extends Resource
 {
     protected static ?string $model = UserCommunication::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-megaphone';
+    protected static ?string $pluralLabel = 'Comunicados';
+    protected static ?string $singularLabel = 'Comunicado';
+    protected static ?string $navigationGroup = 'Actividades';
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('title')
-                    ->label('Título del Correo')
-                    ->required(),
-
                 Forms\Components\Select::make('template_id')
                     ->label('Seleccionar Plantilla de Correo')
                     ->options([
@@ -35,9 +35,9 @@ class UserCommunicationResource extends Resource
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {
                         if ($state === 'solicitud_certificados') {
-                            $set('message', 'Estimado cliente, le solicitamos por favor que nos haga llegar su certificado de retención correspondiente.');
+                            $set('message', 'Buen día, estimado cliente...');
                         } elseif ($state === 'publicidad') {
-                            $set('message', '¡Hola! Descubre nuestras promociones especiales para fin de año...');
+                            $set('message', '¡Hola! Descubre nuestras promociones especiales...');
                         } else {
                             $set('message', 'Por favor, seleccione una plantilla para ver el mensaje.');
                         }
@@ -55,7 +55,8 @@ class UserCommunicationResource extends Resource
                     })->pluck('name', 'id')->toArray())
                     ->columns(2)
                     ->bulkToggleable()
-                    ->required(),
+                    ->required()  // Asegura que se seleccionen clientes
+                    ->rules(['required', 'array', 'min:1']),  // Añade reglas de validación para forzar la selección de clientes
             ]);
     }
 
@@ -63,8 +64,8 @@ class UserCommunicationResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')
-                    ->label('Título')
+                Tables\Columns\TextColumn::make('template_id')
+                    ->label('Plantilla')
                     ->sortable()
                     ->searchable(),
 
@@ -74,44 +75,9 @@ class UserCommunicationResource extends Resource
                     ->sortable(),
             ])
             ->filters([])
-            ->actions([
-                // Acción comentada para enviar comunicado desde la tabla
-                // Tables\Actions\Action::make('enviar_comunicado')
-                //     ->label('Enviar Comunicado')
-                //     ->action(function (array $data) {
-                //         try {
-                //             if (!isset($data['clientes']) || empty($data['clientes'])) {
-                //                 throw new \Exception('No se seleccionaron clientes para enviar el comunicado.');
-                //             }
-                //
-                //             $clientes = User::whereIn('id', $data['clientes'])->get();
-                //
-                //             foreach ($clientes as $cliente) {
-                //                 Mail::to($cliente->email)
-                //                     ->send(new UserCommunicationMail($cliente, $data['template_id']));
-                //             }
-                //
-                //             Notification::make()
-                //                 ->title('Comunicado Enviado')
-                //                 ->body('El comunicado ha sido enviado exitosamente a los clientes seleccionados.')
-                //                 ->success()
-                //                 ->send();
-                //         } catch (\Exception $e) {
-                //             Notification::make()
-                //                 ->title('Error')
-                //                 ->body('Ocurrió un error al intentar enviar el comunicado: ' . $e->getMessage())
-                //                 ->danger()
-                //                 ->send();
-                //         }
-                //     })
-                //     ->requiresConfirmation()
-                //     ->color('primary')
-                //     ->icon('heroicon-o-paper-airplane'),
-            ])
+            ->actions([])  // Se elimina la acción de "Enviar Comunicado" desde la tabla
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

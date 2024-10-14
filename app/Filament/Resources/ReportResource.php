@@ -19,7 +19,7 @@ use Filament\Support\Enums\ActionSize;
 class ReportResource extends Resource
 {
     // Configuración del recurso
-    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?string $navigationGroup = 'Contabilidad';
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $label = 'Generador de Reportes';
     protected static ?int $navigationSort = 10;
