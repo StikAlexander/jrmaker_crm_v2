@@ -16,11 +16,17 @@ class CreateUserCommunication extends CreateRecord
      */
     protected function handleRecordCreation(array $data): UserCommunication
     {
-        // Crear el registro en la tabla 'user_communications' manualmente
-        return UserCommunication::create([
+        // Crear el registro de comunicación
+        $communication = UserCommunication::create([
             'template_id' => $data['template_id'],
             'title' => $data['title'],
             'message' => $data['message'],
         ]);
+    
+        // Asignar los clientes a la comunicación
+        $communication->clients()->sync($data['clientes']);
+    
+        return $communication;
     }
+    
 }
