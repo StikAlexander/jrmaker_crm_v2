@@ -3,30 +3,60 @@
 namespace App\Filament\Resources\UserCommunicationResource\Pages;
 
 use App\Filament\Resources\UserCommunicationResource;
-use App\Models\UserCommunication;  // Asegúrate de importar el modelo
+use App\Models\User;
+use App\Mail\UserCommunicationMail;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Filament\Notifications\Notification;
 
 class CreateUserCommunication extends CreateRecord
 {
     protected static string $resource = UserCommunicationResource::class;
 
     /**
-     * Sobrescribir el método para manejar la creación del registro
+     * Sobrescribir el método para manejar el envío del correo y la creación del registro
      */
-    protected function handleRecordCreation(array $data): UserCommunication
+    protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Crear el registro de comunicación
-        $communication = UserCommunication::create([
-            'template_id' => $data['template_id'],
-            'title' => $data['title'],
-            'message' => $data['message'],
-        ]);
-    
-        // Asignar los clientes a la comunicación
-        $communication->clients()->sync($data['clientes']);
-    
-        return $communication;
+        try {
+            // Verifica si se seleccionaron clientes
+            if (!isset($data['clientes']) || empty($data['clientes'])) {
+                throw new \Exception('No se seleccionaron clientes para enviar el comunicado.');
+            }
+
+            // Obtener los clientes seleccionados
+            $clientes = User::whereIn('id', $data['clientes'])->get();
+
+            // Enviar el correo a cada cliente
+            foreach ($clientes as $cliente) {
+                Mail::to($cliente->email)
+                    ->send(new UserCommunicationMail($cliente, $data['template_id']));
+            }
+
+            // Opción de logging en caso de éxito
+            Log::info('El comunicado ha sido enviado a los clientes seleccionados.');
+
+            // Notificación de éxito en la UI
+            Notification::make()
+                ->title('Comunicado Enviado')
+                ->body('El comunicado ha sido enviado exitosamente a los clientes seleccionados.')
+                ->success()
+                ->send();
+
+        } catch (\Exception $e) {
+            // Registro del error en los logs
+            Log::error('Error al enviar el comunicado: ' . $e->getMessage());
+
+            // Notificación de error en la UI
+            Notification::make()
+                ->title('Error')
+                ->body('Ocurrió un error al intentar enviar el comunicado: ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
+
+        return $data; // Devolver los datos para que se cree el registro en la base de datos
     }
-    
 }

@@ -4,18 +4,20 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserCommunicationResource\Pages;
 use App\Models\User;
+use App\Models\UserCommunication;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\UserCommunicationMail;  // El Mailable para el envío de correos
+use App\Mail\UserCommunicationMail;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 class UserCommunicationResource extends Resource
 {
-    protected static ?string $model = \App\Models\UserCommunication::class;
+    protected static ?string $model = UserCommunication::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -26,7 +28,7 @@ class UserCommunicationResource extends Resource
                 Forms\Components\TextInput::make('title')
                     ->label('Título del Correo')
                     ->required(),
-    
+
                 Forms\Components\Select::make('template_id')
                     ->label('Seleccionar Plantilla de Correo')
                     ->options([
@@ -44,45 +46,71 @@ class UserCommunicationResource extends Resource
                             $set('message', 'Por favor, seleccione una plantilla para ver el mensaje.');
                         }
                     }),
-    
+
                 Forms\Components\Textarea::make('message')
                     ->label('Mensaje del Correo')
                     ->rows(8)
                     ->required(),
-    
+
                 Forms\Components\CheckboxList::make('clientes')
                     ->label('Seleccionar Clientes')
-                    ->relationship('client', 'name')
                     ->options(User::whereHas('roles', function ($query) {
                         $query->where('name', 'client');
-                    })->pluck('name', 'id'))
+                    })->pluck('name', 'id')->toArray()) // Convierte los datos a un array
                     ->columns(2)
-                    ->bulkToggleable(),
+                    ->bulkToggleable()
+                    ->required(), // Asegura que el campo es obligatorio
             ]);
     }
-    
 
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([])
+            ->columns([
+                Tables\Columns\TextColumn::make('title')
+                    ->label('Título')
+                    ->sortable()
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('message')
+                    ->label('Mensaje')
+                    ->limit(50)  
+                    ->sortable(),
+            ])
             ->filters([])
             ->actions([
                 Tables\Actions\Action::make('enviar_comunicado')
                     ->label('Enviar Comunicado')
                     ->action(function (array $data) {
-                        $clientes = User::whereIn('id', $data['clientes'])->get();
+                        try {
+                            // Verifica si los clientes han sido seleccionados
+                            if (!isset($data['clientes']) || empty($data['clientes'])) {
+                                throw new \Exception('No se seleccionaron clientes para enviar el comunicado.');
+                            }
 
-                        foreach ($clientes as $cliente) {
-                            Mail::to($cliente->email)
-                                ->send(new UserCommunicationMail($cliente, $data['template_id']));
+                            $clientes = User::whereIn('id', $data['clientes'])->get();
+
+                            foreach ($clientes as $cliente) {
+                                Mail::to($cliente->email)
+                                    ->send(new UserCommunicationMail($cliente, $data['template_id']));
+                            }
+
+                            Notification::make()
+                                ->title('Comunicado Enviado')
+                                ->body('El comunicado ha sido enviado exitosamente a los clientes seleccionados.')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            // Registro del error en los logs
+                            Log::error('Error al enviar el comunicado: ' . $e->getMessage());
+
+                            // Enviar una notificación de error al frontend
+                            Notification::make()
+                                ->title('Error')
+                                ->body('Ocurrió un error al intentar enviar el comunicado: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
                         }
-
-                        Notification::make()
-                            ->title('Comunicado Enviado')
-                            ->body('El comunicado ha sido enviado exitosamente a los clientes seleccionados.')
-                            ->success()
-                            ->send();
                     })
                     ->requiresConfirmation()
                     ->color('primary')
