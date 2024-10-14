@@ -33,8 +33,8 @@ class CreateUserCommunication extends CreateRecord
 
             // Enviar el correo a cada cliente
             foreach ($clientes as $cliente) {
-                Mail::to($cliente->email)
-                    ->send(new UserCommunicationMail($cliente, $data['template_id']));
+                Mail::to($cliente->email)->send(new UserCommunicationMail($cliente, $data['template_id']));
+
             }
 
             // Notificación de éxito
