@@ -2,16 +2,14 @@
 
 namespace App\Mail;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class UserCommunicationMail extends Mailable implements ShouldQueue
+class UserCommunicationMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;  // Eliminamos Queueable
 
     public $cliente;
     public $plantilla;
@@ -25,7 +23,7 @@ class UserCommunicationMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '' . $this->getSubject(),
+            subject: $this->getSubject(),
         );
     }
 
