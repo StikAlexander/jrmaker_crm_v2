@@ -36,7 +36,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{ asset('images/jr_maker_logo.png') }}" alt="Logo de J.R. Maker S.A.S.">
+            <img src="{{ asset('storage/images/jr_maker_logo.png') }}" alt="Logo de J.R. Maker S.A.S.">
         </div>
 
         <p>Buen día, estimado cliente,</p>
