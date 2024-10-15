@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\User;
 use App\Models\DocumentType;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -12,12 +13,15 @@ class ClientImport implements ToModel, WithValidation, WithHeadingRow
 {
     public function model(array $row)
     {
+        Log::info("Fila procesada: ", $row);
+    
         $documentType = DocumentType::where('name', $row['document_type'])->first();
-
+    
         if (!$documentType) {
+            Log::error("Tipo de documento no encontrado: " . $row['document_type']);
             throw new \Exception("Tipo de documento no encontrado: " . $row['document_type']);
         }
-
+    
         return new User([
             'name' => $row['name'],
             'email' => $row['email'],
@@ -28,9 +32,12 @@ class ClientImport implements ToModel, WithValidation, WithHeadingRow
             'address' => $row['address'] ?? null,
         ]);
     }
+    
 
     public function rules(): array
     {
+        Log::info("Validando fila...");
+    
         return [
             'name' => 'required|string|max:255',
             'email' => 'nullable|email',
@@ -41,4 +48,5 @@ class ClientImport implements ToModel, WithValidation, WithHeadingRow
             'address' => 'nullable|string|max:255',
         ];
     }
+    
 }
