@@ -8,7 +8,6 @@ use Filament\Resources\Pages\ListRecords;
 use YOS\FilamentExcel\Actions\Import;
 use App\Imports\ClientImport;
 use App\Exports\ClientExport;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ListClientUsers extends ListRecords
@@ -23,16 +22,14 @@ class ListClientUsers extends ListRecords
                 ->icon('heroicon-o-user-plus')
                 ->color('primary'),
 
+            
             Import::make()
                 ->import(ClientImport::class)  
                 ->type(\Maatwebsite\Excel\Excel::XLSX)
                 ->label('Importar Clientes')
                 ->hint('Sube un archivo XLSX para importar clientes')
                 ->icon('heroicon-o-arrow-up-tray')
-                ->color('primary')
-                ->action(function () {
-                    Log::info("Importación de clientes iniciada.");
-                }),
+                ->color('primary'),
 
             Actions\Action::make('export')
                 ->label('Exportar Clientes')

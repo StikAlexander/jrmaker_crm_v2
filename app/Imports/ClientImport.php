@@ -14,16 +14,21 @@ class ClientImport implements ToModel, WithValidation, WithHeadingRow
 {
     public function model(array $row)
     {
-        Log::info("Fila procesada: ", $row);
+        Log::info("Procesando fila: ", $row); // Log para ver el contenido de la fila
 
         // Verificar que 'document_type' no sea null antes de usar trim
         $documentTypeName = !is_null($row['document_type']) ? trim($row['document_type']) : null;
+        Log::info("Buscando tipo de documento: " . $documentTypeName);
+
+        // Buscar el tipo de documento
         $documentType = DocumentType::where('name', $documentTypeName)->first();
 
         if (!$documentType) {
             Log::error("Tipo de documento no encontrado: " . $documentTypeName);
             throw new \Exception("Tipo de documento no encontrado: " . $documentTypeName);
         }
+
+        Log::info("Creando usuario con documento: " . $row['document_number']);
 
         // Crear el usuario
         $user = new User([
@@ -38,15 +43,19 @@ class ClientImport implements ToModel, WithValidation, WithHeadingRow
         ]);
 
         $user->save();
+        Log::info("Usuario creado: " . $user->id);
 
         // Asignar los roles: cliente y panel_user
         $user->assignRole(['panel_user', 'client']);
+        Log::info("Roles asignados a usuario: " . $user->id);
 
         return $user;
     }
 
     public function rules(): array
     {
+        Log::info("Aplicando reglas de validación...");
+
         return [
             'name' => 'required|string|max:255',
             'email' => 'nullable|email',
