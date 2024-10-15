@@ -8,21 +8,25 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Illuminate\Support\Facades\Auth;
 
 class ClientImport implements ToModel, WithValidation, WithHeadingRow
 {
     public function model(array $row)
     {
         Log::info("Fila procesada: ", $row);
-    
-        $documentType = DocumentType::where('name', $row['document_type'])->first();
-    
+
+        // Verificar que 'document_type' no sea null antes de usar trim
+        $documentTypeName = !is_null($row['document_type']) ? trim($row['document_type']) : null;
+        $documentType = DocumentType::where('name', $documentTypeName)->first();
+
         if (!$documentType) {
-            Log::error("Tipo de documento no encontrado: " . $row['document_type']);
-            throw new \Exception("Tipo de documento no encontrado: " . $row['document_type']);
+            Log::error("Tipo de documento no encontrado: " . $documentTypeName);
+            throw new \Exception("Tipo de documento no encontrado: " . $documentTypeName);
         }
-    
-        return new User([
+
+        // Crear el usuario
+        $user = new User([
             'name' => $row['name'],
             'email' => $row['email'],
             'phone' => $row['phone'],
@@ -30,14 +34,19 @@ class ClientImport implements ToModel, WithValidation, WithHeadingRow
             'document_type_id' => $documentType->id,
             'status' => $row['status'] ?? 'active',
             'address' => $row['address'] ?? null,
+            'created_by_id' => Auth::id(),
         ]);
+
+        $user->save();
+
+        // Asignar los roles: cliente y panel_user
+        $user->assignRole(['panel_user', 'client']);
+
+        return $user;
     }
-    
 
     public function rules(): array
     {
-        Log::info("Validando fila...");
-    
         return [
             'name' => 'required|string|max:255',
             'email' => 'nullable|email',
@@ -48,5 +57,4 @@ class ClientImport implements ToModel, WithValidation, WithHeadingRow
             'address' => 'nullable|string|max:255',
         ];
     }
-    
 }
