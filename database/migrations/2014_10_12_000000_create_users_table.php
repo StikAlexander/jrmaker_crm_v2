@@ -15,10 +15,11 @@ return new class extends Migration
             $table->id()->primary();
             
             
-            $table->string('document_number', 20); 
+            $table->string('document_number', 20)->unique();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email')->nullable();
             $table->string('phone', 20)->nullable();
+            $table->string('address')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->rememberToken();

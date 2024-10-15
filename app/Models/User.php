@@ -27,7 +27,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
     protected $fillable = [
         'document_number', 'name', 'email', 'phone', 'email_verified_at',
         'password', 'created_at', 'updated_at', 'deleted_at',
-        'document_type_id', 'created_by_id', 'status',
+        'document_type_id', 'created_by_id', 'status', 'address',
     ];
 
     protected $hidden = ['password', 'remember_token'];

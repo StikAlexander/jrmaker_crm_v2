@@ -27,7 +27,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Enums\ActionSize;
-
+use Illuminate\Validation\Rule;
 
 class AdminUserResource extends Resource
 {
@@ -78,7 +78,10 @@ class AdminUserResource extends Resource
                                         Forms\Components\TextInput::make('document_number')
                                             ->label('Identificación')
                                             ->required()
-                                            ->rules(['regex:/^[0-9]+$/'])
+                                            ->rules([
+                                                'regex:/^[0-9]+$/',
+                                                Rule::unique('users', 'document_number'),
+                                            ])
                                             ->maxLength(20)
                                             ->helperText('Solo se permiten números.')
                                             ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
@@ -98,6 +101,9 @@ class AdminUserResource extends Resource
                                             ->required()
                                             ->maxLength(255)
                                             ->label('Correo electrónico')
+                                            ->rules([
+                                                Rule::unique('users', 'email'),  
+                                            ])
                                             ->columnSpan(1),
     
                                         Forms\Components\TextInput::make('phone')

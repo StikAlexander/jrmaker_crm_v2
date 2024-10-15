@@ -25,7 +25,7 @@ use Filament\Forms\Components\Section;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Enums\ActionSize;
 use App\Filament\Resources\ClientUserResource\RelationManagers\InvoicesRelationManager;
-
+use Illuminate\Validation\Rule;
 
 class ClientUserResource extends Resource
 {
@@ -69,7 +69,10 @@ class ClientUserResource extends Resource
                                         Forms\Components\TextInput::make('document_number')
                                             ->label('Número de documento')
                                             ->required()
-                                            ->rules(['regex:/^[0-9]+$/'])
+                                            ->rules([
+                                                'regex:/^[0-9]+$/',  
+                                                Rule::unique('users', 'document_number'),  
+                                            ])
                                             ->maxLength(20)
                                             ->helperText('Solo se permiten números.')
                                             ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
@@ -86,7 +89,7 @@ class ClientUserResource extends Resource
                                     ->schema([
                                         Forms\Components\TextInput::make('email')
                                             ->email()
-                                            ->required()
+                                            ->nullable() 
                                             ->maxLength(255)
                                             ->label('Correo electrónico')
                                             ->columnSpan(2),
@@ -99,6 +102,12 @@ class ClientUserResource extends Resource
                                             ->helperText('Solo se permiten números.')
                                             ->extraAttributes(['inputmode' => 'numeric', 'pattern' => '[0-9]*'])
                                             ->numeric()
+                                            ->columnSpan(1),
+
+                                        Forms\Components\TextInput::make('address')
+                                            ->nullable() 
+                                            ->maxLength(255)
+                                            ->label('Dirección')
                                             ->columnSpan(1),
     
                                         Forms\Components\Select::make('status')

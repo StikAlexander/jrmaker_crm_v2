@@ -11,7 +11,6 @@ class ClientExport implements FromCollection, WithHeadings, WithMapping
 {
     public function collection()
     {
-        // Obtener solo los usuarios con el rol de cliente y cargar su tipo de documento y el creador
         return User::role('client')->with(['documentType', 'createdBy'])->get();
     }
 
@@ -22,11 +21,12 @@ class ClientExport implements FromCollection, WithHeadings, WithMapping
             'Email',
             'Teléfono',
             'Número de documento',
-            'Tipo de Documento',  // Nuevo campo
+            'Tipo de Documento',
+            'Dirección',  
             'Estado',
-            'Fecha de Creación',  // Nuevo campo
-            'Última Actualización',  // Nuevo campo
-            'Creado por',  // Nuevo campo
+            'Fecha de Creación',
+            'Última Actualización',
+            'Creado por',
         ];
     }
 
@@ -34,14 +34,15 @@ class ClientExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             $client->name,
-            $client->email,
-            $client->phone,
+            $client->email ?? '-',  
+            $client->phone ?? '-',
             $client->document_number,
-            $client->documentType->name ?? '-',  // Nombre del tipo de documento
+            $client->documentType->name ?? '-',  // Nombre del tipo de documento o guion
+            $client->address ?? '-',  // Dirección o guion si es nula
             $client->status,
-            $client->created_at->format('Y-m-d'),  // Fecha de creación
-            $client->updated_at->format('Y-m-d'),  // Fecha de última actualización
-            $client->createdBy->name ?? '-',  // Nombre del creador (si existe)
+            $client->created_at->format('Y-m-d'),
+            $client->updated_at->format('Y-m-d'),
+            $client->createdBy->name ?? '-',  // Nombre del creador o guion
         ];
     }
 }
