@@ -52,10 +52,12 @@ class UserCommunicationResource extends Resource
                     ->label('Seleccionar Clientes')
                     ->options(User::whereHas('roles', function ($query) {
                         $query->where('name', 'client');
-                    })->pluck('name', 'id')->toArray())
+                    })
+                    ->whereNotNull('email')
+                    ->pluck('name', 'id')->toArray())
                     ->columns(2)
                     ->bulkToggleable()
-                    ->required()  // Asegura que se seleccionen clientes
+                    ->required()  
                     ->rules(['required', 'array', 'min:1']),  // Añade reglas de validación para forzar la selección de clientes
             ]);
     }
