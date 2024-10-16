@@ -96,7 +96,7 @@ class ClientUserResource extends Resource
     
                                         Forms\Components\TextInput::make('phone')
                                             ->label('Teléfono')
-                                            ->required()
+                                            ->nullable()
                                             ->rules(['regex:/^[0-9]+$/'])
                                             ->maxLength(20)
                                             ->helperText('Solo se permiten números.')
