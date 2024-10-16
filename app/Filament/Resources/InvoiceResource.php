@@ -255,9 +255,10 @@ class InvoiceResource extends Resource
                     ->limit(50)
                     ->url(fn ($record) => InvoiceResource::getUrl('view', ['record' => $record->getKey()]))
                     ->formatStateUsing(fn (string $state): string => 'FEVD' . $state),
-                ModelLinkColumn::make('client.name')
+                    ModelLinkColumn::make('client.name')
                     ->label('Cliente')
-                    ->setViewType('view'),
+                    ->setViewType('view')
+                    ->url(fn ($record) => ClientUserResource::getUrl('view', ['record' => $record->client->getKey()])),                
                 TextColumn::make('createdBy.name')
                     ->label('Creado por')
                     ->sortable()
