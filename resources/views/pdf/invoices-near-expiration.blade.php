@@ -15,18 +15,34 @@
         th, td {
             padding: 8px;
             border: 1px solid black;
-            text-align: left;
+            text-align: left.
         }
         .text-center {
             text-align: center;
         }
         .text-right {
-            text-align: right;
+            text-align: right.
+        }
+        .logo {
+            width: 150px;
+            height: auto;
         }
     </style>
     <title>Facturas Próximas a Vencer</title>
 </head>
 <body>
+
+    <table>
+        <tr>
+            <td><img src="{{ url('storage/images/jr_maker_logo.png') }}" alt="Logo JR Maker" class="logo"></td>
+            <td class="text-right">
+                JR Maker SAS <br>
+                Dirección de la empresa <br>
+                Ciudad, País
+            </td>
+        </tr>
+    </table>
+
     <h2 class="text-center">Reporte de Facturas Próximas a Vencer</h2>
     <table>
         <thead>

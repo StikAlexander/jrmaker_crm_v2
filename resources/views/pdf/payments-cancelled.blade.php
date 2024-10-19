@@ -42,7 +42,7 @@
                 <tr>
                     <td>{{ $payment->Payment_number }}</td>
                     <td>{{ $payment->client->name }}</td>
-                    <td>{{ $payment->payment_date->format('d/m/Y') }}</td>
+                    <td>{{ $payment->created_at ? $payment->created_at->format('d/m/Y') : 'No disponible' }}</td>
                     <td>${{ number_format($payment->amount, 2) }}</td>
                 </tr>
             @endforeach

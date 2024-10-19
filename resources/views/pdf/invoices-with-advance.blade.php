@@ -23,10 +23,26 @@
         .text-right {
             text-align: right;
         }
+        .logo {
+            width: 150px;
+            height: auto;
+        }
     </style>
     <title>Facturas con Anticipo</title>
 </head>
 <body>
+
+    <table>
+        <tr>
+            <td><img src="{{ url('storage/images/jr_maker_logo.png') }}" alt="Logo JR Maker" class="logo"></td>
+            <td class="text-right">
+                JR Maker SAS <br>
+                Dirección de la empresa <br>
+                Ciudad, País
+            </td>
+        </tr>
+    </table>
+
     <h2 class="text-center">Reporte de Facturas con Anticipo</h2>
     <table>
         <thead>

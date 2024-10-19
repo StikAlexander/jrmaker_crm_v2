@@ -34,7 +34,7 @@
 
     <table>
         <tr>
-            <td><img src="{{ url('images/jr-logo-completo.jpg') }}" alt="Logo JR Maker" class="logo"></td>
+            <td><img src="{{ url('storage/images/jr_maker_logo.png') }}" alt="Logo JR Maker" class="logo"></td>
             <td class="text-right">
                 JR Maker SAS <br>
                 Dirección de la empresa <br>
