@@ -135,7 +135,7 @@ class ReportResource extends Resource
     protected static function generarPagosExitosos($fechaInicio, $fechaFin)
     {
         $pagosExitosos = Payment::where('payment_status', 'Completed')
-            ->whereBetween('payment_date', [$fechaInicio, $fechaFin])
+            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
             ->get();
 
         $totalPagado = $pagosExitosos->sum('amount');
@@ -173,7 +173,7 @@ class ReportResource extends Resource
     protected static function generarPagosFallidos($fechaInicio, $fechaFin)
     {
         $pagosFallidos = Payment::where('payment_status', 'Failed')
-            ->whereBetween('payment_date', [$fechaInicio, $fechaFin])
+            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
             ->get();
 
         $pdf = FacadePdf::loadView('pdf.payments-failed', [ // Cambiado a inglés
@@ -188,13 +188,13 @@ class ReportResource extends Resource
     protected static function generarPagosCancelados($fechaInicio, $fechaFin)
     {
         $pagosCancelados = Payment::where('payment_status', 'Cancelled')
-            ->whereBetween('payment_date', [$fechaInicio, $fechaFin])
+            ->whereBetween('created_at', [$fechaInicio, $fechaFin]) // Cambiado 'payment_date' a 'created_at'
             ->get();
-
-        $pdf = FacadePdf::loadView('pdf.payments-cancelled', [ // Cambiado a inglés
+    
+        $pdf = FacadePdf::loadView('pdf.payments-cancelled', [
             'payments' => $pagosCancelados,
         ]);
-
+    
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->stream();
         }, 'pagos_cancelados_' . date('d_m_Y') . '.pdf');
@@ -204,7 +204,7 @@ class ReportResource extends Resource
     {
         $fechaInicio = Carbon::now();
         $fechaFin = Carbon::now()->addDays(7);
-
+    
         $facturas = Invoice::whereBetween('due_date', [$fechaInicio, $fechaFin])
             ->where('status', 'Pending')
             ->get();
@@ -220,10 +220,10 @@ class ReportResource extends Resource
 
     protected static function generarPagosFacturasVencidas($fechaInicio, $fechaFin)
     {
-        $pagos = Payment::whereHas('invoice', function($query) {
+        $pagos = Payment::whereHas('invoices', function ($query) {
                 $query->where('due_date', '<', Carbon::now());
             })
-            ->whereBetween('payment_date', [$fechaInicio, $fechaFin])
+            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
             ->get();
 
         $pdf = FacadePdf::loadView('pdf.payments-to-overdue-invoices', [ // Cambiado a inglés
