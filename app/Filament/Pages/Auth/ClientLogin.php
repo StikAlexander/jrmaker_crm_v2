@@ -11,11 +11,16 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Support\Htmlable;
-use Livewire\Livewire;
 use Illuminate\Validation\ValidationException;
 
 class ClientLogin extends AuthLogin
 {
+    /**
+     * La vista personalizada que debe usar este login.
+     * @var string
+     */
+    protected static string $view = 'filament.auth.client-login'; // Apunta a la vista Blade personalizada
+
     protected function getForms(): array
     {
         return [
@@ -72,7 +77,6 @@ class ClientLogin extends AuthLogin
 
         if (!$documentTypeId) {
             $this->addError('document_type', __('Tipo de documento no válido.'));
-            // Emitir evento para reiniciar el CAPTCHA
             $this->dispatch('reset-captcha');
             return null;
         }
@@ -83,24 +87,21 @@ class ClientLogin extends AuthLogin
             ->first();
 
         if ($user) {
-            // Verificar si el usuario tiene el rol de "client"
             if (!$user->hasRole('client')) {
                 $this->addError('document_number', __('Solo los clientes pueden acceder a este panel.'));
-                // Emitir evento para reiniciar el CAPTCHA
                 $this->dispatch('reset-captcha');
                 return null;
             }
 
             // Si es un cliente válido, iniciar sesión
             Auth::login($user);
-            session()->regenerate(); // Regenerar la sesión para evitar problemas
+            session()->regenerate(); 
 
             return app(LoginResponse::class);
         }
 
         // Si el usuario no existe o no tiene permiso
         $this->addError('document_number', __('Este documento no se encuentra en nuestros registros.'));
-        // Emitir evento para reiniciar el CAPTCHA
         $this->dispatch('reset-captcha');
 
         return null;
@@ -120,18 +121,9 @@ class ClientLogin extends AuthLogin
         ];
     }
 
-    /**
-     * 
-     *
-     * @param \Illuminate\Validation\ValidationException $exception
-     * @return void
-     */
     protected function onValidationError(ValidationException $exception): void
     {
-        // Emitir evento para reiniciar el CAPTCHA
         $this->dispatch('reset-captcha');
-
-        // Llamar al método de la clase padre para manejar los errores de validación
         parent::onValidationError($exception);
     }
 }
