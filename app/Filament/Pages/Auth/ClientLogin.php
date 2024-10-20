@@ -19,7 +19,7 @@ class ClientLogin extends AuthLogin
      * La vista personalizada que debe usar este login.
      * @var string
      */
-    protected static string $view = 'filament.auth.client-login'; // Apunta a la vista Blade personalizada
+    //protected static string $view = 'filament.auth.client-login'; // Apunta a la vista Blade personalizada
 
     protected function getForms(): array
     {

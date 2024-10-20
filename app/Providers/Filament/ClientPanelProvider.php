@@ -34,6 +34,7 @@ class ClientPanelProvider extends PanelProvider
             ->sidebarFullyCollapsibleOnDesktop()
             ->id('client')
             ->path('client')
+            ->darkMode(false)
             ->login(AuthClientLogin::class)
             ->colors([
                 'primary' => 'rgb(171, 83, 79)',    // Rojo terracota para botones
