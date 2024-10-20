@@ -188,8 +188,10 @@ class ReportResource extends Resource
     protected static function generarPagosCancelados($fechaInicio, $fechaFin)
     {
         $pagosCancelados = Payment::where('payment_status', 'Cancelled')
-            ->whereBetween('created_at', [$fechaInicio, $fechaFin]) // Cambiado 'payment_date' a 'created_at'
-            ->get();
+        ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+        ->get();
+    
+    
     
         $pdf = FacadePdf::loadView('pdf.payments-cancelled', [
             'payments' => $pagosCancelados,
