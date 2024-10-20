@@ -11,6 +11,7 @@ use App\Filament\Widgets\InvoicesGeneratedWidget;
 use App\Livewire\MyProfileExtended;
 use App\Livewire\UpdatePasswordCustom;
 use App\Settings\GeneralSettings;
+use Filament\Enums\ThemeMode;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -60,12 +61,15 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->darkMode(true)
+            ->defaultThemeMode(ThemeMode::Dark) 
             ->login(AdminLogin::class)
             ->passwordReset(RequestPasswordReset::class)
             ->emailVerification(EmailVerification::class)
             ->favicon(fn (GeneralSettings $settings) => Storage::url($settings->site_favicon))
             ->brandName(fn (GeneralSettings $settings) => $settings->brand_name)
             ->brandLogo(fn (GeneralSettings $settings) => Storage::url($settings->brand_logo))
+          //->darkModeBrandLogo(asset('images/logo-oscuro.svg')) AQUI IRA POSTERIORMENTE EL LOGO PARA EL MODO DARK
             ->brandLogoHeight(fn (GeneralSettings $settings) => $settings->brand_logoHeight)
             ->colors(fn (GeneralSettings $settings) => $settings->site_theme)
             ->databaseNotifications()->databaseNotificationsPolling('30s')
