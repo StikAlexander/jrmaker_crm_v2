@@ -152,22 +152,30 @@ class ReportResource extends Resource
 
     protected static function generarClientesMayorDeuda($fechaInicio, $fechaFin)
     {
-        $clientes = Invoice::selectRaw('client_id, sum(pending_amount) as total_pendiente')
+        // Obtener la fecha actual al generar el reporte
+        $fechaActual = now();
+    
+        // Obtener los clientes con mayor deuda (top 15)
+        $clientes = Invoice::with('client')  // Cargamos la relación del cliente
+            ->selectRaw('client_id, sum(pending_amount) as total_pendiente')
             ->where('status', 'Pending')
-            ->whereBetween('due_date', [$fechaInicio, $fechaFin])
+            ->where('due_date', '<=', $fechaActual)  // Solo facturas que ya han vencido o están por vencer
             ->groupBy('client_id')
             ->orderBy('total_pendiente', 'desc')
-            ->take(10)
+            ->take(15)  // Limitamos al top 15
             ->get();
-
+    
+        // Generar el PDF con los clientes y su deuda pendiente
         $pdf = FacadePdf::loadView('pdf.clientes_mayor_deuda', [
             'clientes' => $clientes,
         ]);
-
+    
+        // Descargar el PDF
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->stream();
         }, 'clientes_mayor_deuda_' . date('d_m_Y') . '.pdf');
     }
+    
 
     // Métodos para generar nuevos reportes
     protected static function generarPagosFallidos($fechaInicio, $fechaFin)
@@ -189,9 +197,8 @@ class ReportResource extends Resource
     {
         $pagosCancelados = Payment::where('payment_status', 'Cancelled')
         ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+        ->select('payment_number', 'client_id', 'created_at', 'amount')
         ->get();
-    
-    
     
         $pdf = FacadePdf::loadView('pdf.payments-cancelled', [
             'payments' => $pagosCancelados,
