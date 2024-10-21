@@ -28,6 +28,7 @@ use Filament\Forms\Components\Section;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Support\Enums\ActionSize;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class AdminUserResource extends Resource
 {
@@ -310,19 +311,41 @@ class AdminUserResource extends Resource
 
     public static function doResendEmailVerification($settings = null, User $record): void
     {
-        if (! method_exists($record, 'notify')) {
+        // Verificar si el modelo tiene el método notify
+        if (!method_exists($record, 'notify')) {
             $userClass = $record::class;
-
+    
+            // Registrar el error si el método notify no está presente
+            Log::error("El modelo [{$userClass}] no tiene el método [notify()].");
+    
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
         }
-
-        $notification = new AuthVerifyEmail();
-        $notification->url = Filament::getVerifyEmailUrl($record);
-
+    
+        // Generar la URL de verificación
+        $verificationUrl = Filament::getVerifyEmailUrl($record);
+    
+        // Registrar la URL generada
+        Log::info('URL de verificación generada: ' . $verificationUrl);
+    
+        // Cargar configuraciones de correo
         $settings->loadMailSettingsToConfig();
-
+        
+        // Registrar que las configuraciones de correo han sido cargadas
+        Log::info('Configuraciones de correo cargadas para el reenvío de verificación');
+    
+        // Enviar la notificación de verificación por correo
+        $notification = new AuthVerifyEmail();
+        $notification->url = $verificationUrl;
+    
+        // Registrar que se está notificando al usuario
+        Log::info('Enviando correo de verificación a: ' . $record->email);
+    
         $record->notify($notification);
-
+    
+        // Registrar el éxito del envío de la notificación
+        Log::info('Correo de verificación reenviado a: ' . $record->email);
+    
+        // Enviar una notificación visual al usuario dentro del sistema
         Notification::make()
             ->title(__('resource.user.notifications.notification_resent.title'))
             ->success()

@@ -76,7 +76,9 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_PORT: ${REDIS_PORT}
-    command: php artisan queue:work --daemon --sleep=3 --tries=3 --timeout=90
+      
+    # Configuración del worker para reiniciarse después de 100 trabajos
+    command: php artisan queue:work --daemon --sleep=3 --tries=3 --timeout=90 --max-jobs=100
     restart: unless-stopped
     networks:
       - nginxpm
