@@ -7,17 +7,18 @@ return [
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
-            'host' => env('MAIL_HOST', 'sandbox.smtp.mailtrap.io'),
-            'port' => env('MAIL_PORT', 2525),
-            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
-            'username' => env('MAIL_USERNAME', 'ab024018081ad1'),
-            'password' => env('MAIL_PASSWORD', 'dd06d3b89754f3'),
+            // Aquí se ajusta para usar las variables de entorno o Hostinger como predeterminado
+            'host' => env('MAIL_HOST', 'smtp.hostinger.com'),
+            'port' => env('MAIL_PORT', 465),  // Puerto 465 para Hostinger (SSL)
+            'encryption' => env('MAIL_ENCRYPTION', 'ssl'),  // SSL para Hostinger
+            'username' => env('MAIL_USERNAME', 'operaciones@jrmaker.com.co'),  // Tu usuario de Hostinger
+            'password' => env('MAIL_PASSWORD', 'Metroidvania22.'),  // Tu contraseña de Hostinger
             'timeout' => null,
             'auth_mode' => null,
         ],
-        
+
         'from' => [
-            'address' => env('MAIL_FROM_ADDRESS', 'makercolombia@hotmail.com'),
+            'address' => env('MAIL_FROM_ADDRESS', 'operaciones@jrmaker.com.co'),
             'name' => env('MAIL_FROM_NAME', 'J.R. MAKER S.A.S.'),
         ],
 
