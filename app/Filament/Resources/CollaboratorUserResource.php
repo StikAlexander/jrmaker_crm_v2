@@ -29,7 +29,7 @@ use Illuminate\Validation\Rule;
 
 class CollaboratorUserResource extends Resource
 {
-    protected static ?string $model = User::class;
+    protected static ?string $model = CollaboratorUser::class;
 
     public static function getEloquentQuery(): Builder
     {

@@ -32,7 +32,7 @@ use Illuminate\Validation\Rule;
 class AdminUserResource extends Resource
 {
     
-    protected static ?string $model = User::class;
+    protected static ?string $model = AdminUser::class;
     
     public static function getEloquentQuery(): Builder
     {
