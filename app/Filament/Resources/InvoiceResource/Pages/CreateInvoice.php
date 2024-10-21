@@ -7,6 +7,7 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Storage;
 
 class CreateInvoice extends CreateRecord
 {
@@ -35,20 +36,42 @@ class CreateInvoice extends CreateRecord
             return null;
         }
 
-        // Añadir el usuario que creó la factura
         $data['created_by'] = auth()->id();
 
         // Crear la factura
         $invoice = static::getModel()::create($data);
+
+        // Renombrar el archivo PDF con el número de factura
+        if (isset($data['invoice_pdf'])) {
+            $this->renameInvoicePdf($invoice, $data['invoice_pdf']);
+        }
 
         return $invoice;
     }
 
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        // Actualizar el registro de la factura
+        if (isset($data['invoice_pdf'])) {
+            $this->renameInvoicePdf($record, $data['invoice_pdf']);
+        }
+
         $record->update($data);
 
         return $record;
+    }
+
+    protected function renameInvoicePdf(Model $invoice, $pdfPath): void
+    {
+        if ($pdfPath) {
+            $extension = pathinfo($pdfPath, PATHINFO_EXTENSION);
+            $newFilename = 'FEVD' . $invoice->invoice_number . '.' . $extension;
+            $newPath = 'invoices/' . $newFilename;
+
+            // Verificar si el archivo existe y renombrarlo
+            if (Storage::disk('public')->exists($pdfPath)) {
+                Storage::disk('public')->move($pdfPath, $newPath); // Mover el archivo
+                $invoice->update(['invoice_pdf' => $newPath]); // Actualizar el registro en la BD
+            }
+        }
     }
 }

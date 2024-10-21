@@ -226,13 +226,9 @@ class InvoiceResource extends Resource
                                             ->disabled(),
                                             FileUpload::make('invoice_pdf')
                                             ->directory('invoices')
-                                            ->getUploadedFileNameForStorageUsing(function ($file, $state) {
-                                                $invoiceNumber = $state['invoice_number'];
-                                                return 'FEVD' . $invoiceNumber . '.' . $file->getClientOriginalExtension();
-                                            })
                                             ->required()
                                             ->acceptedFileTypes(['application/pdf'])
-                                            ->maxSize(10240)
+                                            ->maxSize(10240)           
                                         
                                     ]),
                                 Textarea::make('description')
