@@ -113,36 +113,36 @@ class ReportResource extends Resource
     }
 
     // Métodos para generar reportes existentes
+    // Método revisado para obtener solo facturas con due_date anterior a la fecha actual
+// Método revisado para obtener solo facturas que ya hayan vencido
     protected static function generarFacturasVencidas($fechaInicio, $fechaFin)
     {
-        // Si no se selecciona un rango de fechas, mostrar todas las facturas vencidas hasta la fecha actual.
+        // Obtener las facturas pendientes que ya están vencidas (sin rango de fechas)
         $facturasVencidasQuery = Invoice::where('status', 'Pending')
-            ->where('due_date', '<', Carbon::now());  // Facturas vencidas hasta el día de hoy.
-    
-        // Si el usuario selecciona fechas de inicio y fin, aplicamos el filtro.
+            ->where('due_date', '<', Carbon::now());  // Facturas vencidas hasta hoy
+        
+        // Si el usuario especifica un rango de fechas, aplicamos el filtro
         if ($fechaInicio && $fechaFin) {
             $facturasVencidasQuery->whereBetween('due_date', [$fechaInicio, $fechaFin]);
         }
-    
-        // Obtenemos las facturas.
+
+        // Obtenemos las facturas vencidas
         $facturasVencidas = $facturasVencidasQuery->get();
-    
+
         // Calcular el total pendiente de las facturas vencidas
         $totalPendiente = $facturasVencidas->sum('pending_amount');
-    
-        // Generar el PDF con la vista correspondiente y los datos de facturas vencidas
+
+        // Generar el PDF con la vista y los datos de facturas vencidas
         $pdf = FacadePdf::loadView('pdf.invoices', [
             'invoices' => $facturasVencidas,
             'total_pending' => $totalPendiente,
         ]);
-    
-        // Retornar el PDF para descarga
+
+        // Descargar el PDF generado
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->stream();
         }, 'facturas_vencidas_' . date('d_m_Y') . '.pdf');
     }
-    
-    
 
     protected static function generarPagosExitosos($fechaInicio, $fechaFin)
     {
