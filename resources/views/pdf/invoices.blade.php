@@ -1,37 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Helvetica, sans-serif;
-            font-size: 14px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            border: 1px solid black;
-            text-align: left;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .text-right {
-            text-align: right;
-        }
-        .logo {
-            width: 150px;
-            height: auto;
-        }
-    </style>
-    <title>Facturas Vencidas</title>
-</head>
 <body>
-
     <table>
         <tr>
             <td><img src="{{ url('storage/images/jr_maker_logo.png') }}" alt="Logo JR Maker" class="logo"></td>
@@ -44,6 +11,17 @@
     </table>
 
     <h2 class="text-center">Reporte de Facturas Vencidas</h2>
+
+    <!-- Mostrar rango de fechas si existe -->
+    @if(isset($fechaInicio) && isset($fechaFin))
+        <p class="text-center">
+            Facturas vencidas desde {{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }} 
+            hasta {{ \Carbon\Carbon::parse($fechaFin)->format('d/m/Y') }}.
+        </p>
+    @else
+        <p class="text-center">Facturas vencidas hasta la fecha de generación del reporte ({{ \Carbon\Carbon::now()->format('d/m/Y') }}).</p>
+    @endif
+
     <table>
         <thead>
             <tr>
@@ -71,4 +49,3 @@
         Total Facturas Vencidas: ${{ number_format($total_pending, 2) }}
     </p>
 </body>
-</html>
