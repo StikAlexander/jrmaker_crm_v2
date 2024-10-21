@@ -315,7 +315,8 @@ class InvoiceResource extends Resource
                     ->label('')
                     ->size(ActionSize::Large)
                     ->tooltip('Editar Factura')
-                    ->iconButton(),
+                    ->iconButton()
+                    ->disabled(fn ($record) => $record->status === 'Cancelled'),
 
                 Action::make('viewPdf')
                     ->label('')
