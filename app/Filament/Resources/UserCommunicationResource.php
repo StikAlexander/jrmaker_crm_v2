@@ -18,8 +18,8 @@ class UserCommunicationResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-megaphone';
     protected static ?string $pluralLabel = 'Comunicados';
     protected static ?string $singularLabel = 'Comunicado';
-    protected static ?string $navigationGroup = 'Banner';
-    protected static ?int $navigationSort = 4;
+    //protected static ?string $navigationGroup = 'Banner';
+    //protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
