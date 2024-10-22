@@ -23,28 +23,29 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Shanerbaner82\PanelRoles\PanelRoles;
 use Filament\Support\Enums\MaxWidth;
+use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
+use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 
 class ClientPanelProvider extends PanelProvider
 {
-    
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->maxContentWidth(MaxWidth::Full) // ScreenExtraLarge
+            ->maxContentWidth(MaxWidth::Full)
             ->sidebarFullyCollapsibleOnDesktop()
             ->id('client')
             ->path('client')
             ->darkMode(false)
             ->login(AuthClientLogin::class)
             ->colors([
-                'primary' => 'rgb(171, 83, 79)',    // Rojo terracota para botones
-                'secondary' => 'rgb(53, 65, 83)',   // Azul oscuro para textos secundarios
-                'gray' => 'rgb(0, 0, 0)',           // Negro puro para texto y bordes
-                'success' => 'rgb(12, 195, 178)',   // Verde azulado para éxitos
-                'danger' => 'rgb(199, 29, 81)',     // Rojo para alertas
-                'info' => 'rgb(113, 12, 195)',      // Púrpura para información adicional
-                'warning' => 'rgb(255, 186, 93)',   // Amarillo para advertencias
-                'accent' => 'rgb(171, 83, 79)',     // Rojo terracota para acentos
+                'primary' => 'rgb(171, 83, 79)',
+                'secondary' => 'rgb(53, 65, 83)',
+                'gray' => 'rgb(0, 0, 0)',
+                'success' => 'rgb(12, 195, 178)',
+                'danger' => 'rgb(199, 29, 81)',
+                'info' => 'rgb(113, 12, 195)',
+                'warning' => 'rgb(255, 186, 93)',
+                'accent' => 'rgb(171, 83, 79)',
             ])
             ->favicon(fn (GeneralSettings $settings) => Storage::url($settings->site_favicon))
             ->brandName(fn (GeneralSettings $settings) => $settings->brand_name)
@@ -110,6 +111,12 @@ class ClientPanelProvider extends PanelProvider
                     ]),
                 PanelRoles::make()
                     ->restrictedRoles(['client']),
+                FilamentBackgroundsPlugin::make()
+                    ->imageProvider(
+                        MyImages::make()
+                            ->directory('images/cliente-fondo') 
+                    )
+                    ->showAttribution(false) // Opcional, desactiva la atribución
             ]);
     }
 }
