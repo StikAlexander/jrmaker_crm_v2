@@ -6,7 +6,7 @@ use App\Filament\Client\Resources\ClientInvoiceResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListClientInvoices extends ListRecords
+class ListClientInvoice extends ListRecords
 {
     protected static string $resource = ClientInvoiceResource::class;
 

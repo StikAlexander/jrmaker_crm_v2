@@ -115,9 +115,9 @@ class ClientInvoiceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ClientInvoiceResource\Pages\ListInvoices::route('/'),
-            'create' => ClientInvoiceResource\Pages\CreateInvoice::route('/create'),
-            'edit' => ClientInvoiceResource\Pages\EditInvoice::route('/{record}/edit'),
+            'index' => ClientInvoiceResource\Pages\ListClientInvoice::route('/'),
+            'create' => ClientInvoiceResource\Pages\CreateClientInvoice::route('/create'),
+            'edit' => ClientInvoiceResource\Pages\EditClientInvoice::route('/{record}/edit'),
         ];
     }
 }
