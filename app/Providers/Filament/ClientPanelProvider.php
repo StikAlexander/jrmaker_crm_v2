@@ -25,6 +25,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Shanerbaner82\PanelRoles\PanelRoles;
 use Filament\Support\Enums\MaxWidth;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
+use Swis\Filament\Backgrounds\ImageProviders\CuratedBySwis;
 use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 
 class ClientPanelProvider extends PanelProvider
@@ -113,8 +114,8 @@ class ClientPanelProvider extends PanelProvider
                 PanelRoles::make()
                     ->restrictedRoles(['client']),
                 FilamentBackgroundsPlugin::make()
-                    ->imageProvider(MyCustomImageProvider::make())  
-                    ->showAttribution(false)  
+                    ->imageProvider(CuratedBySwis::make())  
+                    ->showAttribution(false),  
             ]);
     }
 }

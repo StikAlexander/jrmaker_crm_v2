@@ -14,10 +14,13 @@ class MyCustomImageProvider implements ProvidesImages
 
     public function getImage(): Image
     {
-        // Aquí especificamos la imagen que ya tienes en el directorio
+        // Verificar la URL generada por asset()
+        //dd(asset('storage/images/cliente-fondo.png'));
+        
         return new Image(
-            asset('storage/images/cliente-fondo.png'),  // Ruta a la imagen 'cliente-fondo.png'
-            ''  // Deja en blanco o añade texto si necesitas atribución
+            asset('storage/images/cliente-fondo.png'),
+            ''
         );
     }
+    
 }
