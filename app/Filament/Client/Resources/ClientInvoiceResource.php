@@ -50,7 +50,69 @@ class ClientInvoiceResource extends Resource
             ->emptyStateHeading('Sin facturas pendientes de pago')
             ->emptyStateDescription('No hay facturas pendientes en este momento.')
             ->columns([
-                // Aquí están tus columnas
+                // Número de Factura
+                TextColumn::make('invoice_number')
+                    ->label('Número de Factura')
+                    ->prefix('FEVD')
+                    ->sortable()
+                    ->searchable()
+                    ->limit(20)
+                    ->alignStart()
+                    ->columnSpan('full'),
+
+                // Descripción
+                TextColumn::make('description')
+                    ->label('Descripción')
+                    ->sortable()
+                    ->searchable()
+                    ->limit(30) // Limitar caracteres
+                    ->tooltip(fn ($record) => $record->description)
+                    ->alignStart()
+                    ->columnSpan('full'),
+
+                // Monto Total
+                TextColumn::make('total_amount')
+                    ->label('Monto Total')
+                    ->sortable()
+                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
+                    ->alignStart()
+                    ->columnSpan('full'),
+
+                // Monto Abonado
+                TextColumn::make('total_paid') 
+                    ->label('Monto Abonado')
+                    ->sortable()
+                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
+                    ->alignStart()
+                    ->columnSpan('full'),
+
+                // Monto Pendiente
+                TextColumn::make('pending_amount') 
+                    ->label('Monto Pendiente')
+                    ->sortable()
+                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
+                    ->alignStart()
+                    ->columnSpan('full'),
+
+                // Estado de la Factura
+                TextColumn::make('status')
+                    ->label('Estado')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Pending' => 'warning',
+                        'Paid' => 'success',
+                        'Cancelled' => 'danger',
+                        default => 'secondary',
+                    })
+                    ->sortable()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'Pending' => 'Pendiente',
+                        'Paid' => 'Pagada',
+                        'Cancelled' => 'Cancelada',
+                        default => $state,
+                    })
+                    ->alignStart()
+                    ->columnSpan('full'),
             ])
             ->actions([
                 Action::make('viewPdf')
@@ -102,6 +164,7 @@ class ClientInvoiceResource extends Resource
                     ->icon('heroicon-o-credit-card'),
             ]);
     }
+    
     public static function getHeaderWidgets(): array
     {
         return [];

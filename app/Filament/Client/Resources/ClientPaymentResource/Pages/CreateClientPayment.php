@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Filament\Client\Resources\ClientPaymentResource\Pages;
+namespace App\Filament\Client\Resources\ClientInvoiceResource\Pages;
 
-use App\Filament\Client\Resources\ClientPaymentResource;
-use Filament\Actions;
+use App\Filament\Client\Resources\ClientInvoiceResource;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreateClientPayment extends CreateRecord
+class CreateClientInvoice extends CreateRecord
 {
-    protected static string $resource = ClientPaymentResource::class;
+    protected static string $resource = ClientInvoiceResource::class;
 }
