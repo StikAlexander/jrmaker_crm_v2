@@ -17,13 +17,14 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 
-class InvoiceResource extends Resource
+class ClientInvoiceResource extends Resource
 {
     protected static ?string $model = Invoice::class;
     protected static ?string $recordTitleAttribute = 'invoice_number';
     protected static ?string $pluralLabel = 'Facturas Pendientes';
     protected static ?string $singularLabel = 'Factura Pendiente';
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+    protected static ?string $navigationGroup = 'Mi Cuenta';
     protected static ?int $navigationSort = 1;
 
     // Filtrar facturas del cliente autenticado
@@ -45,80 +46,21 @@ class InvoiceResource extends Resource
     {
         return $table
             ->description('Selecciona una o más facturas pendientes para proceder con el pago.')
+            ->emptyStateIcon('heroicon-o-document')
+            ->emptyStateHeading('Sin facturas pendientes de pago')
+            ->emptyStateDescription('No hay facturas pendientes en este momento.')
             ->columns([
-                // Número de Factura
-                TextColumn::make('invoice_number')
-                    ->label('Número de Factura')
-                    ->prefix('FEVD')
-                    ->sortable()
-                    ->searchable()
-                    ->limit(20) 
-                    ->alignStart() 
-                    ->columnSpan('full'),
-    
-                // Descripción
-                TextColumn::make('description')
-                    ->label('Descripción')
-                    ->sortable()
-                    ->searchable()
-                    ->limit(30) // Limitar caracteres
-                    ->tooltip(fn ($record) => $record->description) 
-                    ->alignStart()
-                    ->columnSpan('full'),
-    
-                // Monto Total
-                TextColumn::make('total_amount')
-                    ->label('Monto Total')
-                    ->sortable()
-                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
-                    ->alignStart()
-                    ->columnSpan('full'),
-    
-                // Monto Abonado
-                TextColumn::make('total_paid') 
-                    ->label('Monto Abonado')
-                    ->sortable()
-                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
-                    ->alignStart()
-                    ->columnSpan('full'),
-    
-                // Monto Pendiente
-                TextColumn::make('pending_amount') 
-                    ->label('Monto Pendiente')
-                    ->sortable()
-                    ->formatStateUsing(fn (string $state): string => '$' . number_format($state, 0, ',', '.'))
-                    ->alignStart()
-                    ->columnSpan('full'),
-    
-                // Estado de la Factura
-                TextColumn::make('status')
-                    ->label('Estado')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Pending' => 'warning',
-                        'Paid' => 'success',
-                        'Cancelled' => 'danger',
-                        default => 'secondary',
-                    })
-                    ->sortable()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'Pending' => 'Pendiente',
-                        'Paid' => 'Pagada',
-                        'Cancelled' => 'Cancelada',
-                        default => $state,
-                    })
-                    ->alignStart()
-                    ->columnSpan('full'),
+                // Aquí están tus columnas
             ])
             ->actions([
-                Action::make('viewPdf') 
+                Action::make('viewPdf')
                     ->label('Ver PDF')
                     ->icon('heroicon-o-document-text')
-                    ->url(fn ($record) => Storage::url($record->invoice_pdf)) 
+                    ->url(fn ($record) => Storage::url($record->invoice_pdf))
                     ->openUrlInNewTab()
                     ->tooltip('Haz clic para ver el PDF de la factura')
                     ->button()
-                    ->color('danger') 
+                    ->color('danger')
                     ->extraAttributes(['class' => 'text-white']),
             ])
             ->bulkActions([
@@ -128,7 +70,6 @@ class InvoiceResource extends Resource
                     ->action(function (Collection $records) {
                         $totalAmount = $records->sum('pending_amount');
     
-                        // Crear el pago
                         $payment = Payment::create([
                             'client_id' => auth()->id(),
                             'amount' => $totalAmount,
@@ -137,23 +78,17 @@ class InvoiceResource extends Resource
                             'external_reference' => 'ref_' . uniqid(),
                         ]);
     
-                        // Asociar las facturas al pago
                         foreach ($records as $invoice) {
                             $payment->invoices()->attach($invoice->id, ['amount' => $invoice->pending_amount]);
                         }
     
-                        // Generar el enlace de pago
                         $paymentService = app(PaymentService::class);
                         $paymentLink = $paymentService->generatePaymentLink($payment, route('payment.callback'));
     
                         if ($paymentLink) {
-                            // Actualizar el enlace de pago
                             $payment->update(['payment_link' => $paymentLink]);
-
-                            // preguntar en 2 minutos si el link ya vencio 
                             CheckWompiPaymentStatus::dispatch($payment)->delay(now()->addMinutes(2)->addSeconds(15));
     
-                            // Redirigir al enlace de pago
                             return redirect()->away($paymentLink);
                         } else {
                             Notification::make()
@@ -167,8 +102,6 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-credit-card'),
             ]);
     }
-    
-
     public static function getHeaderWidgets(): array
     {
         return [];
