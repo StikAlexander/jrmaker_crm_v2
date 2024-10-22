@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Auth\ClientLogin;
+use App\Filament\Backgrounds\MyCustomImageProvider;
 use App\Filament\Pages\Auth\ClientLogin as AuthClientLogin;
 use App\Http\Middleware\AuthenticateClient;
 use App\Livewire\MyProfileClientExtended;
@@ -112,11 +113,8 @@ class ClientPanelProvider extends PanelProvider
                 PanelRoles::make()
                     ->restrictedRoles(['client']),
                 FilamentBackgroundsPlugin::make()
-                    ->imageProvider(
-                        MyImages::make()
-                            ->directory('images/cliente-fondo') 
-                    )
-                    ->showAttribution(false) // Opcional, desactiva la atribución
+                    ->imageProvider(MyCustomImageProvider::make())  
+                    ->showAttribution(false)  
             ]);
     }
 }
