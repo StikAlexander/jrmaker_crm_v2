@@ -8,7 +8,7 @@ use Filament\Resources\Pages\ListRecords;
 
 class ListInvoices extends ListRecords
 {
-    protected static string $resource = InvoiceResource::class;
+    protected static string $resource = ClientInvoiceResource::class;
 
     protected function getHeaderActions(): array
     {
