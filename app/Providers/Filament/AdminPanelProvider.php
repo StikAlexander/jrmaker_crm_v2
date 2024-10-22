@@ -43,8 +43,8 @@ class AdminPanelProvider extends PanelProvider
         return $panel
         ->spa()
         ->navigationGroups([
-            NavigationGroup::make('Banner')
-                ->icon('heroicon-o-tag'), 
+            NavigationGroup::make('Avisos')
+                ->icon('heroicon-o-megaphone'), 
             NavigationGroup::make('Contabilidad')
                 ->icon('heroicon-o-calculator'),
             NavigationGroup::make('Usuarios')
