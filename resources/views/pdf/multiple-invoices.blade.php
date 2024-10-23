@@ -1,6 +1,6 @@
 <!-- resources/views/pdf/multiple-invoices.blade.php -->
 
-<h1>Facturas Asociadas al Pago {{ $invoices->first() ? $invoices->first()->payment->payment_number : 'N/A' }}</h1>
+<h1>Facturas Asociadas al Pago {{ $invoices->first() && $invoices->first()->payments->first() ? $invoices->first()->payments->first()->payment_number : 'N/A' }}</h1>
 
 @foreach ($invoices as $invoice)
     <h2>Factura #{{ $invoice->invoice_number ?? 'N/A' }}</h2>
