@@ -46,10 +46,10 @@ class PaymentResource extends Resource
                     ->label('Monto')
                     ->money('COP')
                     ->sortable(),
-                TextColumn::make('payment_date')
+                    TextColumn::make('created_at')
                     ->label('Fecha de Pago')
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => \Carbon\Carbon::parse($state)->format('d/m/Y g:i A')),
+                    ->formatStateUsing(fn ($state): string => \Carbon\Carbon::parse($state)->format('d/m/Y g:i A')),                
                 BadgeColumn::make('payment_status')
                     ->label('Estado del Pago')
                     ->colors([
