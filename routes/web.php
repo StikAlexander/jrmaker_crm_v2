@@ -8,6 +8,7 @@ use App\Http\Controllers\WompiController;
 use App\Http\Controllers\WompiWebhookController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
+use App\Http\Controllers\ClientPaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,3 +69,12 @@ Route::post('/email/resend', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
+
+/*
+|--------------------------------------------------------------------------
+| Rutas del controlador para descargar varios pdfs de facturas desde el cliente
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/client/download-invoices/{payment}', [ClientPaymentController::class, 'downloadInvoices'])
+    ->name('client.download-invoices');
