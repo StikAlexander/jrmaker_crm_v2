@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\FacadesLog;
 
 class Payment extends Model 
 {
@@ -26,36 +25,47 @@ class Payment extends Model
         'payment_link_id',  
     ];
 
+    /**
+     * Hook para la creación de un nuevo pago.
+     */
     protected static function boot()
     {
         parent::boot();
 
-        // Genera el número de pago al crear un nuevo pago
+        // Generar número de pago al crear un nuevo registro
         static::creating(function ($model) {
             $lastPaymentNumber = static::max('payment_number');
             $model->payment_number = $lastPaymentNumber ? $lastPaymentNumber + 1 : 1;
         });
 
-        // Ejecuta la lógica de distribución de pagos cuando el estado cambia a "Completed"
+        // Distribuir el monto cuando el estado cambia a "Completed"
         static::updated(function ($payment) {
             if ($payment->isDirty('payment_status') && $payment->payment_status === 'Completed') {
-                // Llama a la función para distribuir el monto entre las facturas
                 $payment->distributePayment();
             }
         });
     }
 
-    // Relaciones
+    /**
+     * Relación: Un pago pertenece a un cliente.
+     */
     public function client()
     {
         return $this->belongsTo(User::class, 'client_id');
     }
 
+    /**
+     * Relación: Un pago puede estar asociado a muchas facturas.
+     */
     public function invoices()
     {
-        return $this->belongsToMany(Invoice::class, 'payment_invoice')->withPivot('amount');
+        return $this->belongsToMany(Invoice::class, 'payment_invoice')
+            ->withPivot('amount'); // Incluye el campo 'amount' de la tabla pivote
     }
 
+    /**
+     * Relación: Pago creado por un usuario (administrador o empleado).
+     */
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -68,51 +78,43 @@ class Payment extends Model
     {
         $remainingAmount = $this->amount;
         Log::info('Iniciando distribución de pago para Payment ID: ' . $this->id);
-    
+
         foreach ($this->invoices as $invoice) {
-            // Si la factura ya está pagada, omitimos la actualización
+            // Si la factura ya está pagada, saltamos a la siguiente
             if ($invoice->status === 'Paid') {
                 Log::info('Factura ID: ' . $invoice->id . ' ya está pagada. Se omite.');
                 continue;
             }
-    
-            Log::info('Procesando factura ID: ' . $invoice->id . ' con monto pendiente: ' . $invoice->pending_amount);
-    
+
             $invoicePendingAmount = $invoice->pending_amount;
-    
-            // Calcular el monto a pagar para esta factura
             $paymentAmount = min($remainingAmount, $invoicePendingAmount);
             Log::info('Monto a pagar para esta factura: ' . $paymentAmount);
-    
-            // Actualizar los campos de la factura
+
+            // Actualizar el monto pagado y pendiente
             $invoice->total_paid += $paymentAmount;
             $invoice->pending_amount = max($invoice->total_amount - $invoice->total_paid, 0);
-            Log::info('Monto pagado total de la factura ahora es: ' . $invoice->total_paid);
-            Log::info('Monto pendiente de la factura ahora es: ' . $invoice->pending_amount);
-    
-            // Cambia el estado de la factura a 'Paid' si ya no tiene saldo pendiente
+            Log::info('Total pagado: ' . $invoice->total_paid . ', Pendiente: ' . $invoice->pending_amount);
+
+            // Marcar factura como pagada si el monto pendiente es cero
             if ($invoice->pending_amount <= 0) {
                 $invoice->status = 'Paid';
-                Log::info('Factura ID: ' . $invoice->id . ' marcada como Pagada');
+                Log::info('Factura ID: ' . $invoice->id . ' marcada como Pagada.');
             }
-    
-            // Guardar los cambios en la factura
+
             $invoice->save();
-    
+
             // Actualizar la tabla pivote con el monto pagado
             $this->invoices()->updateExistingPivot($invoice->id, ['amount' => $paymentAmount]);
-    
-            // Reducir el monto restante
+
+            // Reducir el monto restante del pago
             $remainingAmount -= $paymentAmount;
-    
-            // Salir si no queda monto por distribuir
+
             if ($remainingAmount <= 0) {
-                log::info('Monto total distribuido. Saliendo de la distribución.');
+                Log::info('Monto total distribuido. Fin del proceso.');
                 break;
             }
         }
-    
-        Log::info('Pago distribuido exitosamente para Payment ID: ' . $this->id);
+
+        Log::info('Distribución de pago finalizada para Payment ID: ' . $this->id);
     }
-    
 }

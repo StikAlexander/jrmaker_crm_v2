@@ -11,10 +11,9 @@ class ClientPaymentController extends Controller
 {
     public function downloadInvoices(Payment $payment)
     {
-        // Obtener las facturas asociadas al pago
         $invoices = $payment->invoices;
-
-        // Si no hay facturas asociadas, mostrar notificación de error
+    
+        // Si no hay facturas asociadas, mostramos un mensaje de error
         if ($invoices->isEmpty()) {
             Notification::make()
                 ->title('Error')
@@ -23,21 +22,21 @@ class ClientPaymentController extends Controller
                 ->send();
             return back();
         }
-
-        // Verificar si alguna factura no tiene PDF subido
-        $missingPdf = $invoices->filter(fn($invoice) => is_null($invoice->invoice_pdf));
-
-        if ($missingPdf->count() > 0) {
+    
+        // Filtramos facturas que no tienen PDF
+        $invoicesWithoutPdf = $invoices->filter(fn ($invoice) => is_null($invoice->invoice_pdf));
+    
+        if ($invoicesWithoutPdf->count() > 0) {
             Notification::make()
-                ->title('Error')
+                ->title('Advertencia')
                 ->body('Algunas facturas no tienen un PDF disponible.')
-                ->danger()
+                ->warning()
                 ->send();
             return back();
         }
-
-        // Generar un solo PDF combinando las facturas que tienen PDF
+    
+        // Generamos un PDF combinando las facturas con PDF
         $pdf = Pdf::loadView('pdf.multiple-invoices', compact('invoices'));
         return $pdf->download('facturas-' . $payment->payment_number . '.pdf');
-    }
+    }    
 }
