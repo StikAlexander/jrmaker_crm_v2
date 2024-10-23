@@ -40,42 +40,32 @@ class ClientPaymentResource extends Resource
                 TextColumn::make('payment_number')
                     ->label('Número de Pago')
                     ->prefix('SP')
-                    ->sortable(),
+                    ->sortable()
+                    ->width('15%'),
     
                 TextColumn::make('amount')
                     ->label('Monto')
                     ->money('COP')
-                    ->sortable(),
+                    ->sortable()
+                    ->width('15%'),
     
                 TextColumn::make('updated_at')
                     ->label('Fecha de Pago')
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => \Carbon\Carbon::parse($state)->format('d/m/Y g:i A')),
-    
-                /*TextColumn::make('payment_method_type')
-                    ->label('Método de Pago')
-                    ->sortable(),*/
-    
-                // Nueva columna para ver facturas asociadas
-                TextColumn::make('ver_facturas')
-                    ->label('Facturas')
-                    ->formatStateUsing(fn (Payment $record) => view('filament.tables.columns.view-invoices', ['invoices' => $record->invoices]))
-                    ->html(), // Permitir HTML para renderizar el enlace a los PDFs
+                    ->formatStateUsing(fn (string $state): string => \Carbon\Carbon::parse($state)->format('d/m/Y g:i A'))
+                    ->width('20%'),
             ])
             ->actions([
-                // Acción para ver facturas asociadas al pago
                 ViewAction::make()
-                    ->label('Ver Facturas')
+                    ->label('Ver Facturas Asociadas')
                     ->modalHeading('Facturas Asociadas al Pago')
                     ->modalContent(fn (Payment $record) => view('filament.modals.view-invoices', ['invoices' => $record->invoices])),
-
-                // Nueva acción para descargar PDF de facturas asociadas
-                Action::make('downloadPdf')
-                    ->label('Descargar Factura(s)')
+    
+                Action::make('downloadInvoicePdf')
+                    ->label('Descargar Factura PDF')  // Cambiar el label para reflejar que es un PDF real
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn (Payment $record) => route('client.download-invoices', ['payment' => $record->id]))
-                    ->openUrlInNewTab()
-                    ->iconButton(),
+                    ->url(fn (Payment $record) => route('client.download-invoices', ['payment' => $record->id]))  // Cambiar a 'client.download-invoices'
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
