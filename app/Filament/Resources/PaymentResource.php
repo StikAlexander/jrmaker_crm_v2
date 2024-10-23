@@ -23,13 +23,13 @@ class PaymentResource extends Resource
     /**
      * Preload client and invoices for optimized query and filter by authenticated client.
      */
-    public static function getEloquentQuery(): Builder
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()
-            ->with(['client', 'invoices']) // Carga anticipada de relaciones
-            ->orderBy('payment_date', 'desc'); // Ordenar por fecha de pago
+        return static::getModel()::query()
+            ->with(['invoices', 'client']) // Carga anticipada
+            ->orderBy('created_at', 'desc'); // Ordenar por fecha de creación
     }
-
+    
     public static function table(Table $table): Table
     {
         return $table
