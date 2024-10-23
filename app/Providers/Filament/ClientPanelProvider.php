@@ -113,9 +113,11 @@ class ClientPanelProvider extends PanelProvider
                     ]),
                 PanelRoles::make()
                     ->restrictedRoles(['client']),
-                FilamentBackgroundsPlugin::make()
-                    ->imageProvider(CuratedBySwis::make())  
-                    ->showAttribution(false),  
+                    FilamentBackgroundsPlugin::make()
+                    ->imageProvider(
+                        MyImages::make()
+                            ->directory('images/swisnl/filament-backgrounds/jr-images') 
+                    )
             ]);
     }
 }
