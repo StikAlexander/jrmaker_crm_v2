@@ -46,7 +46,7 @@ class ClientInvoiceResource extends Resource
     {
         return $table
             ->description('Selecciona una o más facturas pendientes para proceder con el pago.')
-            ->emptyStateIcon('heroicon-o-document')
+            ->emptyStateIcon('heroicon-o-document-currency-dollar')
             ->emptyStateHeading('Sin facturas pendientes de pago')
             ->emptyStateDescription('No hay facturas pendientes en este momento.')
             ->columns([
