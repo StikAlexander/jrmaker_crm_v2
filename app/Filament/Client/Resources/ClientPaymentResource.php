@@ -12,7 +12,6 @@ use Filament\Tables\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\Action;
-use Illuminate\Support\Facades\Storage;
 
 class ClientPaymentResource extends Resource
 {
@@ -42,22 +41,22 @@ class ClientPaymentResource extends Resource
                     ->label('Número de Pago')
                     ->prefix('SP')
                     ->sortable(),
-
+    
                 TextColumn::make('amount')
                     ->label('Monto')
                     ->money('COP')
                     ->sortable(),
-
+    
                 TextColumn::make('updated_at')
                     ->label('Fecha de Pago')
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => \Carbon\Carbon::parse($state)->format('d/m/Y g:i A')),
-
-                TextColumn::make('payment_method_type')
+    
+                /*TextColumn::make('payment_method_type')
                     ->label('Método de Pago')
-                    ->sortable(),
-
-                // Nueva columna para descargar facturas asociadas en PDF
+                    ->sortable(),*/
+    
+                // Nueva columna para ver facturas asociadas
                 TextColumn::make('ver_facturas')
                     ->label('Facturas')
                     ->formatStateUsing(fn (Payment $record) => view('filament.tables.columns.view-invoices', ['invoices' => $record->invoices]))
@@ -69,17 +68,14 @@ class ClientPaymentResource extends Resource
                     ->label('Ver Facturas')
                     ->modalHeading('Facturas Asociadas al Pago')
                     ->modalContent(fn (Payment $record) => view('filament.modals.view-invoices', ['invoices' => $record->invoices])),
-                    //->lg(), // Cambiado a 'large'
 
                 // Nueva acción para descargar PDF de facturas asociadas
                 Action::make('downloadPdf')
-                ->label('Descargar Factura(s)')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->url(fn (Payment $record) => route('client.download-invoices', ['payment' => $record->id]))
-                ->openUrlInNewTab()
-                ->iconButton(),
-                //->lg(),
-            
+                    ->label('Descargar Factura(s)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(fn (Payment $record) => route('client.download-invoices', ['payment' => $record->id]))
+                    ->openUrlInNewTab()
+                    ->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
