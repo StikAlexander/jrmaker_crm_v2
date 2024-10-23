@@ -79,6 +79,6 @@ class Invoice extends Model
 
     public function payments()
     {
-        return $this->hasMany(Payment::class);
-    }
+        return $this->belongsToMany(Payment::class, 'payment_invoice')->withPivot('amount');
+    }    
 }
