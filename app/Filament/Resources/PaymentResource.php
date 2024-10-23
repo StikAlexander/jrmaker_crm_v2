@@ -27,7 +27,6 @@ class PaymentResource extends Resource
     {
         return parent::getEloquentQuery()
             ->with(['client', 'invoices']) // Carga anticipada de relaciones
-            ->where('client_id', auth()->id()) // Filtrar por cliente autenticado
             ->orderBy('payment_date', 'desc'); // Ordenar por fecha de pago
     }
 
