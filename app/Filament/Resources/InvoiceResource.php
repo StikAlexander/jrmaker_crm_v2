@@ -101,6 +101,7 @@ class InvoiceResource extends Resource
             ->orderBy('created_at', 'desc'); // Ordenar por fecha de creación
     }
     
+    
     public static function form(Form $form): Form
     {
         return $form
