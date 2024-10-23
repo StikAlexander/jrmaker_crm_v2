@@ -94,6 +94,14 @@ class InvoiceResource extends Resource
         ];
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return static::getModel()::query()
+            ->with(['client', 'createdBy']) // Carga anticipada
+            ->where('client_id', auth()->id()) // Filtrar cliente autenticado
+            ->orderBy('created_at', 'desc'); // Ordenar por fecha de creación
+    }
+    
     public static function form(Form $form): Form
     {
         return $form
