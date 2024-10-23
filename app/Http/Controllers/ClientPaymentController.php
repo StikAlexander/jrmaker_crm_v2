@@ -13,7 +13,6 @@ class ClientPaymentController extends Controller
     {
         $invoices = $payment->invoices;
 
-        // Si no hay facturas asociadas, mostramos un mensaje de error
         if ($invoices->isEmpty()) {
             Notification::make()
                 ->title('Error')
@@ -23,7 +22,6 @@ class ClientPaymentController extends Controller
             return back();
         }
 
-        // Filtramos facturas que no tienen un PDF asignado
         $invoicesWithoutPdf = $invoices->filter(fn ($invoice) => is_null($invoice->invoice_pdf));
 
         if ($invoicesWithoutPdf->count() > 0) {
@@ -35,22 +33,27 @@ class ClientPaymentController extends Controller
             return back();
         }
 
-        // Creamos un nuevo archivo PDF combinando las facturas
         $pdf = new Fpdi();
 
         foreach ($invoices as $invoice) {
-            $filePath = Storage::path($invoice->invoice_pdf);  // Obtener la ruta del archivo
-            if (!file_exists($filePath)) {
+            $filePath = "public/invoices/{$invoice->invoice_pdf}";
+
+            if (strpos($invoice->invoice_pdf, 'invoices/') === 0) {
+                $filePath = "public/{$invoice->invoice_pdf}";
+            }
+
+            if (!Storage::exists($filePath)) {
                 Notification::make()
                     ->title('Error')
-                    ->body('Uno de los archivos PDF no existe en el servidor.')
+                    ->body("El archivo PDF {$filePath} no existe en el servidor.")
                     ->danger()
                     ->send();
                 return back();
             }
 
-            // Agregamos las páginas del PDF a FPDI
-            $pageCount = $pdf->setSourceFile($filePath);
+            $fullFilePath = Storage::path($filePath);
+            $pageCount = $pdf->setSourceFile($fullFilePath);
+
             for ($i = 1; $i <= $pageCount; $i++) {
                 $templateId = $pdf->importPage($i);
                 $pdf->addPage();
@@ -58,8 +61,7 @@ class ClientPaymentController extends Controller
             }
         }
 
-        // Salida del archivo combinado para su descarga
-        $output = $pdf->Output('S');  // Output como string
+        $output = $pdf->Output('S');
 
         return response($output, 200)
             ->header('Content-Type', 'application/pdf')

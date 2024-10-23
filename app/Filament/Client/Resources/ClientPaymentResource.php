@@ -10,7 +10,6 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\Action;
 
 class ClientPaymentResource extends Resource
@@ -22,7 +21,6 @@ class ClientPaymentResource extends Resource
     protected static ?string $navigationGroup = 'Mi Cuenta';
     protected static ?int $navigationSort = 2;
 
-    // Filtrar solo los pagos completados del cliente autenticado
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -40,31 +38,28 @@ class ClientPaymentResource extends Resource
                 TextColumn::make('payment_number')
                     ->label('Número de Pago')
                     ->prefix('SP')
-                    ->sortable()
-                    ->width('15%'),
-    
+                    ->sortable(),
+
                 TextColumn::make('amount')
                     ->label('Monto')
                     ->money('COP')
-                    ->sortable()
-                    ->width('15%'),
-    
+                    ->sortable(),
+
                 TextColumn::make('updated_at')
                     ->label('Fecha de Pago')
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => \Carbon\Carbon::parse($state)->format('d/m/Y g:i A'))
-                    ->width('20%'),
+                    ->formatStateUsing(fn (string $state): string => \Carbon\Carbon::parse($state)->format('d/m/Y g:i A')),
             ])
             ->actions([
                 ViewAction::make()
                     ->label('Ver Facturas Asociadas')
                     ->modalHeading('Facturas Asociadas al Pago')
                     ->modalContent(fn (Payment $record) => view('filament.modals.view-invoices', ['invoices' => $record->invoices])),
-    
+
                 Action::make('downloadInvoicePdf')
-                    ->label('Descargar Factura PDF')  // Cambiar el label para reflejar que es un PDF real
+                    ->label('Descargar Facturas Relacionadas')  // Cambié el nombre para algo más claro
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn (Payment $record) => route('client.download-invoices', ['payment' => $record->id]))  // Cambiar a 'client.download-invoices'
+                    ->url(fn (Payment $record) => route('client.download-invoices', ['payment' => $record->id]))
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([

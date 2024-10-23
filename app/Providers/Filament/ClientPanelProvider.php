@@ -33,7 +33,7 @@ class ClientPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->maxContentWidth(MaxWidth::Full)
+            ->maxContentWidth(MaxWidth::SevenExtraLarge)
             ->sidebarFullyCollapsibleOnDesktop()
             ->id('client')
             ->path('client')
