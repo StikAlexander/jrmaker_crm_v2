@@ -81,7 +81,7 @@ class PaymentResource extends Resource
             ->bulkActions([ // Acciones en lote
                 Tables\Actions\DeleteBulkAction::make(),
             ])
-            ->defaultSort('payment_date', 'desc') // Ordenación por defecto
+            ->defaultSort('created_at', 'desc') // Ordenación por defecto
             ->paginated(50); // Paginación para mejorar la velocidad con un límite de 50 elementos por página
     }
 
