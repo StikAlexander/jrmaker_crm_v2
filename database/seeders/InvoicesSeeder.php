@@ -37,12 +37,14 @@ class InvoicesSeeder extends Seeder
             ->whereIn('roles.name', ['super_admin', 'admin', 'collaborator'])
             ->pluck('users.id')
             ->random();
-
+    
         $issueDate = Carbon::now()->subMonths(rand(0, 12))->subDays(rand(0, 30));
         $dueDate = (clone $issueDate)->addDays(rand(15, 60));
-        $totalAmount = rand(500, 5000);
+    
+        // Asegurar que el total sea al menos 100.000
+        $totalAmount = rand(100000, 500000);  // Ajustado para un mínimo de 100.000
         $totalPaid = rand(0, $totalAmount);
-
+    
         return [
             'invoice_number' => $invoiceNumber,
             'issue_date' => $issueDate,
@@ -56,10 +58,10 @@ class InvoicesSeeder extends Seeder
             'invoice_pdf' => 'invoices/' . $invoiceNumber . '.pdf',
             'created_at' => now(),
             'updated_at' => now(),
-            'last_reminder_sent_at' => null, // Aquí aseguramos que sea null
+            'last_reminder_sent_at' => null, // Aseguramos que sea null
         ];
     }
-
+    
     private function randomStatus($totalAmount, $totalPaid)
     {
         if ($totalPaid === 0) {
