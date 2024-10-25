@@ -39,8 +39,8 @@ class InvoicesSeeder extends Seeder
             ->random();
     
         $issueDate = Carbon::now()->subMonths(rand(0, 12))->subDays(rand(0, 30));
-        $dueDate = (clone $issueDate)->addDays(rand(15, 60));
-    
+        $dueDate = (clone $issueDate)->addDays(30);
+        
         // Asegurar que el total sea al menos 100.000
         $totalAmount = rand(100000, 500000);  // Ajustado para un mínimo de 100.000
         $totalPaid = rand(0, $totalAmount);
