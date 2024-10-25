@@ -7,7 +7,7 @@
 <p align="center">
   Debido a los numerosos cambios en la interfaz de usuario y en la seguridad, se tomó la decisión de crear un nuevo repositorio para la versión 2 de J.R. MAKER CRM.
   <br><br>
-  Esta nueva versión incluye mejoras importantes, incluyendo la reducción de las comisiones cobradas por la pasarela de pagos. Para ello, se ha integrado completamente la solución de pagos Bancolombia Wompi.
+  Esta nueva versión incluye mejoras importantes, incluyendo la reducción de las comisiones cobradas por la pasarela de pagos. Para ello, se ha integrado completamente la solución de pagos Bancolombia Wompi. prueba de comit
 </p>
 
 ---
