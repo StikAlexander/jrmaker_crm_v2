@@ -12,15 +12,10 @@ use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\HtmlString;
 
 class ClientLogin extends AuthLogin
 {
-    /**
-     * La vista personalizada que debe usar este login.
-     * @var string
-     */
-    //protected static string $view = 'filament.auth.client-login'; // Apunta a la vista Blade personalizada
-
     protected function getForms(): array
     {
         return [
@@ -29,18 +24,23 @@ class ClientLogin extends AuthLogin
                     ->schema([
                         $this->getDocumentTypeFormComponent(),
                         $this->getDocumentNumberFormComponent(),
-                        // Usamos Turnstile en lugar de GRecaptcha
                         Turnstile::make('captcha')
                             ->label('Captcha')
-                            ->theme('light') // Puedes usar 'light', 'dark', o 'auto'
-                            ->language('es') 
-                            ->size('normal'), 
+                            ->theme('light')
+                            ->language('es')
+                            ->size('normal'),
+    
+                        
+                        \Filament\Forms\Components\Placeholder::make('pdf_instructivo')
+                            ->label('Ver Instructivo')
+                            ->content(new HtmlString('<a href="https://crm.jrmaker.com.co/storage/instructivo.pdf" target="_blank" class="text-blue-500 underline">Descargar PDF</a>'))
+                            ->disableLabel(),
                     ])
                     ->statePath('data'),
             ),
         ];
     }
-
+    
     protected function getDocumentTypeFormComponent(): Component
     {
         return Select::make('document_type')
