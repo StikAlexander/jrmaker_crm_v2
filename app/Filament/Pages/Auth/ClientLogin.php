@@ -31,9 +31,9 @@ class ClientLogin extends AuthLogin
                             ->size('normal'),
     
                         
-                        \Filament\Forms\Components\Placeholder::make('pdf_instructivo')
+                            \Filament\Forms\Components\Placeholder::make('pdf_instructivo')
                             ->label('Ver Instructivo')
-                            ->content(new HtmlString('<a href="https://crm.jrmaker.com.co/storage/instructivo.pdf" target="_blank" class="text-blue-500 underline">Ver Instructivo</a>'))
+                            ->content(new HtmlString('<a href="https://crm.jrmaker.com.co/storage/instructivo.pdf" target="_blank" style="color: #HEXCODE; text-decoration: underline;">Ver Instructivo</a>'))
                             ->disableLabel(),
                     ])
                     ->statePath('data'),
