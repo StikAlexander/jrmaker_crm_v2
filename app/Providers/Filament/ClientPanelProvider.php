@@ -116,8 +116,8 @@ class ClientPanelProvider extends PanelProvider
                 PanelRoles::make()
                     ->restrictedRoles(['client']),
                 FilamentBackgroundsPlugin::make()
-                    ->imageProvider(SingleImageProvider::make())
-                    ->remember(3600), // Cachea la imagen por 1 hora
+                    ->imageProvider(\App\Filament\Backgrounds\MyCustomImageProvider::make())
+                    ->remember(3600), 
             ]);
     }       
 }

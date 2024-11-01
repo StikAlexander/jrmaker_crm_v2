@@ -5,7 +5,7 @@ namespace App\Filament\Backgrounds;
 use Swis\Filament\Backgrounds\Contracts\ProvidesImages;
 use Swis\Filament\Backgrounds\Image;
 
-class SingleImageProvider implements ProvidesImages
+class MyCustomImageProvider implements ProvidesImages
 {
     public static function make(): static
     {
@@ -19,4 +19,3 @@ class SingleImageProvider implements ProvidesImages
         );
     }
 }
-
