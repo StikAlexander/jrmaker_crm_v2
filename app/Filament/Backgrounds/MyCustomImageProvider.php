@@ -5,22 +5,18 @@ namespace App\Filament\Backgrounds;
 use Swis\Filament\Backgrounds\Contracts\ProvidesImages;
 use Swis\Filament\Backgrounds\Image;
 
-class MyCustomImageProvider implements ProvidesImages
+class SingleImageProvider implements ProvidesImages
 {
     public static function make(): static
     {
-        return new static();
+        return app(static::class);
     }
 
     public function getImage(): Image
     {
-        // Verificar la URL generada por asset()
-        //dd(asset('storage/images/cliente-fondo.png'));
-        
         return new Image(
-            asset('storage/images/cliente-fondo.png'),
-            ''
+            'url("/images/swisnl/filament-backgrounds/jr-images/pagos-jr.jpg")',
         );
     }
-    
 }
+

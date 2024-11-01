@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Auth\ClientLogin;
 use App\Filament\Backgrounds\MyCustomImageProvider;
+use App\Filament\Backgrounds\SingleImageProvider;
 use App\Filament\Pages\Auth\ClientLogin as AuthClientLogin;
 use App\Http\Middleware\AuthenticateClient;
 use App\Livewire\MyProfileClientExtended;
@@ -27,6 +28,7 @@ use Filament\Support\Enums\MaxWidth;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
 use Swis\Filament\Backgrounds\ImageProviders\CuratedBySwis;
 use Swis\Filament\Backgrounds\ImageProviders\MyImages;
+
 
 class ClientPanelProvider extends PanelProvider
 {
@@ -106,18 +108,16 @@ class ClientPanelProvider extends PanelProvider
                         slug: 'my-profile',
                     )
                     ->withoutMyProfileComponents([
-                        'update_password', 
+                        'update_password',
                     ])
                     ->myProfileComponents([
-                        'personal_info' => MyProfileClientExtended::class, 
+                        'personal_info' => MyProfileClientExtended::class,
                     ]),
                 PanelRoles::make()
                     ->restrictedRoles(['client']),
-                    FilamentBackgroundsPlugin::make()
-                    ->imageProvider(
-                        MyImages::make()
-                            ->directory('images/swisnl/filament-backgrounds/jr-images') 
-                    )
+                FilamentBackgroundsPlugin::make()
+                    ->imageProvider(SingleImageProvider::make())
+                    ->remember(3600), // Cachea la imagen por 1 hora
             ]);
-    }
+    }       
 }
