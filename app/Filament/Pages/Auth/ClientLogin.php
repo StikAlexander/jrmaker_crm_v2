@@ -30,17 +30,24 @@ class ClientLogin extends AuthLogin
                             ->language('es')
                             ->size('normal'),
     
-                        
-                            \Filament\Forms\Components\Placeholder::make('pdf_instructivo')
+                        \Filament\Forms\Components\Placeholder::make('pdf_instructivo')
                             ->label('Ver Instructivo')
-                            ->content(new HtmlString('<a href="https://crm.jrmaker.com.co/storage/instructivo.pdf" target="_blank" style="color: #HEXCODE; text-decoration: underline;">Ver Instructivo</a>'))
+                            ->content(new HtmlString('
+                                <div style="text-align: center;">
+                                    <a href="https://crm.jrmaker.com.co/storage/instructivo.pdf" 
+                                       target="_blank" 
+                                       style="color: #HEXCODE; text-decoration: underline; font-size: 1.25rem;">
+                                       Ver Instructivo
+                                    </a>
+                                </div>
+                            '))
                             ->disableLabel(),
                     ])
-                    ->statePath('data'),
+                    ->statePath('data')
             ),
         ];
     }
-    
+
     protected function getDocumentTypeFormComponent(): Component
     {
         return Select::make('document_type')

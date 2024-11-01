@@ -117,7 +117,8 @@ class ClientPanelProvider extends PanelProvider
                     ->restrictedRoles(['client']),
                 FilamentBackgroundsPlugin::make()
                     ->imageProvider(MyImageProvider::make())
-                    ->showAttribution(false) // Opcional
+                    ->showAttribution(false) 
+                    ->remember(900)
             ]);        
     }
 
