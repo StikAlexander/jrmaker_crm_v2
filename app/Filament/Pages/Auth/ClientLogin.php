@@ -36,7 +36,7 @@ class ClientLogin extends AuthLogin
                                 <div style="text-align: center;">
                                     <a href="https://crm.jrmaker.com.co/storage/instructivo.pdf" 
                                        target="_blank" 
-                                       style="color: #HEXCODE; text-decoration: underline; font-size: 1.25rem;">
+                                       style="color: #HEXCODE; text-decoration: underline; font-size: 1rem; font-weight: 500;">
                                        Ver Instructivo
                                     </a>
                                 </div>
@@ -47,7 +47,7 @@ class ClientLogin extends AuthLogin
             ),
         ];
     }
-
+    
     protected function getDocumentTypeFormComponent(): Component
     {
         return Select::make('document_type')
