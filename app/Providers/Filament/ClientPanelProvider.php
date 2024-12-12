@@ -38,6 +38,7 @@ class ClientPanelProvider extends PanelProvider
             ->maxContentWidth(MaxWidth::SevenExtraLarge)
             ->sidebarFullyCollapsibleOnDesktop()
             ->id('client')
+            ->homeUrl(fn () => route('filament.client.resources.client-invoices.index'))
             ->path('client')
             ->darkMode(false)
             ->login(AuthClientLogin::class)
@@ -58,7 +59,7 @@ class ClientPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Client/Resources'), for: 'App\\Filament\\Client\\Resources')
             ->discoverPages(in: app_path('Filament/Client/Pages'), for: 'App\\Filament\\Client\\Pages')
             ->pages([
-                \App\Filament\Client\Pages\Dashboard::class,  
+                //\App\Filament\Client\Pages\Dashboard::class,  
             ])
             ->discoverWidgets(in: app_path('Filament/Client/Widgets'), for: 'App\\Filament\\Client\\Widgets')
             ->viteTheme('resources/css/filament/client/theme.css')
@@ -69,6 +70,7 @@ class ClientPanelProvider extends PanelProvider
             ])
             ->globalSearch(false)
             ->middleware([
+                \App\Http\Middleware\RedirectToInvoices::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
