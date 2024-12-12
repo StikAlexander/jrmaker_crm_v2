@@ -44,6 +44,7 @@ class WompiWebhookController extends Controller
                             'DECLINED' => 'Declined',
                             'CANCELLED' => 'Cancelled',
                             'ERROR' => 'Error',
+                            'VOIDED' => 'Voided',
                             default => 'Pending',
                         },
                         'transaction_id' => $transactionId,

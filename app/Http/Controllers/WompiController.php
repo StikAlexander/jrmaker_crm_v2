@@ -3,60 +3,103 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Log;
 
 class WompiController extends Controller
 {
+    /**
+     * Maneja la redirección después del proceso de pago en Wompi.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function handleRedirect(Request $request)
     {
-        // Aquí obtienes la información de la transacción desde el request
+        // Recuperar el transaction_id desde la redirección
         $transactionId = $request->input('transaction_id');
-        $status = $request->input('status');
-        
-        // Buscar el pago relacionado en tu base de datos
-        $payment = Payment::where('transaction_id', $transactionId)->first();
 
-        if ($payment) {
-            // Verifica que el estado actual no sea 'Completed' antes de actualizar
-            if ($payment->payment_status !== 'Completed') {
-                // Manejar el estado de la transacción
-                switch ($status) {
-                    case 'APPROVED':
-                        $payment->update(['payment_status' => 'Completed']);
-                        break;
-                    case 'DECLINED':
-                        $payment->update(['payment_status' => 'Failed']);
-                        break;
-                    case 'CANCELLED':
-                        $payment->update(['payment_status' => 'Cancelled']);
-                        break;
-                    case 'ERROR':
-                        $payment->update(['payment_status' => 'Failed']);
-                        break;
-                    default:
-                        $payment->update(['payment_status' => 'Pending']);
-                        break;
-                }
-
-                Log::info('Estado del pago actualizado correctamente', [
-                    'transaction_id' => $transactionId,
-                    'status' => $status,
-                ]);
-
-                return redirect()->route('invoice.index')->with('status', 'Pago actualizado correctamente.');
-            } else {
-                // Si el pago ya fue completado, no hacer nada
-                Log::warning('El pago ya fue completado y no se puede modificar.', [
-                    'transaction_id' => $transactionId,
-                ]);
-
-                return redirect()->route('invoice.index')->with('warning', 'El pago ya está completado.');
-            }
+        if (!$transactionId) {
+            Log::error('No se recibió transaction_id en la redirección.');
+            return redirect('https://jrmaker.com.co/Error-Payment')
+                ->with('message', 'No se pudo identificar la transacción.');
         }
 
-        // Si no se encontró el pago relacionado
-        Log::error('Pago no encontrado para el ID de la transacción: ' . $transactionId);
-        return redirect()->route('invoice.index')->with('error', 'Error al procesar el pago.');
+        // Consultar el estado de la transacción usando la API de Wompi
+        $transaction = $this->fetchTransactionFromApi($transactionId);
+
+        if (!$transaction) {
+            Log::error('La transacción no fue encontrada en la API de Wompi.', [
+                'transaction_id' => $transactionId,
+            ]);
+            return redirect('https://jrmaker.com.co/Error-Payment')
+                ->with('message', 'Error al verificar el estado del pago.');
+        }
+
+        $status = $transaction['status'];
+
+        Log::info('Estado consultado desde la API de Wompi.', [
+            'transaction_id' => $transactionId,
+            'status' => $status,
+        ]);
+
+        // Redirigir basado en el estado de la transacción
+        return $this->redirectBasedOnStatus($status);
+    }
+
+    /**
+     * Consulta el estado de una transacción en la API de Wompi.
+     *
+     * @param string $transactionId
+     * @return array|null
+     */
+    private function fetchTransactionFromApi(string $transactionId)
+    {
+        try {
+            $response = Http::withToken('TU_CLAVE_API_WOMPI')
+                ->get("https://sandbox.wompi.co/v1/transactions/{$transactionId}");
+
+            if ($response->failed()) {
+                Log::error('Error al consultar la API de Wompi.', [
+                    'transaction_id' => $transactionId,
+                    'response' => $response->body(),
+                ]);
+                return null;
+            }
+
+            return $response->json('data');
+        } catch (\Exception $e) {
+            Log::error('Excepción al consultar la API de Wompi.', [
+                'transaction_id' => $transactionId,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Redirige al usuario basado en el estado de la transacción.
+     *
+     * @param string $status
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    private function redirectBasedOnStatus(string $status)
+    {
+        switch ($status) {
+            case 'APPROVED':
+                return redirect('https://jrmaker.com.co/Successful-Payment');
+            case 'DECLINED':
+            case 'ERROR':
+                return redirect('https://jrmaker.com.co/Error-Payment');
+            case 'CANCELLED':
+                return redirect('https://jrmaker.com.co/Error-Payment');
+            case 'VOIDED':
+                return redirect('https://jrmaker.com.co/Error-Payment')
+                    ->with('message', 'La transacción fue anulada.');
+            default:
+                return redirect('https://jrmaker.com.co/Error-Payment')
+                    ->with('message', 'Estado desconocido o pendiente.');
+        }
     }
 }

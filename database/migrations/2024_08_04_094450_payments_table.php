@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('transaction_id')->nullable();
             $table->string('payment_link_id')->nullable();
             $table->string('payment_link')->nullable();
-            $table->enum('payment_status', ['Pending', 'Completed', 'Failed', 'Declined', 'Error', 'Cancelled'])->default('Pending');
+            $table->enum('payment_status', ['Pending', 'Completed', 'Failed', 'Declined', 'Error', 'Cancelled', 'Voided'])->default('Pending');
             $table->json('api_response')->nullable();
             $table->string('payment_method_type')->nullable();
             $table->string('reference')->nullable();
