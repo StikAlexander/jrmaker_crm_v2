@@ -105,7 +105,8 @@ class InvoiceTableSchema
                 ->tooltip('Ver PDF')
                 ->iconButton(),
 
-            Action::make('cancelInvoice')
+            // Temporarily commented out to resolve rateLimit error
+        /*Action::make('cancelInvoice')
                 ->label('')
                 ->icon('heroicon-o-x-circle')
                 ->size(ActionSize::Large)
@@ -120,7 +121,6 @@ class InvoiceTableSchema
                 ->modalHeading('¿Estás seguro de que deseas anular esta factura?')
                 ->modalSubheading('Esta acción no se puede deshacer.')
                 ->iconButton()
-                ->rateLimit(5)
                 ->action(function (Invoice $record) {
                     $record->status = InvoiceStatus::CANCELLED;
                     $record->save();
@@ -129,14 +129,15 @@ class InvoiceTableSchema
                         ->title('Factura anulada')
                         ->success()
                         ->send();
-                }),
+                }),*/
         ];
     }
 
     public static function getBulkActions(): array
     {
         return [
-            BulkAction::make('cancelInvoices')
+            // Temporarily commented out to resolve rateLimit error
+            /*BulkAction::make('cancelInvoices')
                 ->label('Anular Seleccionadas')
                 ->action(function (Collection $records) {
                     $cancelCount = 0;
@@ -160,7 +161,7 @@ class InvoiceTableSchema
                 ->requiresConfirmation()
                 ->color('danger')
                 ->icon('heroicon-o-x-circle')
-                ->chunkSelectedRecords(250),
+                ->chunkSelectedRecords(250),*/
         ];
     }
 }

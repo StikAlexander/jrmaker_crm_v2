@@ -50,8 +50,7 @@ class ListInvoices extends ListRecords
                         ->send();
                         
                     return $result;
-                })
-                ->rateLimit(5),
+                }),
             
             Actions\CreateAction::make()
                 ->label('Crear Factura')  

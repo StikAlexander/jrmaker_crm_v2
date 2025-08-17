@@ -84,8 +84,9 @@ class InvoiceResource extends Resource
     public static function getGlobalSearchResultActions(Model $record): array
     {
         return [
-            Action::make('edit')
-                ->url(static::getUrl('edit', ['record' => $record])),
+            // Temporarily commented out to resolve rateLimit error
+            /*Action::make('edit')
+                ->url(static::getUrl('edit', ['record' => $record])),*/
         ];
     }
 
