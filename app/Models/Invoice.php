@@ -43,9 +43,12 @@ class Invoice extends Model
         parent::boot();
     
         static::creating(function ($model) {
+            // Establecer fecha de vencimiento a 30 días después de la emisión
             if (!empty($model->issue_date)) {
                 $model->due_date = Carbon::parse($model->issue_date)->addDays(30);
             }
+            
+            // Estado inicial: pendiente
             $model->status = InvoiceStatus::PENDING;
         });
     
@@ -55,20 +58,17 @@ class Invoice extends Model
                 throw new \Exception('No se puede cambiar el estado de una factura que ya está pagada.');
             }
             
+            // Recalcular el monto pendiente
             if (!empty($model->total_amount)) {
                 $model->pending_amount = $model->total_amount - ($model->total_paid ?? 0);
-            }
-
-            // Si el estado es cancelado, no cambiará a otro estado
-            if ($model->status === InvoiceStatus::CANCELLED) {
-                return;
-            }
-
-            // Actualiza el estado según el monto pendiente
-            if ($model->pending_amount <= 0) {
-                $model->status = InvoiceStatus::PAID;
-            } else {
-                $model->status = InvoiceStatus::PENDING;
+                
+                // Si no está cancelada, actualizar el estado basado en los montos
+                if ($model->status !== InvoiceStatus::CANCELLED) {
+                    $model->status = InvoiceStatus::determineStatus(
+                        $model->total_amount, 
+                        $model->total_paid
+                    );
+                }
             }
         });
     }
@@ -135,6 +135,29 @@ class Invoice extends Model
     
     public function canBeCancelled(): bool
     {
-        return !$this->isPaid() && !$this->isCancelled();
+        return InvoiceStatus::canBeCancelled($this->status);
+    }
+    
+    public function isOverdue(): bool
+    {
+        return $this->isPending() && Carbon::now()->isAfter($this->due_date);
+    }
+    
+    public function getDaysUntilDue(): int
+    {
+        if ($this->isPaid() || $this->isCancelled()) {
+            return 0;
+        }
+        
+        return max(0, Carbon::now()->diffInDays($this->due_date, false));
+    }
+    
+    public function getDaysOverdue(): int
+    {
+        if (!$this->isOverdue()) {
+            return 0;
+        }
+        
+        return Carbon::now()->diffInDays($this->due_date);
     }
 }

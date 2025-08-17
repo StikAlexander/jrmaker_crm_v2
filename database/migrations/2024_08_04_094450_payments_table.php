@@ -12,8 +12,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('payment_number')->unique();
             $table->foreignId('client_id')->constrained('users')->onDelete('cascade');
+            $table->date('payment_date');
             $table->string('external_reference')->nullable();
-            $table->integer('amount');
+            $table->decimal('amount', 10, 2);
             $table->string('transaction_id')->nullable();
             $table->string('payment_link_id')->nullable();
             $table->string('payment_link')->nullable();
