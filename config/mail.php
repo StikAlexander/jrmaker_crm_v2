@@ -11,14 +11,14 @@ return [
             'host' => env('MAIL_HOST', 'smtp.hostinger.com'),
             'port' => env('MAIL_PORT', 465),  // Puerto 465 para Hostinger (SSL)
             'encryption' => env('MAIL_ENCRYPTION', 'ssl'),  // SSL para Hostinger
-            'username' => env('MAIL_USERNAME', 'operaciones@jrmaker.com.co'),  // Tu usuario de Hostinger
+            'username' => env('MAIL_USERNAME', 'info@jrmaker.com.co'),  // Tu usuario de Hostinger
             'password' => env('MAIL_PASSWORD', 'Metroidvania22.'),  // Tu contraseña de Hostinger
             'timeout' => null,
             'auth_mode' => null,
         ],
 
         'from' => [
-            'address' => env('MAIL_FROM_ADDRESS', 'operaciones@jrmaker.com.co'),
+            'address' => env('MAIL_FROM_ADDRESS', 'info@jrmaker.com.co'),
             'name' => env('MAIL_FROM_NAME', 'J.R. MAKER S.A.S.'),
         ],
 
