@@ -18,8 +18,25 @@ class PaymentProcessor
      * @param Collection|array $invoices Las facturas a las que se asignará el pago
      * @return Payment
      */
+    /**
+     * Crear un nuevo pago y asignarlo a facturas
+     *
+     * @param array $data Los datos del pago
+     * @param Collection|array $invoices Las facturas a las que se asignará el pago
+     * @return Payment
+     * @throws \App\Exceptions\PaymentException Si hay un error al crear el pago
+     */
     public function createPayment(array $data, $invoices = [])
     {
+        // Validación previa de datos requeridos
+        if (empty($data['client_id'])) {
+            throw new \InvalidArgumentException("El campo 'client_id' es obligatorio para crear un pago.");
+        }
+
+        if (empty($data['amount']) || !is_numeric($data['amount']) || $data['amount'] <= 0) {
+            throw new \InvalidArgumentException("El monto del pago debe ser un número positivo.");
+        }
+
         try {
             DB::beginTransaction();
             
@@ -37,11 +54,23 @@ class PaymentProcessor
             }
             
             DB::commit();
+            
+            Log::info("Pago creado con éxito. ID: {$payment->id}, Monto: {$payment->amount}");
             return $payment;
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al crear pago: ' . $e->getMessage());
-            throw $e;
+            
+            // Registro detallado del error
+            Log::error('Error al crear pago', [
+                'datos' => array_diff_key($data, array_flip(['api_response'])), // Excluye datos sensibles
+                'mensaje' => $e->getMessage(),
+                'archivo' => $e->getFile(),
+                'línea' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Lanzar excepción personalizada para manejo superior
+            throw new \App\Exceptions\PaymentException("Error al procesar el pago: " . $e->getMessage(), 0, $e);
         }
     }
     
@@ -104,8 +133,32 @@ class PaymentProcessor
      * @param array $paymentData Datos adicionales del pago (transacción, etc)
      * @return bool
      */
+    /**
+     * Completar un pago (cambia estado y distribuye)
+     *
+     * @param Payment $payment El pago a completar
+     * @param array $paymentData Datos adicionales del pago (transacción, etc)
+     * @return bool
+     * @throws \App\Exceptions\PaymentException Si hay un error al completar el pago
+     */
     public function completePayment(Payment $payment, array $paymentData = [])
     {
+        // Validaciones previas
+        if (!$payment->id) {
+            throw new \InvalidArgumentException("El pago debe estar guardado en la base de datos.");
+        }
+
+        // Verificar si ya está completado
+        if ($payment->payment_status === 'Completed') {
+            Log::info("El pago ID: {$payment->id} ya está en estado Completed. No se requiere acción.");
+            return true;
+        }
+
+        // Verificar si tiene facturas asociadas
+        if ($payment->invoices->isEmpty()) {
+            throw new \App\Exceptions\PaymentException("El pago ID: {$payment->id} no tiene facturas asociadas y no puede ser completado.");
+        }
+
         try {
             DB::beginTransaction();
             
@@ -119,15 +172,28 @@ class PaymentProcessor
             
             if ($success) {
                 DB::commit();
+                Log::info("Pago completado con éxito. ID: {$payment->id}, Monto: {$payment->amount}");
                 return true;
             }
             
             DB::rollBack();
-            return false;
+            throw new \App\Exceptions\PaymentException("No se pudo distribuir el pago ID: {$payment->id} entre las facturas.");
+        } catch (\App\Exceptions\PaymentException $e) {
+            DB::rollBack();
+            // Reenviar excepciones de pago
+            throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al completar pago: ' . $e->getMessage());
-            return false;
+            
+            // Registro detallado del error
+            Log::error('Error al completar pago', [
+                'payment_id' => $payment->id,
+                'mensaje' => $e->getMessage(),
+                'archivo' => $e->getFile(),
+                'línea' => $e->getLine()
+            ]);
+            
+            throw new \App\Exceptions\PaymentException("Error al completar el pago: " . $e->getMessage(), 0, $e);
         }
     }
     

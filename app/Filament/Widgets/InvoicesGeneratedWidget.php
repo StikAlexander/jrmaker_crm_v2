@@ -12,9 +12,13 @@ class InvoicesGeneratedWidget extends ChartWidget
 
     protected function getData(): array
     {
-        // Obtener la cantidad de facturas generadas por mes
+        // Definir el año actual para obtener solo facturas del año en curso
+        $currentYear = Carbon::now()->year;
+        
+        // Obtener la cantidad de facturas generadas por mes - Optimizado para el año actual
         $data = Invoice::query()
             ->selectRaw('MONTH(issue_date) as month_number, MONTHNAME(issue_date) as month, COUNT(*) as count')
+            ->whereYear('issue_date', $currentYear)
             ->groupBy('month_number', 'month')
             ->orderBy('month_number')
             ->get()
