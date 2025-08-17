@@ -2,17 +2,20 @@
 
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
-use App\Filament\Resources\InvoiceResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
-use YOS\FilamentExcel\Actions\Import;
-use App\Imports\InvoiceImport;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Constants\InvoiceStatus;
 use App\Exports\InvoicesExport;
+use App\Filament\Resources\InvoiceResource;
+use App\Imports\InvoiceImport;
+use Filament\Actions;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
+use Maatwebsite\Excel\Facades\Excel;
+use YOS\FilamentExcel\Actions\Import;
 
 class ListInvoices extends ListRecords
 {
     protected static string $resource = InvoiceResource::class;
+    protected ?string $pollingInterval = '30s';
 
     protected function getHeaderActions(): array
     {
@@ -30,9 +33,25 @@ class ListInvoices extends ListRecords
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('primary')
                 ->action(function () {
-                    return Excel::download(new InvoicesExport, 'invoices.xlsx');
-                }),
-
+                    // Notificación de inicio de exportación
+                    Notification::make()
+                        ->title('Exportación iniciada')
+                        ->body('La exportación de facturas ha comenzado')
+                        ->info()
+                        ->send();
+                        
+                    $result = Excel::download(new InvoicesExport, 'facturas_' . now()->format('Y-m-d_His') . '.xlsx');
+                    
+                    // Notificación de éxito
+                    Notification::make()
+                        ->title('Exportación completada')
+                        ->body('Todas las facturas fueron exportadas correctamente')
+                        ->success()
+                        ->send();
+                        
+                    return $result;
+                })
+                ->rateLimit(5),
             
             Actions\CreateAction::make()
                 ->label('Crear Factura')  
