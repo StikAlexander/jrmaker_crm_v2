@@ -115,7 +115,7 @@ class Payment extends Model
         $remainingAmount = $this->amount;
         Log::info('Iniciando distribución de pago para Payment ID: ' . $this->id);
 
-        \DB::beginTransaction();
+        DB::beginTransaction();
         
         try {
             foreach ($this->invoices as $invoice) {
@@ -154,11 +154,11 @@ class Payment extends Model
                 }
             }
             
-            \DB::commit();
+            DB::commit();
             Log::info('Distribución de pago finalizada para Payment ID: ' . $this->id);
             return true;
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
             Log::error('Error distribuyendo pago ID: ' . $this->id . '. Error: ' . $e->getMessage());
             return false;
         }

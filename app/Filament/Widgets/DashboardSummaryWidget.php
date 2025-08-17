@@ -4,7 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Invoice;
 use App\Models\Payment;
-use Filament\Widgets\StatsOverviewWidget\Card;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Illuminate\Support\Facades\DB;
 
@@ -40,27 +40,27 @@ class DashboardSummaryWidget extends BaseWidget
 
         return [
             // Ingresos Totales con consulta optimizada
-            Card::make('Ingresos Totales', '$' . number_format($invoiceSummary->total_paid ?? 0, 0))
+            Stat::make('Ingresos Totales', '$' . number_format($invoiceSummary->total_paid ?? 0, 0))
                 ->description('Suma total de los ingresos recibidos en el sistema')
-                ->descriptionIcon('heroicon-s-currency-dollar')
+                ->icon('heroicon-s-currency-dollar')
                 ->color('success'),
 
             // Ingresos Pendientes con consulta optimizada
-            Card::make('Ingresos Pendientes', '$' . number_format($invoiceSummary->total_pending ?? 0, 0))
+            Stat::make('Ingresos Pendientes', '$' . number_format($invoiceSummary->total_pending ?? 0, 0))
                 ->description('Saldo pendiente de todas las facturas')
-                ->descriptionIcon('heroicon-s-exclamation-circle')
+                ->icon('heroicon-s-exclamation-circle')
                 ->color('warning'),
 
             // Porcentaje de Pagos Exitosos
-            Card::make('Pagos Exitosos', $totalPayments > 0 ? number_format(($successfulPayments / $totalPayments) * 100, 0) . '%' : '0%')
+            Stat::make('Pagos Exitosos', $totalPayments > 0 ? number_format(($successfulPayments / $totalPayments) * 100, 0) . '%' : '0%')
                 ->description('Porcentaje de pagos exitosos')
-                ->descriptionIcon('heroicon-s-check-circle')
+                ->icon('heroicon-s-check-circle')
                 ->color('success'),
 
             // Porcentaje de Pagos Fallidos
-            Card::make('Pagos Fallidos', $totalPayments > 0 ? number_format(($failedPayments / $totalPayments) * 100, 0) . '%' : '0%')
+            Stat::make('Pagos Fallidos', $totalPayments > 0 ? number_format(($failedPayments / $totalPayments) * 100, 0) . '%' : '0%')
                 ->description('Porcentaje de pagos fallidos')
-                ->descriptionIcon('heroicon-s-x-circle')
+                ->icon('heroicon-s-x-circle')
                 ->color('danger'),
         ];
     }
