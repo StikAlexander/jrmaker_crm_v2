@@ -34,7 +34,7 @@ class ClientLogin extends AuthLogin
                             ->label('Ver Instructivo')
                             ->content(new HtmlString('
                                 <div style="text-align: center;">
-                                    <a href="https://crm.jrmaker.com.co/storage/instructivo.pdf" 
+                                    <a href="/storage/instructivo.pdf" 
                                        target="_blank" 
                                        style="color: #HEXCODE; text-decoration: underline; font-size: 1rem; font-weight: 500;">
                                        Ver Instructivo
