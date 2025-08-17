@@ -18,7 +18,7 @@ class WompiController extends Controller
         // Registrar la redirección para fines de depuración
         Log::info('Redirección recibida de Wompi.', $request->all());
 
-        // Redirigir directamente a la página de inicio
-        return redirect('https://jrmaker.com.co/');
+        // Redirigir directamente a la página de inicio (modificado para desarrollo local)
+        return redirect('/admin');
     }
 }

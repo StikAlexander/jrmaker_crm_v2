@@ -21,9 +21,9 @@ use App\Http\Controllers\ClientPaymentController;
 |
 */
 
-// Ruta para la página de bienvenida
+// Ruta para la página de bienvenida (modificada para desarrollo local)
 Route::get('/', function () {
-    return redirect()->to('https://www.jrmaker.com.co');
+    return redirect('/admin');
 });
 
 /*
