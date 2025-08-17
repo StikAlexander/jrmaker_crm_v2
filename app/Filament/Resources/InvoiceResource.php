@@ -113,8 +113,7 @@ class InvoiceResource extends Resource
                     ->extraAttributes([
                         'class' => 'mx-auto mt-10',
                     ]),
-            ])
-            ->uniqueValidationIgnoresRecordByDefault();
+            ]);
     }
 
     public static function table(Table $table): Table
