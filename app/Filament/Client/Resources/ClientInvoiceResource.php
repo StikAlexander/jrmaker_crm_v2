@@ -16,6 +16,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Date;
 
 class ClientInvoiceResource extends Resource
 {
@@ -138,6 +139,7 @@ class ClientInvoiceResource extends Resource
                             'payment_status' => 'Pending',
                             'reference' => 'PAYMENT_' . uniqid(),
                             'external_reference' => 'ref_' . uniqid(),
+                            'payment_date' => date('Y-m-d'),
                         ]);
     
                         foreach ($records as $invoice) {
