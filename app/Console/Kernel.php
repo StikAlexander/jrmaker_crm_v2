@@ -14,6 +14,18 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        // Verifica y procesa pagos pendientes que podrían estar atascados
+        $schedule->call(function() {
+            $pendingPayments = \App\Models\Payment::where('payment_status', 'Pending')
+                ->where('created_at', '<', now()->subHours(1))
+                ->get();
+                
+            foreach($pendingPayments as $payment) {
+                \App\Jobs\CheckWompiPaymentStatus::dispatch($payment);
+                \Illuminate\Support\Facades\Log::info('Reprocesando pago pendiente ID: ' . $payment->id);
+            }
+        })->hourly();
+
         $schedule->call(function () {
             // Obtener las facturas pendientes y agruparlas por cliente
             $invoicesByClient = \App\Models\Invoice::where('status', 'Pending')
